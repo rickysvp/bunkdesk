@@ -1,8 +1,8 @@
 import React from 'react';
 import { useTranslation } from '../../i18nContext';
 import { useHostel } from '../../HostelContext';
-import { Room, Bed, Guest } from '../../types';
-import { format, parseISO } from 'date-fns';
+import { Room, Bed, Guest, GuestLogEntry, GuestLogType } from '../../types';
+import { format, parseISO, formatDistanceToNow } from 'date-fns';
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from '@/components/ui/dialog';
@@ -10,7 +10,12 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { LogOut, Sparkles, X } from 'lucide-react';
+import {
+  LogOut, X, Plus, Receipt, Clock, Bed as BedIcon, CreditCard,
+  Pencil, FileText, ArrowLeftRight, UserPlus, ScanLine, Wallet,
+  ScrollText, History, Hash, CheckCircle2,
+} from 'lucide-react';
+import { cn } from '@/lib/utils';
 import { getBedPrice } from '../../utils/bedPricing';
 
 // ─── Guest Detail Modal ────────────────────────────────────────
@@ -32,229 +37,254 @@ function countryFlag(code: string): string {
   );
 }
 
+const LOG_TYPE_META: Record<GuestLogType, { icon: React.ComponentType<{ className?: string }>; color: string; label: string }> = {
+  'created':         { icon: UserPlus,        color: 'text-slate-600 bg-slate-100',      label: '创建' },
+  'check-in':        { icon: BedIcon,         color: 'text-emerald-700 bg-emerald-100',  label: '入住' },
+  'check-out':       { icon: LogOut,          color: 'text-zinc-700 bg-zinc-100',        label: '退房' },
+  'payment':         { icon: Wallet,          color: 'text-emerald-700 bg-emerald-100',  label: '付款' },
+  'charge':          { icon: Receipt,         color: 'text-amber-700 bg-amber-100',      label: '消费' },
+  'note':            { icon: FileText,        color: 'text-blue-700 bg-blue-100',        label: '备注' },
+  'edit':            { icon: Pencil,          color: 'text-violet-700 bg-violet-100',    label: '编辑' },
+  'bed-change':      { icon: ArrowLeftRight,  color: 'text-cyan-700 bg-cyan-100',        label: '换床' },
+  'extend-stay':     { icon: Plus,            color: 'text-indigo-700 bg-indigo-100',    label: '延住' },
+  'shorten-stay':    { icon: Clock,           color: 'text-orange-700 bg-orange-100',    label: '缩住' },
+  'scan-passport':   { icon: ScanLine,        color: 'text-blue-700 bg-blue-100',        label: '扫护照' },
+  'reservation':     { icon: BedIcon,         color: 'text-slate-600 bg-slate-100',      label: '改预订' },
+  'shift-note':      { icon: ScrollText,      color: 'text-zinc-600 bg-zinc-100',        label: '值班' },
+  'profile-merge':   { icon: Hash,            color: 'text-pink-700 bg-pink-100',        label: '合并' },
+};
+
+function LogEntry({ entry }: { entry: GuestLogEntry } & React.HTMLAttributes<HTMLDivElement>) {
+  const meta = LOG_TYPE_META[entry.type] || LOG_TYPE_META['note'];
+  const Icon = meta.icon;
+  const ago = formatDistanceToNow(parseISO(entry.createdAt), { addSuffix: true });
+  return (
+    <div className="flex gap-2.5 items-start py-1.5">
+      <div className={cn('flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center', meta.color)}>
+        <Icon className="h-3 w-3" />
+      </div>
+      <div className="flex-1 min-w-0">
+        <div className="flex items-baseline gap-1.5">
+          <span className="text-xs font-medium text-zinc-800">{meta.label}</span>
+          <span className="text-[10px] text-zinc-400">{ago}</span>
+          {entry.amount !== undefined && entry.amount > 0 && (
+            <span className="text-[10px] font-semibold text-emerald-600 ml-auto">${entry.amount}</span>
+          )}
+        </div>
+        <div className="text-[11px] text-zinc-600 mt-0.5 break-words">{entry.description}</div>
+        <div className="text-[9px] text-zinc-400 mt-0.5">by {entry.author}</div>
+      </div>
+    </div>
+  );
+}
+
 export function GuestDetailModal({ guest, bed, room, onClose, onCheckout }: GuestDetailModalProps) {
   const { t } = useTranslation();
-  const { updateArrival, scanPassport, settlePayment } = useHostel();
-  const [notesDraft, setNotesDraft] = React.useState('');
+  const {
+    rooms, arrivals, guestLogs,
+    addCharge, extendStay, addPartialPayment, addGuestNote, updateGuestField,
+    scanPassport, settlePayment,
+  } = useHostel();
+
   const [extendNights, setExtendNights] = React.useState('');
   const [chargeAmount, setChargeAmount] = React.useState('');
   const [chargeReason, setChargeReason] = React.useState('');
+  const [notesDraft, setNotesDraft] = React.useState('');
+  const [showFullLog, setShowFullLog] = React.useState(false);
 
-  // Reset drafts whenever a new guest opens
+  // Resolve the live guest by id from either arrivals or rooms/beds.
+  // This is the fix for the "extend-stay but due didn't update" bug —
+  // we always read the latest state, not the snapshot taken at click time.
+  const liveGuest = React.useMemo<Guest | null>(() => {
+    if (!guest) return null;
+    const fromArrivals = arrivals.find((g) => g.id === guest.id);
+    if (fromArrivals) return fromArrivals;
+    for (const r of rooms) {
+      for (const b of r.beds) {
+        if (b.guest?.id === guest.id) return b.guest;
+      }
+    }
+    return guest;
+  }, [guest, arrivals, rooms]);
+
+  // Find the live bed/room too in case the guest was moved.
+  const { liveBed, liveRoom } = React.useMemo(() => {
+    if (!liveGuest) return { liveBed: null, liveRoom: null };
+    for (const r of rooms) {
+      for (const b of r.beds) {
+        if (b.guest?.id === liveGuest.id) return { liveBed: b, liveRoom: r };
+      }
+    }
+    return { liveBed: bed, liveRoom: room };
+  }, [liveGuest, rooms, bed, room]);
+
+  // Reset drafts when opening a different guest.
   React.useEffect(() => {
-    if (guest) {
-      setNotesDraft(guest.notes || '');
+    if (liveGuest) {
+      setNotesDraft(liveGuest.notes || '');
       setExtendNights('');
       setChargeAmount('');
       setChargeReason('');
+      setShowFullLog(false);
     }
-  }, [guest?.id]);
+  }, [liveGuest?.id]);
 
-  if (!guest) return null;
+  if (!liveGuest) return null;
 
-  const checkIn = parseISO(guest.checkInDate);
-  const checkOut = parseISO(guest.checkOutDate);
-  const totalNights = guest.nights || 0;
+  // ── Derived values ──
+  const checkIn = parseISO(liveGuest.checkInDate);
+  const checkOut = parseISO(liveGuest.checkOutDate);
+  const totalNights = liveGuest.nights || 0;
   const nightsStayed = Math.max(0, Math.min(totalNights, Math.floor((Date.now() - checkIn.getTime()) / 86400000)));
   const progress = totalNights > 0 ? Math.min(1, nightsStayed / totalNights) : 0;
-  const totalAmt = guest.totalAmount || 0;
-  const paidAmt = guest.paidAmount || 0;
-  const dueAmt = totalAmt - paidAmt;
+  const totalAmt = liveGuest.totalAmount || 0;
+  const paidAmt = liveGuest.paidAmount || 0;
+  const dueAmt = Math.max(0, totalAmt - paidAmt);
+  const pricePerNight = liveRoom && liveBed ? getBedPrice(liveRoom, liveBed) : 0;
 
-  const pricePerNight = room && bed ? getBedPrice(room, bed) : 0;
+  // Audit log for this guest: prefer the phone key to link across visits.
+  const guestHistory: GuestLogEntry[] = React.useMemo(() => {
+    if (liveGuest.phone) {
+      return guestLogs.filter((l) => l.phone === liveGuest.phone);
+    }
+    return guestLogs.filter((l) => l.guestId === liveGuest.id);
+  }, [guestLogs, liveGuest.id, liveGuest.phone]);
 
-  // ── Action handlers ──
-  const handleSaveNotes = () => {
-    if (notesDraft === guest.notes) return;
-    updateArrival(guest.id, { notes: notesDraft });
-  };
+  const visibleLog = showFullLog ? guestHistory : guestHistory.slice(0, 8);
 
-  const handleExtendStay = () => {
+  // ── Handlers ──
+  const handleExtend = () => {
     const n = parseInt(extendNights, 10);
     if (!n || n < 1) return;
-    const newNights = totalNights + n;
-    const newCheckOut = format(
-      new Date(checkOut.getTime() + n * 86400000),
-      'yyyy-MM-dd',
-    );
-    const newTotal = (pricePerNight > 0)
-      ? Math.round((totalAmt + pricePerNight * n) * 100) / 100
-      : totalAmt;
-    updateArrival(guest.id, {
-      nights: newNights,
-      checkOutDate: newCheckOut,
-      totalAmount: newTotal,
-    });
+    extendStay(liveGuest.id, n);
     setExtendNights('');
   };
 
-  const handleAddCharge = () => {
+  const handleCharge = () => {
     const amt = parseFloat(chargeAmount);
     if (!amt || amt <= 0) return;
-    const newTotal = Math.round((totalAmt + amt) * 100) / 100;
-    const noteLine = `[${format(new Date(), 'M/d HH:mm')}] $${amt.toFixed(2)} - ${chargeReason || 'misc'}`;
-    updateArrival(guest.id, {
-      totalAmount: newTotal,
-      notes: notesDraft ? `${notesDraft}\n${noteLine}` : noteLine,
-    });
-    setNotesDraft((prev) => prev ? `${prev}\n${noteLine}` : noteLine);
+    addCharge(liveGuest.id, amt, chargeReason);
     setChargeAmount('');
     setChargeReason('');
   };
 
-  const handleSettleDue = () => {
-    updateArrival(guest.id, {
-      paidAmount: totalAmt,
-      paymentStatus: 'paid',
-    });
-    settlePayment(guest.id);
+  const handleSettle = () => {
+    if (dueAmt > 0) addPartialPayment(liveGuest.id, dueAmt);
+    settlePayment(liveGuest.id);
   };
 
-  const handlePartialPayment = (extra: number) => {
-    const newPaid = Math.round((paidAmt + extra) * 100) / 100;
-    const newStatus = newPaid >= totalAmt ? 'paid' : 'partial';
-    updateArrival(guest.id, {
-      paidAmount: newPaid,
-      paymentStatus: newStatus as 'paid' | 'partial',
-    });
+  const handleSaveNotes = () => {
+    if (notesDraft === (liveGuest.notes || '')) return;
+    addGuestNote(liveGuest.id, notesDraft);
   };
 
   const paymentBadge =
-    guest.paymentStatus === 'paid'
-      ? 'bg-emerald-100 text-emerald-700 border-emerald-200'
-      : guest.paymentStatus === 'partial'
-      ? 'bg-amber-100 text-amber-700 border-amber-200'
-      : 'bg-red-100 text-red-700 border-red-200';
+    liveGuest.paymentStatus === 'paid' ? 'bg-emerald-100 text-emerald-700 border-emerald-200' :
+    liveGuest.paymentStatus === 'partial' ? 'bg-amber-100 text-amber-700 border-amber-200' :
+    'bg-red-100 text-red-700 border-red-200';
 
   return (
-    <Dialog open={!!guest} onOpenChange={() => onClose()}>
-      <DialogContent className="max-w-2xl max-h-[88vh] overflow-y-auto">
-        {/* Header — name + country + payment badge */}
-        <DialogHeader className="pb-2">
+    <Dialog open={!!liveGuest} onOpenChange={() => onClose()}>
+      <DialogContent className="max-w-2xl max-h-[88vh] overflow-y-auto p-0">
+        {/* ── Header ── */}
+        <div className="px-5 pt-4 pb-3 border-b border-zinc-100 bg-gradient-to-br from-zinc-50 to-white">
           <div className="flex items-start gap-3">
-            <div className="text-3xl leading-none mt-1 select-none">{countryFlag(guest.countryCode)}</div>
+            <div className="text-3xl leading-none mt-0.5 select-none">{countryFlag(liveGuest.countryCode)}</div>
             <div className="flex-1 min-w-0">
-              <DialogTitle className="text-xl truncate">{guest.name}</DialogTitle>
-              <div className="flex items-center gap-2 mt-1 flex-wrap">
-                <span className={`text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full border ${paymentBadge}`}>
-                  {guest.paymentStatus}
+              <DialogTitle className="text-lg font-semibold leading-tight truncate">{liveGuest.name}</DialogTitle>
+              <div className="text-[11px] text-zinc-500 mt-0.5">
+                {liveGuest.country} · {liveGuest.gender || '—'}
+                {liveBed && liveRoom && <span> · {liveRoom.name} / {liveBed.name}</span>}
+              </div>
+              <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
+                <span className={cn('text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded border', paymentBadge)}>
+                  {liveGuest.paymentStatus}
                 </span>
-                {guest.passportScanned && (
-                  <span className="text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full border bg-blue-100 text-blue-700 border-blue-200">
+                {liveGuest.passportScanned && (
+                  <span className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded border bg-blue-100 text-blue-700 border-blue-200">
                     ID ✓
                   </span>
                 )}
-                <span className="text-xs text-zinc-500">
-                  {guest.gender || '—'} · {guest.country} ({guest.countryCode})
-                </span>
+                {liveGuest.phone && (
+                  <span className="text-[10px] text-zinc-500">📞 {liveGuest.phone}</span>
+                )}
+                {liveGuest.email && (
+                  <span className="text-[10px] text-zinc-500 truncate max-w-[200px]">✉ {liveGuest.email}</span>
+                )}
               </div>
             </div>
           </div>
-        </DialogHeader>
+        </div>
 
-        <div className="space-y-4">
-          {/* Stay progress with extension */}
+        {/* ── Body ── */}
+        <div className="px-5 py-4 space-y-4">
+          {/* Stay progress + extend */}
           <div className="bg-zinc-50 rounded-lg p-3">
-            <div className="flex justify-between text-xs text-zinc-600 mb-1.5">
-              <span className="font-medium">Check-in</span>
-              <span className="font-medium">Check-out</span>
-            </div>
-            <div className="flex justify-between text-sm font-semibold text-zinc-800 mb-2">
+            <div className="flex justify-between items-baseline text-[11px] text-zinc-500 mb-1">
               <span>{format(checkIn, 'MMM d, yyyy')}</span>
+              <span className="text-[10px] text-zinc-400 font-medium">
+                {nightsStayed}/{totalNights} nights
+                {progress >= 1 && <span className="text-emerald-600 ml-1">· 完</span>}
+              </span>
               <span>{format(checkOut, 'MMM d, yyyy')}</span>
             </div>
-            <div className="h-2.5 bg-zinc-200 rounded-full overflow-hidden">
+            <div className="h-2 bg-zinc-200 rounded-full overflow-hidden">
               <div
-                className={`h-full rounded-full transition-all ${
+                className={cn('h-full rounded-full transition-all',
                   progress >= 1 ? 'bg-emerald-500' :
-                  progress >= 0.6 ? 'bg-blue-500' : 'bg-amber-500'
-                }`}
-                style={{ width: `${progress * 100}%` }}
+                  progress >= 0.6 ? 'bg-blue-500' : 'bg-amber-500')}
+                style={{ width: `${Math.max(progress * 100, 2)}%` }}
               />
             </div>
-            <div className="text-center text-xs text-zinc-500 mt-1.5">
-              {nightsStayed}/{totalNights} {t('guest.nights') || 'Nights'}
-              {room && bed && (
-                <span className="ml-2 text-zinc-400">· {room.name} / {bed.name}</span>
-              )}
-            </div>
-
-            {/* Extend stay quick form */}
-            <div className="mt-3 pt-3 border-t border-zinc-200 flex items-center gap-2">
-              <Label className="text-[11px] text-zinc-500 shrink-0">延住 +</Label>
+            {/* Extend stay */}
+            <div className="mt-2.5 flex items-center gap-1.5 flex-wrap">
+              <span className="text-[10px] font-medium text-zinc-500">延住</span>
               <Input
-                type="number"
-                min={1}
-                placeholder="nights"
+                type="number" min={1} max={30}
                 value={extendNights}
                 onChange={(e) => setExtendNights(e.target.value)}
-                className="h-7 text-xs w-20"
+                placeholder="N"
+                className="h-7 w-14 text-xs"
               />
               <span className="text-[10px] text-zinc-500">晚</span>
               {pricePerNight > 0 && extendNights && (
-                <span className="text-[10px] text-amber-600">
-                  +${pricePerNight * (parseInt(extendNights, 10) || 0)}
+                <span className="text-[10px] text-amber-600 font-medium">
+                  +${(pricePerNight * (parseInt(extendNights, 10) || 0)).toFixed(0)}
                 </span>
               )}
-              <Button
-                size="sm"
-                variant="outline"
-                className="h-7 text-xs ml-auto"
-                onClick={handleExtendStay}
-                disabled={!extendNights || parseInt(extendNights, 10) < 1}
-              >
-                延住
+              <Button size="sm" variant="outline" className="h-7 text-[11px] ml-auto"
+                onClick={handleExtend} disabled={!extendNights || parseInt(extendNights, 10) < 1}>
+                <Plus className="h-3 w-3 mr-0.5" />延住
               </Button>
             </div>
           </div>
 
-          {/* 2-col details grid */}
-          <div className="grid grid-cols-2 gap-3 text-sm">
+          {/* Profile fields (editable) */}
+          <div className="grid grid-cols-2 gap-x-3 gap-y-2">
             <div>
-              <Label className="text-[10px] text-zinc-400 uppercase tracking-wider">Phone</Label>
-              <Input
-                className="h-7 text-xs mt-0.5"
-                defaultValue={guest.phone || ''}
-                onBlur={(e) => e.target.value !== (guest.phone || '') && updateArrival(guest.id, { phone: e.target.value })}
-                placeholder="—"
-              />
+              <Label className="text-[9px] uppercase tracking-wider text-zinc-400">电话</Label>
+              <Input className="h-7 text-xs mt-0.5" defaultValue={liveGuest.phone || ''}
+                onBlur={(e) => e.target.value !== (liveGuest.phone || '') && updateGuestField(liveGuest.id, 'phone', e.target.value)} />
             </div>
             <div>
-              <Label className="text-[10px] text-zinc-400 uppercase tracking-wider">Email</Label>
-              <Input
-                className="h-7 text-xs mt-0.5"
-                defaultValue={guest.email || ''}
-                onBlur={(e) => e.target.value !== (guest.email || '') && updateArrival(guest.id, { email: e.target.value })}
-                placeholder="—"
-              />
+              <Label className="text-[9px] uppercase tracking-wider text-zinc-400">邮箱</Label>
+              <Input className="h-7 text-xs mt-0.5" defaultValue={liveGuest.email || ''}
+                onBlur={(e) => e.target.value !== (liveGuest.email || '') && updateGuestField(liveGuest.id, 'email', e.target.value)} />
             </div>
             <div>
-              <Label className="text-[10px] text-zinc-400 uppercase tracking-wider">ID / Passport</Label>
-              <Input
-                className="h-7 text-xs mt-0.5"
-                defaultValue={guest.passportOrId || ''}
-                onBlur={(e) => e.target.value !== (guest.passportOrId || '') && updateArrival(guest.id, { passportOrId: e.target.value })}
-                placeholder="—"
-              />
+              <Label className="text-[9px] uppercase tracking-wider text-zinc-400">证件</Label>
+              <Input className="h-7 text-xs mt-0.5" defaultValue={liveGuest.passportOrId || ''}
+                onBlur={(e) => e.target.value !== (liveGuest.passportOrId || '') && updateGuestField(liveGuest.id, 'passportOrId', e.target.value)} />
             </div>
             <div>
-              <Label className="text-[10px] text-zinc-400 uppercase tracking-wider">Date of Birth</Label>
-              <Input
-                className="h-7 text-xs mt-0.5"
-                defaultValue={guest.dob || ''}
-                onBlur={(e) => e.target.value !== (guest.dob || '') && updateArrival(guest.id, { dob: e.target.value })}
-                placeholder="YYYY-MM-DD"
-              />
+              <Label className="text-[9px] uppercase tracking-wider text-zinc-400">生日</Label>
+              <Input className="h-7 text-xs mt-0.5" defaultValue={liveGuest.dob || ''} placeholder="YYYY-MM-DD"
+                onBlur={(e) => e.target.value !== (liveGuest.dob || '') && updateGuestField(liveGuest.id, 'dob', e.target.value)} />
             </div>
             <div>
-              <Label className="text-[10px] text-zinc-400 uppercase tracking-wider">Gender</Label>
-              <Select
-                value={guest.gender || 'male'}
-                onValueChange={(v) => updateArrival(guest.id, { gender: v as 'male' | 'female' | 'other' })}
-              >
-                <SelectTrigger className="h-7 text-xs mt-0.5">
-                  <SelectValue />
-                </SelectTrigger>
+              <Label className="text-[9px] uppercase tracking-wider text-zinc-400">性别</Label>
+              <Select value={liveGuest.gender || 'male'} onValueChange={(v) => updateGuestField(liveGuest.id, 'gender', v)}>
+                <SelectTrigger className="h-7 text-xs mt-0.5"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="male">男 Male</SelectItem>
                   <SelectItem value="female">女 Female</SelectItem>
@@ -263,14 +293,9 @@ export function GuestDetailModal({ guest, bed, room, onClose, onCheckout }: Gues
               </Select>
             </div>
             <div>
-              <Label className="text-[10px] text-zinc-400 uppercase tracking-wider">Source</Label>
-              <Select
-                value={guest.source}
-                onValueChange={(v) => updateArrival(guest.id, { source: v as any })}
-              >
-                <SelectTrigger className="h-7 text-xs mt-0.5">
-                  <SelectValue />
-                </SelectTrigger>
+              <Label className="text-[9px] uppercase tracking-wider text-zinc-400">来源</Label>
+              <Select value={liveGuest.source} onValueChange={(v) => updateGuestField(liveGuest.id, 'source', v)}>
+                <SelectTrigger className="h-7 text-xs mt-0.5"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="walk-in">Walk-in</SelectItem>
                   <SelectItem value="booking">Booking.com</SelectItem>
@@ -285,149 +310,127 @@ export function GuestDetailModal({ guest, bed, room, onClose, onCheckout }: Gues
             </div>
           </div>
 
-          {/* Bed info */}
-          {bed && room && (
-            <div className="bg-blue-50/60 rounded-lg p-3 text-sm flex items-center gap-3 flex-wrap">
-              <div className="flex-1 min-w-0">
-                <span className="text-zinc-500">房间 </span>
-                <span className="font-semibold text-zinc-800">{room.name || room.number}</span>
-                <span className="text-zinc-400 mx-1.5">·</span>
-                <span className="font-semibold text-zinc-800">{bed.name}</span>
-                {bed.bedType && (
-                  <span className="text-zinc-400 text-xs ml-1.5">({bed.bedType})</span>
-                )}
-              </div>
-              <div className="text-xs text-zinc-500">
-                ${pricePerNight}<span className="text-zinc-400">/night</span>
-              </div>
+          {/* Financial card */}
+          <div className="border border-zinc-200 rounded-lg overflow-hidden">
+            <div className="px-3 py-2 bg-zinc-50 border-b border-zinc-200 flex items-center justify-between">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">财务</span>
+              {liveGuest.roomPreference && <span className="text-[10px] text-zinc-400">偏好: {liveGuest.roomPreference}</span>}
             </div>
-          )}
-
-          {/* Financial card with quick actions */}
-          <div className="border border-zinc-200 rounded-lg p-3">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">财务 Financial</span>
-              {guest.roomPreference && (
-                <span className="text-[10px] text-zinc-400">
-                  偏好: {guest.roomPreference}
-                </span>
-              )}
-            </div>
-            <div className="grid grid-cols-3 gap-2 mb-3">
-              <div className="bg-zinc-50 rounded p-2">
-                <div className="text-[10px] text-zinc-500 uppercase">总额</div>
+            <div className="grid grid-cols-3 divide-x divide-zinc-200">
+              <div className="p-2.5 text-center">
+                <div className="text-[9px] uppercase text-zinc-500 tracking-wider">总额</div>
                 <div className="text-lg font-semibold text-zinc-800">${totalAmt}</div>
               </div>
-              <div className="bg-emerald-50 rounded p-2">
-                <div className="text-[10px] text-emerald-600 uppercase">已付</div>
+              <div className="p-2.5 text-center">
+                <div className="text-[9px] uppercase text-emerald-600 tracking-wider">已付</div>
                 <div className="text-lg font-semibold text-emerald-700">${paidAmt}</div>
               </div>
-              <div className={`rounded p-2 ${dueAmt > 0 ? 'bg-red-50' : 'bg-zinc-50'}`}>
-                <div className={`text-[10px] uppercase ${dueAmt > 0 ? 'text-red-600' : 'text-zinc-500'}`}>待付</div>
-                <div className={`text-lg font-semibold ${dueAmt > 0 ? 'text-red-600' : 'text-zinc-400'}`}>
-                  ${dueAmt}
-                </div>
+              <div className={cn('p-2.5 text-center', dueAmt > 0 ? 'bg-red-50' : '')}>
+                <div className={cn('text-[9px] uppercase tracking-wider', dueAmt > 0 ? 'text-red-600' : 'text-zinc-500')}>待付</div>
+                <div className={cn('text-lg font-semibold', dueAmt > 0 ? 'text-red-600' : 'text-zinc-400')}>${dueAmt}</div>
               </div>
             </div>
-
-            {/* Add charge row */}
-            <div className="flex items-center gap-1.5 mb-2">
-              <span className="text-[10px] text-zinc-500 shrink-0">+消费</span>
-              <Input
-                type="number"
-                min={0}
-                step="0.01"
-                placeholder="金额"
-                value={chargeAmount}
-                onChange={(e) => setChargeAmount(e.target.value)}
-                className="h-7 text-xs w-20"
-              />
-              <Input
-                placeholder="说明 (e.g. 洗衣/饮料)"
-                value={chargeReason}
-                onChange={(e) => setChargeReason(e.target.value)}
-                className="h-7 text-xs flex-1"
-              />
-              <Button
-                size="sm"
-                variant="outline"
-                className="h-7 text-xs"
-                onClick={handleAddCharge}
-                disabled={!chargeAmount || parseFloat(chargeAmount) <= 0}
-              >
-                记账
-              </Button>
-            </div>
-
-            {/* Payment actions */}
-            <div className="flex items-center gap-1.5 flex-wrap">
-              {dueAmt > 0 && (
-                <Button
-                  size="sm"
-                  className="h-7 text-xs bg-emerald-600 hover:bg-emerald-700"
-                  onClick={handleSettleDue}
-                >
-                  补差价 ${dueAmt}
+            {/* Add charge */}
+            <div className="p-2.5 bg-zinc-50 border-t border-zinc-200">
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <Receipt className="h-3.5 w-3.5 text-amber-600 shrink-0" />
+                <span className="text-[10px] font-medium text-zinc-500 shrink-0">+消费</span>
+                <Input type="number" min={0} step="0.01" placeholder="金额"
+                  value={chargeAmount} onChange={(e) => setChargeAmount(e.target.value)}
+                  className="h-7 w-20 text-xs" />
+                <Input placeholder="说明 (e.g. 洗衣/小食/酒水)"
+                  value={chargeReason} onChange={(e) => setChargeReason(e.target.value)}
+                  className="h-7 text-xs flex-1 min-w-[120px]" />
+                <Button size="sm" variant="outline" className="h-7 text-[11px]"
+                  onClick={handleCharge}
+                  disabled={!chargeAmount || parseFloat(chargeAmount) <= 0}>
+                  <Plus className="h-3 w-3 mr-0.5" />记账
                 </Button>
-              )}
-              {dueAmt > 0 && [10, 20, 50, 100].filter((n) => n <= dueAmt).map((n) => (
-                <Button
-                  key={n}
-                  size="sm"
-                  variant="outline"
-                  className="h-7 text-xs"
-                  onClick={() => handlePartialPayment(n)}
-                >
-                  +${n}
-                </Button>
-              ))}
-              {guest.paymentStatus === 'paid' && (
-                <span className="text-xs text-emerald-600 font-medium">已结清 ✓</span>
-              )}
+              </div>
+              {/* Pay actions */}
+              <div className="flex items-center gap-1.5 flex-wrap mt-2">
+                {dueAmt > 0 && (
+                  <Button size="sm" className="h-7 text-[11px] bg-emerald-600 hover:bg-emerald-700"
+                    onClick={handleSettle}>
+                    <CreditCard className="h-3 w-3 mr-1" />补差价 ${dueAmt}
+                  </Button>
+                )}
+                {dueAmt > 0 && [10, 20, 50, 100].filter((n) => n <= dueAmt).map((n) => (
+                  <Button key={n} size="sm" variant="outline" className="h-7 text-[11px]"
+                    onClick={() => addPartialPayment(liveGuest.id, n)}>
+                    +${n}
+                  </Button>
+                ))}
+                {liveGuest.paymentStatus === 'paid' && (
+                  <span className="text-[11px] text-emerald-600 font-medium flex items-center gap-0.5">
+                    <CheckCircle2 className="h-3 w-3" />已结清
+                  </span>
+                )}
+              </div>
             </div>
           </div>
 
-          {/* Notes (always editable) */}
+          {/* Notes */}
           <div>
-            <Label className="text-[10px] text-zinc-400 uppercase tracking-wider">备注 Notes</Label>
+            <Label className="text-[9px] uppercase tracking-wider text-zinc-400">备注 (失焦自动保存)</Label>
             <textarea
               value={notesDraft}
               onChange={(e) => setNotesDraft(e.target.value)}
               onBlur={handleSaveNotes}
-              placeholder="添加备注..."
-              rows={3}
-              className="w-full mt-1 px-3 py-2 text-xs border border-zinc-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 resize-none"
+              placeholder="如: VIP客户、晚到、过敏等..."
+              rows={2}
+              className="w-full mt-1 px-2.5 py-1.5 text-xs border border-zinc-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 resize-none"
             />
           </div>
 
           {/* Status toggles */}
-          <div className="flex items-center gap-2 flex-wrap">
-            <button
-              onClick={() => scanPassport(guest.id)}
-              className={`text-[11px] px-2.5 py-1 rounded-full border transition-colors ${
-                guest.passportScanned
+          <div className="flex items-center gap-1.5 flex-wrap">
+            <button onClick={() => scanPassport(liveGuest.id)}
+              className={cn('text-[10px] px-2 py-1 rounded-full border transition-colors',
+                liveGuest.passportScanned
                   ? 'bg-blue-100 text-blue-700 border-blue-200'
-                  : 'bg-zinc-50 text-zinc-500 border-zinc-200 hover:bg-blue-50'
-              }`}
-            >
-              {guest.passportScanned ? '✓' : '○'} 护照扫描 Passport
+                  : 'bg-zinc-50 text-zinc-500 border-zinc-200 hover:bg-blue-50 hover:border-blue-200')}>
+              <ScanLine className="h-3 w-3 inline mr-0.5" />
+              {liveGuest.passportScanned ? '已扫' : '扫护照'}
             </button>
-            <span className="text-[10px] text-zinc-400 ml-auto">
-              ID: <code className="bg-zinc-100 px-1 rounded">{guest.id}</code>
-            </span>
+            <code className="text-[9px] text-zinc-400 bg-zinc-100 px-1.5 py-0.5 rounded ml-auto">
+              {liveGuest.id}
+            </code>
+          </div>
+
+          {/* Audit log timeline */}
+          <div className="border-t border-zinc-200 pt-3">
+            <div className="flex items-center justify-between mb-2">
+              <h4 className="text-[10px] font-bold uppercase tracking-wider text-zinc-500 flex items-center gap-1">
+                <History className="h-3 w-3" />
+                历史日志 {liveGuest.phone && <span className="text-zinc-400 font-normal normal-case">· {liveGuest.phone}</span>}
+                {guestHistory.length > 0 && <span className="text-zinc-400 font-normal">({guestHistory.length})</span>}
+              </h4>
+              {guestHistory.length > 8 && (
+                <button className="text-[10px] text-blue-600 hover:underline"
+                  onClick={() => setShowFullLog((s) => !s)}>
+                  {showFullLog ? '收起' : `全部 ${guestHistory.length}`}
+                </button>
+              )}
+            </div>
+            {guestHistory.length === 0 ? (
+              <div className="text-[11px] text-zinc-400 italic py-2 text-center">
+                {liveGuest.phone ? '该住客尚无历史记录' : '未填写手机号,无法关联历史记录'}
+              </div>
+            ) : (
+              <div className="divide-y divide-zinc-100 max-h-60 overflow-y-auto">
+                {visibleLog.map((entry) => <LogEntry key={entry.id} entry={entry} />)}
+              </div>
+            )}
           </div>
         </div>
 
-        {/* Footer actions */}
-        <DialogFooter className="gap-2 pt-2">
-          <Button variant="outline" onClick={onClose}>关闭</Button>
-          {bed && (
-            <Button
-              variant="destructive"
-              onClick={() => onCheckout(bed.id)}
-            >
-              <LogOut className="h-4 w-4 mr-1.5" />
-              退房 Check Out
+        {/* ── Footer ── */}
+        <DialogFooter className="px-5 py-3 border-t border-zinc-100 bg-zinc-50/60 gap-2">
+          <Button variant="outline" onClick={onClose} size="sm">关闭</Button>
+          {liveBed && (
+            <Button variant="destructive" size="sm" onClick={() => onCheckout(liveBed.id)}>
+              <LogOut className="h-3.5 w-3.5 mr-1.5" />退房
             </Button>
           )}
         </DialogFooter>

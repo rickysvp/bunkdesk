@@ -212,6 +212,39 @@ export interface OccupancyAction {
   dismissedAt?: string;
 }
 
+// Guest Audit Log
+// Phone number is the unique identifier that links a guest's history
+// across multiple visits. A guest without a phone is logged by ID only
+// and will not be linked to other visits.
+export type GuestLogType =
+  | "created"        // new arrival added
+  | "check-in"       // assigned to a bed
+  | "check-out"      // checked out
+  | "payment"        // full or partial payment received
+  | "charge"         // extra charge added to total
+  | "note"           // note added / edited
+  | "edit"           // profile field edited (name, phone, email, etc.)
+  | "bed-change"     // moved to another bed
+  | "extend-stay"    // stay lengthened
+  | "shorten-stay"   // stay shortened
+  | "scan-passport"  // passport scanned / unscanned
+  | "reservation"    // reservation moved
+  | "shift-note"     // linked shift note
+  | "profile-merge"; // merged with another profile
+
+export interface GuestLogEntry {
+  id: string;
+  phone: string;            // unique identifier for cross-visit linking
+  guestId: string;          // the specific guest record this happened to
+  guestName: string;        // snapshot at time of action
+  type: GuestLogType;
+  description: string;      // human-readable summary
+  amount?: number;          // for payment / charge
+  meta?: Record<string, any>;
+  author: string;           // staff name (or 'system')
+  createdAt: string;        // ISO timestamp
+}
+
 // Copilot Insights
 export type InsightSeverity = "info" | "warning" | "opportunity" | "risk";
 
