@@ -1,0 +1,7 @@
+- [x] CheckInPanel 付款金额读取 totalAmount 而非硬编码 $85
+- [x] CheckInPanel "Legal Consent" 切换中文后正确显示
+- [x] ReservationsView partial 付款状态显示 "Partial"/"部分支付" 而非 "Unpaid"
+- [x] i18n zh reservations section 包含所有 key
+- [x] Dashboard "+N more" 切换中文后正确显示
+- [x] CalendarView 弹窗 footer 显示 "关闭" 而非 "取消"
+- [x] TypeScript 0 错误

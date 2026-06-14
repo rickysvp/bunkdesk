@@ -1,0 +1,29 @@
+- [x] 所有 "Bunkly" 已改为 "BunkDesk"，Logo "Bk" 改为 "BD"
+  - UI 文本全部已替换，Grep "Bunkly" 在 .tsx/.ts 中零结果
+  - LoginScreen.tsx 和 Sidebar.tsx Logo 均为 "BD"
+  - ⚠️ StaffContext.tsx localStorage key 仍为 `bunkly_` 前缀（非用户可见）
+- [x] GrowPanel.tsx 包含4个子标签：Hostel Page / Social / Referral / Pricing
+- [x] Sidebar 只有 Grow 和 Migrate 入口（无 My Page / Revenue）
+  - ALL_TAB_CONFIG 中无 my-page / revenue 条目
+- [x] Reception 角色不可见 Grow 和 Migrate
+  - ROLE_TABS.reception 不含 "grow" 和 "migrate"
+- [x] Dashboard 首屏有空床机会提示卡片
+  - Dashboard.tsx 包含 emptyBedsTitle / emptyBedsDesc / suggestPromo / suggestWhatsApp / suggestPricing
+- [x] BedBoard 空床位有"怎么填满？"行动入口
+  - BedBoard.tsx 包含 bedboard.howToFill 按钮及弹出菜单
+- [x] RevenueBoost 措辞已降级（无"AI"/"智能"措辞）
+  - revenue 区段无 AI/智能/Smart 用词
+  - landing 页 "No AI hype" / "没有 AI 噱头" 属反向表述，合规
+- [x] SocialKit 无 Instagram Story 功能，保留 WhatsApp
+  - SocialKit.tsx 无 Instagram 引用，仅有 WhatsApp 模板
+  - socialKit.instagramTitle 等废弃 i18n 键已清理
+- [x] 落地页品牌为 BunkDesk，Slogan "别让空床白白浪费"
+  - LandingPage.tsx Logo "BD" + "BunkDesk"
+  - i18n ZH: heroTitle1="别让空床" heroTitle2="白白浪费"
+- [x] 落地页竞品对比包含 BananaDesk 列
+  - i18n EN/ZH 均有 compareColBananaDesk 键，LandingPage.tsx 渲染三列对比表
+- [x] 所有新增文案完成 i18n（中英双语）
+  - dashboard: emptyBedsTitle, emptyBedsDesc, suggestPromo, suggestWhatsApp, suggestPricing, fullHouseTitle, fullHouseDesc ✅
+  - bedboard: howToFill, suggestLowerPrice, suggestPromo, suggestShare ✅
+  - grow: hostelPage, social, referral, pricing ✅
+  - sidebar: grow, migrate ✅

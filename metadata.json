@@ -1,0 +1,6 @@
+{
+  "name": "Hostel Desk",
+  "description": "Visual bed management system for small independent hostels.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

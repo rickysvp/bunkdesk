@@ -1,0 +1,10 @@
+- [x] 刷新浏览器后所有业务数据（房间、客人、任务、日志、活动）保持不变
+- [x] ReservationsView 切换中文后所有文本正确显示（状态标签、空状态、清洁按钮）
+- [x] BedBoard 清洁提示 banner 切换中文后正确显示
+- [x] CalendarView Today 按钮切换中文后显示"今天"
+- [x] CalendarView 弹窗显示来源标签、房间偏好、DOB、金额明细
+- [x] CheckInPanel 未付款客人可正常办理入住（显示警告但不阻止）
+- [x] ShiftStaffContext.tsx 已删除
+- [x] TypeScript 0 错误，无 any 类型
+- [x] BedBoard 添加新房间时 name 字段正确生成
+- [x] 全局无硬编码英文字符串（所有用户可见文本通过 i18n）

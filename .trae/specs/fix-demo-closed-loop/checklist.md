@@ -1,0 +1,7 @@
+- [x] BookingEngine 预订确认后客人自动分配到空床位
+- [x] BookingEngine 预订时应用匹配的活跃促销折扣
+- [x] Dashboard "创建促销"建议跳转后促销表单自动展开
+- [x] HostelPage 预览封面图有浮动 Book Now 按钮
+- [x] GrowPanel 子标签切换有淡入淡出动画
+- [x] ReferralPanel 推荐码生成后自动复制到剪贴板
+- [x] TypeScript 编译无错误

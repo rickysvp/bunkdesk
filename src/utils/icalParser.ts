@@ -1,0 +1,73 @@
+import { Guest } from '../types';
+
+export interface ParsedEvent {
+  uid: string;
+  summary: string;
+  dtStart: string;
+  dtEnd: string;
+  description?: string;
+  location?: string;
+}
+
+function parseICalDate(raw: string): string {
+  // Handle formats: YYYYMMDD, YYYYMMDDTHHMMSSZ, YYYYMMDDTHHMMSS
+  const clean = raw.replace(/[TZ]$/, '').replace(/[-:]/g, '');
+  if (clean.length >= 8) {
+    return `${clean.slice(0, 4)}-${clean.slice(4, 6)}-${clean.slice(6, 8)}`;
+  }
+  return raw;
+}
+
+function extractProperty(lines: string[], key: string): string {
+  for (const line of lines) {
+    if (line.startsWith(`${key}:`) || line.startsWith(`${key};`)) {
+      const colonIdx = line.indexOf(':');
+      if (colonIdx !== -1) return line.slice(colonIdx + 1).trim();
+    }
+  }
+  return '';
+}
+
+export function parseICal(text: string): ParsedEvent[] {
+  const events: ParsedEvent[] = [];
+  const veventRegex = /BEGIN:VEVENT[\s\S]*?END:VEVENT/gi;
+  let match: RegExpExecArray | null;
+
+  while ((match = veventRegex.exec(text)) !== null) {
+    const block = match[0];
+    const lines = block.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+
+    const uid = extractProperty(lines, 'UID');
+    const summary = extractProperty(lines, 'SUMMARY');
+    const dtStart = parseICalDate(extractProperty(lines, 'DTSTART'));
+    const dtEnd = parseICalDate(extractProperty(lines, 'DTEND'));
+    const description = extractProperty(lines, 'DESCRIPTION');
+    const location = extractProperty(lines, 'LOCATION');
+
+    if (summary && dtStart && dtEnd) {
+      events.push({ uid, summary, dtStart, dtEnd, description: description || undefined, location: location || undefined });
+    }
+  }
+
+  return events;
+}
+
+export function mapEventToGuest(event: ParsedEvent): Omit<Guest, 'id'> {
+  const checkIn = new Date(event.dtStart);
+  const checkOut = new Date(event.dtEnd);
+  const nights = Math.max(1, Math.round((checkOut.getTime() - checkIn.getTime()) / (1000 * 60 * 60 * 24)));
+
+  return {
+    name: event.summary,
+    country: '',
+    countryCode: '',
+    checkInDate: event.dtStart,
+    checkOutDate: event.dtEnd,
+    nights,
+    paymentStatus: 'unpaid',
+    passportScanned: false,
+    source: 'ical',
+    notes: event.description || undefined,
+    roomPreference: event.location || undefined,
+  };
+}

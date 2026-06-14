@@ -1,0 +1,13 @@
+- [x] i18n EN dashboard 块包含 emptyBedsTitle、emptyBedsDesc、suggestPromo、suggestWhatsApp、suggestPricing、fullHouseTitle、fullHouseDesc
+- [x] i18n EN bedboard 块包含 howToFill、suggestLowerPrice、suggestPromo、suggestShare
+- [x] i18n ZH grow 块包含 hostelPage、social、referral、pricing
+- [x] i18n ZH dashboard 块包含 emptyBedsTitle、emptyBedsDesc、suggestPromo、suggestWhatsApp、suggestPricing、fullHouseTitle、fullHouseDesc
+- [x] i18n ZH bedboard 块包含 howToFill、suggestLowerPrice、suggestPromo、suggestShare
+- [x] 废弃 i18n 键已清理（socialKit.instagramTitle 及 story/download/saved 相关键在 EN/ZH 中不存在）
+- [x] SocialKit 中无 `bunkly.app` 引用，链接使用 `bunkdesk.app`
+- [x] ReferralPanel 推荐码前缀为 `BUNKDESK-` 而非 `BUNKLY-`
+- [x] Dashboard 空床建议可点击跳转到 Grow 面板对应子标签
+- [x] BedBoard 空床弹出菜单建议项可点击跳转到 Grow 面板对应子标签
+- [x] HostelPage "Book Now" 按钮点击后展示 BookingEngine 预订流程
+- [x] Landing Page "Watch Demo" 按钮点击后平滑滚动到 Showcase 区域
+- [x] TypeScript 编译无错误（npx tsc --noEmit 通过）

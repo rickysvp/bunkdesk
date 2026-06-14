@@ -1,0 +1,15 @@
+- [x] types.ts 包含 GroupBooking、Referral、HostelPage、Promotion 类型定义
+- [x] GuestSource 包含 "direct"、"referral"、"group" 新来源
+- [x] HostelContext 包含 groupBookings、referrals、hostelPage、promotions 状态和方法
+- [x] data.ts 包含团队预订、推荐记录、青旅主页配置的 demo 数据
+- [x] HostelPage.tsx 提供3套模板选择、内容编辑、分享链接、预览功能
+- [x] BookingEngine.tsx 提供日期→房型→人数预订流程，支持团队预订和推荐码
+- [x] GroupBookingModal.tsx 支持创建团队预订、自动分配床位、shared/split付款
+- [x] ReferralPanel.tsx 展示推荐码生成和转化统计
+- [x] SocialKit.tsx 提供 WhatsApp/Instagram 模板生成和空床促销自动生成
+- [x] RevenueBoost.tsx 提供空床预警、定价建议、促销模板创建
+- [x] MigrationHub.tsx 提供 CSV导入和 iCal迁移双通道，含预置样本下载
+- [x] BedBoard 性别宿舍智能分配和性别冲突预警正常工作
+- [x] Sidebar 新增 My Page、Revenue、Migrate 入口，Reception角色不可见后两项
+- [x] 落地页痛点叙事聚焦"空床卖不完+OTA佣金"，展示获客引擎功能
+- [x] 所有新增文案完成 i18n（中英双语）
