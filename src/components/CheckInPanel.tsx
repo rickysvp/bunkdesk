@@ -13,6 +13,7 @@ import { Guest, Bed, Room } from '../types';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '@/lib/utils';
 import { getSourceConfig, getPaymentStatusClass } from '../utils/guestDisplay';
+import { scoreBeds, getRoomSummaries, type BedScore } from '../utils/bedAllocator';
 
 const COUNTRY_MAP: Record<string, string> = {
   US: 'USA', GBR: 'United Kingdom', AU: 'Australia',
@@ -23,7 +24,7 @@ const DEFAULT_PRICE = 85;
 type SubTab = 'pending' | 'checked-in' | 'reserved';
 
 export function CheckInPanel({ setActiveTab }: { setActiveTab?: (tab: string) => void }) {
-  const { arrivals, rooms, assignArrival, settlePayment, scanPassport, addArrival, updateArrival, importArrivals, checkoutGuest } = useHostel();
+  const { arrivals, rooms, assignArrival, autoAssignBed, settlePayment, scanPassport, addArrival, updateArrival, importArrivals, checkoutGuest } = useHostel();
   const { t } = useTranslation();
   const [subTab, setSubTab] = useState<SubTab>('pending');
   const [searchQuery, setSearchQuery] = useState('');
@@ -57,6 +58,15 @@ export function CheckInPanel({ setActiveTab }: { setActiveTab?: (tab: string) =>
   const emptyBeds = useMemo(() => rooms.flatMap(r =>
     r.beds.filter(b => b.status === 'empty').map(b => ({ ...b, roomType: r.type, roomNumber: r.number }))
   ), [rooms]);
+
+  // Scored beds for the selected guest (sorted by recommendation)
+  const scoredBeds = useMemo(() => {
+    if (!selectedGuest || selectedGuestId === 'NEW') return [];
+    return scoreBeds(selectedGuest, rooms);
+  }, [selectedGuest, rooms, selectedGuestId]);
+
+  // Room summaries for Checked In tab
+  const roomSummaries = useMemo(() => getRoomSummaries(rooms), [rooms]);
 
   // Gather checked-in guests
   const checkedInGuests = useMemo(() => rooms.flatMap(r =>
@@ -343,31 +353,51 @@ export function CheckInPanel({ setActiveTab }: { setActiveTab?: (tab: string) =>
                 {/* Bed Assignment */}
                 <Card className="p-4 border-zinc-200 shadow-none">
                   <Label className="text-xs text-zinc-900 font-semibold mb-2 flex items-center gap-1.5"><BedDouble className="h-3.5 w-3.5" />{t('checkin.assignBed')}</Label>
+                  {/* Auto Assign Button */}
+                  <Button size="lg" className="w-full h-11 text-sm mb-3 bg-blue-600 hover:bg-blue-700 text-white shadow-md"
+                    onClick={() => {
+                      const result = autoAssignBed(selectedGuest.id);
+                      if (result) {
+                        setCheckInSuccess(selectedGuest.name);
+                        setSelectedGuestId(null);
+                        setSelectedBedId(null);
+                      }
+                    }}>
+                    <svg className="w-4 h-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+                    {t('checkin.autoAssign') || 'Auto Assign & Check-in'}
+                  </Button>
+                  {/* Scored Bed List */}
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-48 overflow-y-auto">
-                    {emptyBeds.map(bed => {
-                      const isFemaleDorm = bed.roomType === 'dorm-female';
-                      const isFemaleGuest = selectedGuest.gender === 'female';
-                      const isMaleGuest = selectedGuest.gender === 'male';
-                      const isRecommended = isFemaleDorm && isFemaleGuest;
-                      const isNotRecommended = isFemaleDorm && isMaleGuest;
+                    {scoredBeds.map((score, idx) => {
+                      const isTop = idx === 0;
                       return (
-                        <button key={bed.id} onClick={() => !isNotRecommended && setSelectedBedId(bed.id)}
-                          className={cn("p-3 rounded-xl border text-left transition-all cursor-pointer min-h-[70px]",
-                            selectedBedId === bed.id ? 'border-zinc-900 bg-zinc-900 text-white shadow-md' :
-                            isRecommended ? 'border-emerald-400 bg-emerald-50/50 hover:border-emerald-500' :
-                            isNotRecommended ? 'border-zinc-200 bg-zinc-100/60 text-zinc-400 cursor-not-allowed opacity-60' :
+                        <button key={score.bedId} onClick={() => setSelectedBedId(score.bedId)}
+                          className={cn("p-3 rounded-xl border text-left transition-all cursor-pointer min-h-[70px] relative",
+                            selectedBedId === score.bedId ? 'border-zinc-900 bg-zinc-900 text-white shadow-md' :
+                            isTop ? 'border-emerald-400 bg-emerald-50/70 hover:border-emerald-500 shadow-sm' :
                             'border-zinc-200 bg-white hover:border-zinc-400')}>
-                          <span className="font-semibold text-xs">{bed.roomType === 'dorm-mixed' ? t('bedboard.mixedDorm') : bed.roomType === 'dorm-female' ? t('bedboard.femaleDorm') : t('bedboard.private')}</span>
-                          <span className={cn("text-[10px] mt-0.5 block", selectedBedId === bed.id ? 'text-zinc-300' : 'text-zinc-500')}>{bed.name} · R{bed.roomNumber}</span>
-                          {isRecommended && selectedBedId !== bed.id && <span className="text-[10px] font-semibold text-emerald-600">♀ {t('bedboard.femaleOnly')}</span>}
+                          {isTop && <span className="absolute -top-2 left-2 text-[10px] font-bold bg-emerald-500 text-white px-1.5 py-0.5 rounded">★ Best</span>}
+                          <span className="font-semibold text-xs">
+                            {score.roomType === 'dorm-mixed' ? t('bedboard.mixedDorm') : score.roomType === 'dorm-female' ? t('bedboard.femaleDorm') : t('bedboard.private')}
+                          </span>
+                          <span className={cn("text-[10px] mt-0.5 block", selectedBedId === score.bedId ? 'text-zinc-300' : 'text-zinc-500')}>
+                            {score.bedName} · R{score.roomNumber} · ${score.pricePerNight}
+                          </span>
+                          <div className="flex items-center gap-0.5 mt-1">
+                            {score.fillExisting && <span className="text-[9px] bg-zinc-100 dark:bg-zinc-800 px-1 py-0.5 rounded text-zinc-600">Fill</span>}
+                            {score.genderMatch && <span className="text-[9px] bg-blue-50 px-1 py-0.5 rounded text-blue-600">Match</span>}
+                          </div>
                         </button>
                       );
                     })}
+                    {scoredBeds.length === 0 && (
+                      <div className="col-span-full py-4 text-center text-xs text-red-500">{t('checkin.noAvailableBeds') || 'No suitable beds available'}</div>
+                    )}
                   </div>
                   {(selectedGuest.paymentStatus === 'unpaid' || selectedGuest.paymentStatus === 'partial') && (
                     <p className="text-[10px] font-medium text-amber-600 mt-2">⚠️ {t('checkin.unpaidWarning')}</p>
                   )}
-                  <div className="mt-3 pt-3 border-t border-zinc-100 flex justify-end">
+                  <div className="mt-3 pt-3 border-t border-zinc-100 flex justify-end gap-2">
                     <Button size="lg" disabled={!selectedBedId || !selectedGuest.passportScanned} onClick={handleCheckIn}
                       className="w-full sm:w-auto h-11 px-6 text-sm shadow-lg">{t('checkin.completeCheckIn')}</Button>
                   </div>
@@ -385,6 +415,24 @@ export function CheckInPanel({ setActiveTab }: { setActiveTab?: (tab: string) =>
       {/* ── Checked In Tab ── */}
       {subTab === 'checked-in' && (
         <div className="flex-1 overflow-auto">
+          {/* Room Summaries */}
+          <div className="mb-3 p-3 bg-white rounded-xl border border-zinc-200 shadow-sm">
+            <h4 className="text-[10px] font-semibold text-zinc-500 uppercase mb-2">{t('checkin.roomStatus') || 'Room Status'}</h4>
+            <div className="space-y-1">
+              {roomSummaries.map(s => (
+                <div key={s.roomId} className="flex items-center justify-between text-xs px-2 py-1.5 rounded-lg bg-zinc-50">
+                  <span className="text-zinc-600 font-medium">
+                    {s.roomType === 'dorm-mixed' ? t('bedboard.mixedDorm') : s.roomType === 'dorm-female' ? t('bedboard.femaleDorm') : t('bedboard.private')} R{s.roomNumber}
+                  </span>
+                  <span className={cn("text-[11px] font-bold",
+                    s.occupiedBeds === s.totalBeds ? "text-red-600" :
+                    s.occupiedBeds > 0 ? "text-amber-600" : "text-emerald-600")}>
+                    {s.occupiedBeds}/{s.totalBeds}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
           <div className="bg-white rounded-2xl border border-zinc-200 shadow-sm overflow-hidden">
             <table className="w-full text-left border-collapse">
               <thead>

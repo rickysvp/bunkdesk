@@ -10,8 +10,8 @@ function loadState<T>(key: string, fallback: T): T {
 }
 
 const ROLE_TABS: Record<StaffRole, string[]> = {
-  manager: ["dashboard", "bedboard", "shiftlog", "checkin", "calendar", "staff", "grow", "migrate"],
-  reception: ["dashboard", "bedboard", "shiftlog", "checkin", "calendar"],
+  manager: ["dashboard", "bedboard", "shiftlog", "checkin", "staff", "grow", "migrate"],
+  reception: ["dashboard", "bedboard", "shiftlog", "checkin"],
   cleaning: ["dashboard", "bedboard", "shiftlog"],
 };
 

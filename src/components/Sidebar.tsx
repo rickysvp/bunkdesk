@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { LayoutDashboard, Grid, KeyRound, Calendar, BookOpen, ClipboardList, MoreHorizontal, Users, Sprout, ArrowRightLeft, Brain, ChevronDown, Settings } from 'lucide-react';
+import { LayoutDashboard, Grid, KeyRound, ClipboardList, MoreHorizontal, Users, Sprout, ArrowRightLeft, Brain, ChevronDown, Settings } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useTranslation } from '../i18nContext';
 import { useStaff } from '../StaffContext';
@@ -18,7 +18,6 @@ const MODULE_CONFIG = [
     tabs: [
       { id: 'bedboard', icon: Grid, i18nKey: 'sidebar.bedBoard' },
       { id: 'checkin', icon: KeyRound, i18nKey: 'sidebar.checkIn' },
-      { id: 'calendar', icon: Calendar, i18nKey: 'sidebar.calendar' },
       { id: 'shiftlog', icon: ClipboardList, i18nKey: 'sidebar.shiftLog' },
     ],
   },

@@ -65,7 +65,6 @@ const sourceIcons: Record<ShiftNoteSource, { icon: React.ElementType; className:
   checkin: { icon: LogIn, className: "bg-emerald-50 text-emerald-700" },
   checkout: { icon: LogOut, className: "bg-orange-50 text-orange-700" },
   cleaning: { icon: Sparkles, className: "bg-purple-50 text-purple-700" },
-  task: { icon: CheckSquare, className: "bg-blue-50 text-blue-700" },
   system: { icon: Cpu, className: "bg-zinc-100 text-zinc-500" },
 };
 
@@ -74,7 +73,6 @@ const sourceI18nKeys: Record<ShiftNoteSource, string> = {
   checkin: "shiftlog.sourceCheckin",
   checkout: "shiftlog.sourceCheckout",
   cleaning: "shiftlog.sourceCleaning",
-  task: "shiftlog.sourceTask",
   system: "shiftlog.sourceSystem",
 };
 
@@ -166,16 +164,12 @@ export function ShiftLog({ onNavigate }: ShiftLogProps) {
       case "bed":
         onNavigate("bedboard");
         break;
-      case "task":
-        onNavigate("tasks");
-        break;
     }
   };
 
   const relatedLinkI18nKeys: Record<string, { i18nKey: string; tab: string }> = {
     guest: { i18nKey: "shiftlog.viewGuest", tab: "checkin" },
     bed: { i18nKey: "shiftlog.viewBed", tab: "bedboard" },
-    task: { i18nKey: "shiftlog.viewTask", tab: "tasks" },
   };
 
   const filterTabs: { key: FilterType; label: string }[] = [

@@ -139,10 +139,10 @@ export function LandingPage({ onEnterApp }: LandingPageProps) {
                 </div>
                 <div className="p-6 space-y-4">
                   <div className="grid grid-cols-6 gap-3">
-                    {['75%', '2', '1', '3', '4', '1'].map((v, i) => (
+                    {['75%', '2', '1', '3'].map((v, i) => (
                       <div key={i} className="bg-zinc-900 rounded-lg p-3">
                         <div className="text-xl font-bold text-white">{v}</div>
-                        <div className="text-[10px] text-zinc-500 mt-1">{['Occupancy', 'Arrivals', 'Departing', 'Cleaning', 'Tasks', 'Activities'][i]}</div>
+                        <div className="text-[10px] text-zinc-500 mt-1">{['Occupancy', 'Arrivals', 'Departing', 'Cleaning'][i]}</div>
                       </div>
                     ))}
                   </div>

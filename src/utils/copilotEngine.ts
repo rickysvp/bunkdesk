@@ -59,6 +59,13 @@ export function generateWeekForecast(rooms: Room[]) {
     peakDay: { date: peakDay.date, rate: peakDay.occupancyRate },
     lowDay: { date: lowDay.date, rate: lowDay.occupancyRate },
     totalEmptyBedNights,
+    // Daily breakdown for downstream consumers (e.g. CopilotPanel chart).
+    daily: availability.map((d) => ({
+      date: d.date,
+      occupancyRate: d.occupancyRate,
+      occupiedBeds: d.occupiedBeds,
+      totalBeds: d.totalBeds,
+    })),
   };
 }
 

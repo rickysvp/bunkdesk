@@ -1,7 +1,8 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode, useMemo, useCallback, useRef } from "react";
-import { Room, Guest, Bed, ShiftNote, ShiftNoteSource, Task, TaskStatus, Activity, ActivityParticipant, GroupBooking, Referral, HostelPage, Promotion, GuestProfile, GuestTag, OccupancyAction } from "./types";
-import { INITIAL_ROOMS, ARRIVALS, INITIAL_SHIFT_NOTES, INITIAL_TASKS, INITIAL_ACTIVITIES, INITIAL_GROUP_BOOKINGS, INITIAL_REFERRALS, INITIAL_HOSTEL_PAGE, INITIAL_PROMOTIONS, INITIAL_GUEST_PROFILES } from "./data";
+import React, { createContext, useContext, useState, useEffect, ReactNode, useMemo, useCallback } from "react";
+import { Room, Guest, Bed, ShiftNote, ShiftNoteSource, GroupBooking, Referral, HostelPage, Promotion, GuestProfile, GuestTag, OccupancyAction } from "./types";
+import { INITIAL_ROOMS, ARRIVALS, INITIAL_SHIFT_NOTES, INITIAL_GROUP_BOOKINGS, INITIAL_REFERRALS, INITIAL_HOSTEL_PAGE, INITIAL_PROMOTIONS, INITIAL_GUEST_PROFILES } from "./data";
 import { useStaff } from "./StaffContext";
+import { pickBestBed, scoreBeds, type BedScore } from "./utils/bedAllocator";
 
 function loadState<T>(key: string, fallback: T): T {
   try {
@@ -10,17 +11,66 @@ function loadState<T>(key: string, fallback: T): T {
   } catch { return fallback; }
 }
 
+// Persist all 9 hostel slices under a single versioned key to:
+//  - Avoid partial writes if any one slice serializes badly
+//  - Make schema migrations explicit (bump STORAGE_VERSION and add a migrator)
+//  - Keep reads/writes atomic from the app's perspective
+const STORAGE_KEY = 'bunkdesk_state_v1';
+const STORAGE_VERSION = 1;
+type HostelPersisted = {
+  rooms: Room[];
+  arrivals: Guest[];
+  shiftNotes: ShiftNote[];
+  groupBookings: GroupBooking[];
+  referrals: Referral[];
+  hostelPage: HostelPage;
+  promotions: Promotion[];
+  guestProfiles: GuestProfile[];
+  occupancyActions: OccupancyAction[];
+};
+
+function loadPersistedState(fallback: HostelPersisted): HostelPersisted {
+  // Prefer the new versioned key; fall back to the legacy 9-key layout if
+  // it exists so we don't drop data from older builds.
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (parsed && parsed.__v === STORAGE_VERSION && parsed.data) {
+        return { ...fallback, ...parsed.data };
+      }
+    }
+  } catch {
+    // Ignore — fall through to legacy fallback
+  }
+
+  // Legacy fallback: read each key independently and merge.
+  return {
+    rooms: loadState('rooms', fallback.rooms),
+    arrivals: loadState('arrivals', fallback.arrivals),
+    shiftNotes: loadState('shiftNotes', fallback.shiftNotes),
+    groupBookings: loadState('groupBookings', fallback.groupBookings),
+    referrals: loadState('referrals', fallback.referrals),
+    hostelPage: loadState('hostelPage', fallback.hostelPage),
+    promotions: loadState('promotions', fallback.promotions),
+    guestProfiles: loadState('guestProfiles', fallback.guestProfiles),
+    occupancyActions: loadState('occupancyActions', fallback.occupancyActions),
+  };
+}
+
 interface HostelState {
   rooms: Room[];
   arrivals: Guest[];
   moveGuest: (sourceBedId: string, targetBedId: string) => void;
   assignArrival: (guestId: string, bedId: string) => void;
-  occupyBed: (bedId: string, guest: Omit<Guest, "id">) => string;
+  autoAssignBed: (guestId: string) => BedScore | null;
+  occupyBed: (bedId: string, guest: Omit<Guest, "id">, guestId?: string) => string;
+  moveReservation: (sourceBedId: string, targetBedId: string, guestId: string) => void;
   markBedClean: (bedId: string) => void;
   checkoutGuest: (bedId: string) => void;
   settlePayment: (guestId: string) => void;
   scanPassport: (guestId: string) => void;
-  addArrival: (guest: Omit<Guest, "id">) => void;
+  addArrival: (guest: Omit<Guest, "id">) => string;
   updateArrival: (guestId: string, updates: Partial<Pick<Guest, 'notes' | 'roomPreference' | 'source' | 'phone' | 'email' | 'totalAmount' | 'paidAmount' | 'gender' | 'dob' | 'passportOrId' | 'checkInDate' | 'checkOutDate' | 'nights'>>) => void;
   importArrivals: (guests: Omit<Guest, "id">[]) => void;
   addRoom: (room: Omit<Room, "id" | "beds">) => void;
@@ -35,21 +85,6 @@ interface HostelState {
   resolveShiftNote: (noteId: string) => void;
   unresolveShiftNote: (noteId: string) => void;
   deleteShiftNote: (noteId: string) => void;
-  // Tasks
-  tasks: Task[];
-  addTask: (task: Omit<Task, "id" | "createdAt" | "comments">) => void;
-  updateTaskStatus: (taskId: string, status: TaskStatus) => void;
-  updateTask: (taskId: string, updates: Partial<Pick<Task, "title" | "description" | "priority" | "assignee" | "dueDate" | "category">>) => void;
-  deleteTask: (taskId: string) => void;
-  addTaskComment: (taskId: string, author: string, content: string) => void;
-  // Activities
-  activities: Activity[];
-  addActivity: (activity: Omit<Activity, "id" | "participants">) => void;
-  updateActivityStatus: (activityId: string, status: Activity["status"]) => void;
-  addParticipant: (activityId: string, participant: Omit<ActivityParticipant, "id">) => void;
-  removeParticipant: (activityId: string, participantId: string) => void;
-  toggleParticipantCheckIn: (activityId: string, participantId: string) => void;
-  deleteActivity: (activityId: string) => void;
   // Group Bookings
   groupBookings: GroupBooking[];
   addGroupBooking: (booking: Omit<GroupBooking, "id" | "createdAt">) => void;
@@ -80,39 +115,48 @@ interface HostelState {
 const HostelContext = createContext<HostelState | undefined>(undefined);
 
 export function HostelProvider({ children }: { children: ReactNode }) {
-  const [rooms, setRooms] = useState<Room[]>(() => loadState('rooms', INITIAL_ROOMS));
-  const [arrivals, setArrivals] = useState<Guest[]>(() => loadState('arrivals', ARRIVALS));
-  const [shiftNotes, setShiftNotes] = useState<ShiftNote[]>(() => loadState('shiftNotes', INITIAL_SHIFT_NOTES));
-  const [tasks, setTasks] = useState<Task[]>(() => loadState('tasks', INITIAL_TASKS));
-  const [activities, setActivities] = useState<Activity[]>(() => loadState('activities', INITIAL_ACTIVITIES));
-  const [groupBookings, setGroupBookings] = useState<GroupBooking[]>(() => loadState('groupBookings', INITIAL_GROUP_BOOKINGS));
-  const [referrals, setReferrals] = useState<Referral[]>(() => loadState('referrals', INITIAL_REFERRALS));
-  const [hostelPage, setHostelPage] = useState<HostelPage>(() => loadState('hostelPage', INITIAL_HOSTEL_PAGE));
-  const [promotions, setPromotions] = useState<Promotion[]>(() => loadState('promotions', INITIAL_PROMOTIONS));
-  const [guestProfiles, setGuestProfiles] = useState<GuestProfile[]>(() => loadState('guestProfiles', INITIAL_GUEST_PROFILES));
-  const [occupancyActions, setOccupancyActions] = useState<OccupancyAction[]>(() => loadState('occupancyActions', []));
+  // Load all 9 slices atomically from the versioned key (with legacy fallback).
+  const initial = loadPersistedState({
+    rooms: INITIAL_ROOMS,
+    arrivals: ARRIVALS,
+    shiftNotes: INITIAL_SHIFT_NOTES,
+    groupBookings: INITIAL_GROUP_BOOKINGS,
+    referrals: INITIAL_REFERRALS,
+    hostelPage: INITIAL_HOSTEL_PAGE,
+    promotions: INITIAL_PROMOTIONS,
+    guestProfiles: INITIAL_GUEST_PROFILES,
+    occupancyActions: [],
+  });
 
-  // Use ref for shiftNotes to avoid circular dependencies in useCallback
-  const shiftNotesRef = useRef(shiftNotes);
-  shiftNotesRef.current = shiftNotes;
+  const [rooms, setRooms] = useState<Room[]>(initial.rooms);
+  const [arrivals, setArrivals] = useState<Guest[]>(initial.arrivals);
+  const [shiftNotes, setShiftNotes] = useState<ShiftNote[]>(initial.shiftNotes);
+  const [groupBookings, setGroupBookings] = useState<GroupBooking[]>(initial.groupBookings);
+  const [referrals, setReferrals] = useState<Referral[]>(initial.referrals);
+  const [hostelPage, setHostelPage] = useState<HostelPage>(initial.hostelPage);
+  const [promotions, setPromotions] = useState<Promotion[]>(initial.promotions);
+  const [guestProfiles, setGuestProfiles] = useState<GuestProfile[]>(initial.guestProfiles);
+  const [occupancyActions, setOccupancyActions] = useState<OccupancyAction[]>(initial.occupancyActions);
 
-  // Persist state to localStorage with debounce
+  // Persist state to localStorage with debounce. All 9 slices are written
+  // atomically under a single versioned key inside a try/catch so a quota
+  // or serialization error is logged but never crashes the React tree.
   useEffect(() => {
     const timer = setTimeout(() => {
-      localStorage.setItem('bunkdesk_rooms', JSON.stringify(rooms));
-      localStorage.setItem('bunkdesk_arrivals', JSON.stringify(arrivals));
-      localStorage.setItem('bunkdesk_shiftNotes', JSON.stringify(shiftNotes));
-      localStorage.setItem('bunkdesk_tasks', JSON.stringify(tasks));
-      localStorage.setItem('bunkdesk_activities', JSON.stringify(activities));
-      localStorage.setItem('bunkdesk_groupBookings', JSON.stringify(groupBookings));
-      localStorage.setItem('bunkdesk_referrals', JSON.stringify(referrals));
-      localStorage.setItem('bunkdesk_hostelPage', JSON.stringify(hostelPage));
-      localStorage.setItem('bunkdesk_promotions', JSON.stringify(promotions));
-      localStorage.setItem('bunkdesk_guestProfiles', JSON.stringify(guestProfiles));
-      localStorage.setItem('bunkdesk_occupancyActions', JSON.stringify(occupancyActions));
+      try {
+        const payload = {
+          __v: STORAGE_VERSION,
+          data: { rooms, arrivals, shiftNotes, groupBookings, referrals, hostelPage, promotions, guestProfiles, occupancyActions },
+        };
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+      } catch (e) {
+        // QuotaExceededError, circular refs, etc. — log and let the app keep running.
+        // eslint-disable-next-line no-console
+        console.warn('[bunkly] localStorage persist failed:', e);
+      }
     }, 300);
     return () => clearTimeout(timer);
-  }, [rooms, arrivals, shiftNotes, tasks, activities, groupBookings, referrals, hostelPage, promotions, guestProfiles, occupancyActions]);
+  }, [rooms, arrivals, shiftNotes, groupBookings, referrals, hostelPage, promotions, guestProfiles, occupancyActions]);
 
   const { currentStaff } = useStaff();
 
@@ -121,7 +165,7 @@ export function HostelProvider({ children }: { children: ReactNode }) {
     content: string,
     source: ShiftNoteSource,
     relatedId?: string,
-    relatedType?: "guest" | "bed" | "task" | "room",
+    relatedType?: "guest" | "bed" | "room",
   ) => {
     const authorName = currentStaff?.name || "System";
     const note: ShiftNote = {
@@ -143,30 +187,70 @@ export function HostelProvider({ children }: { children: ReactNode }) {
 
   // ── Bed/Guest operations ──────────────────────────────────────
 
+  const getBedStatusFromBookings = useCallback((bed: Bed) => {
+    if (bed.guest) return bed.status === "late-arrival" ? "late-arrival" : "occupied";
+    if ((bed.reservations?.length ?? 0) > 0) return "reserved";
+    return "empty";
+  }, []);
+
   const moveGuest = useCallback((sourceBedId: string, targetBedId: string) => {
     setRooms((prevRooms) => {
-      let movedGuest: Guest | undefined;
-      const step1Rooms = prevRooms.map((r) => ({
-        ...r,
-        beds: r.beds.map((b) => {
-          if (b.id === sourceBedId) {
-            movedGuest = b.guest;
-            return { ...b, status: "cleaning", guest: undefined } as Bed;
+      if (sourceBedId === targetBedId) return prevRooms;
+
+      let sourceRoom: Room | undefined;
+      let targetRoom: Room | undefined;
+      let sourceGuest: Guest | undefined;
+      let targetGuest: Guest | undefined;
+
+      for (const room of prevRooms) {
+        for (const bed of room.beds) {
+          if (bed.id === sourceBedId) {
+            sourceRoom = room;
+            sourceGuest = bed.guest;
           }
-          return b;
-        }),
-      }));
-      return step1Rooms.map((r) => ({
-        ...r,
-        beds: r.beds.map((b) => {
-          if (b.id === targetBedId && movedGuest) {
-            return { ...b, status: "occupied", guest: movedGuest };
+          if (bed.id === targetBedId) {
+            targetRoom = room;
+            targetGuest = bed.guest;
           }
-          return b;
+        }
+      }
+
+      if (!sourceGuest || !sourceRoom || !targetRoom) return prevRooms;
+
+      if (targetGuest && targetGuest.id !== sourceGuest.id) {
+        return prevRooms.map((room) => ({
+          ...room,
+          beds: room.beds.map((bed) => {
+            if (bed.id === sourceBedId) {
+              const nextBed = { ...bed, guest: targetGuest };
+              return { ...nextBed, status: getBedStatusFromBookings(nextBed) };
+            }
+            if (bed.id === targetBedId) {
+              const nextBed = { ...bed, guest: sourceGuest };
+              return { ...nextBed, status: getBedStatusFromBookings(nextBed) };
+            }
+            return bed;
+          }),
+        }));
+      }
+
+      return prevRooms.map((room) => ({
+        ...room,
+        beds: room.beds.map((bed) => {
+          if (bed.id === sourceBedId) {
+            const nextBed = { ...bed, guest: undefined };
+            const nextStatus = (nextBed.reservations?.length ?? 0) > 0 ? "reserved" : "cleaning";
+            return { ...nextBed, status: nextStatus } as Bed;
+          }
+          if (bed.id === targetBedId) {
+            const nextBed = { ...bed, guest: sourceGuest };
+            return { ...nextBed, status: getBedStatusFromBookings(nextBed) };
+          }
+          return bed;
         }),
       }));
     });
-  }, []);
+  }, [getBedStatusFromBookings]);
 
   const assignArrival = useCallback((guestId: string, bedId: string) => {
     const guest = arrivals.find((g) => g.id === guestId);
@@ -193,8 +277,20 @@ export function HostelProvider({ children }: { children: ReactNode }) {
     }
   }, [arrivals, addAutoNote]);
 
-  const occupyBed = useCallback((bedId: string, guest: Omit<Guest, "id">) => {
-    const newGuest: Guest = { ...guest, id: `g_${crypto.randomUUID()}` };
+  const autoAssignBed = useCallback((guestId: string): BedScore | null => {
+    const guest = arrivals.find((g) => g.id === guestId);
+    if (!guest) return null;
+
+    const best = pickBestBed(guest, rooms);
+    if (!best) return null;
+
+    // Assign the guest to the best bed
+    assignArrival(guestId, best.bedId);
+    return best;
+  }, [arrivals, rooms, assignArrival]);
+
+  const occupyBed = useCallback((bedId: string, guest: Omit<Guest, "id">, guestId?: string): string => {
+    const newGuest: Guest = { ...guest, id: guestId ?? `g_${crypto.randomUUID()}` };
     setRooms((prevRooms) =>
       prevRooms.map((r) => ({
         ...r,
@@ -209,6 +305,48 @@ export function HostelProvider({ children }: { children: ReactNode }) {
     addAutoNote(`${newGuest.name} checked in`, "checkin", newGuest.id, "guest");
     return newGuest.id;
   }, [addAutoNote]);
+
+  const moveReservation = useCallback((sourceBedId: string, targetBedId: string, guestId: string) => {
+    setRooms((prevRooms) => {
+      let movedReservation: Guest | undefined;
+
+      const sourceRoom = prevRooms.find((room) => room.beds.some((bed) => bed.id === sourceBedId));
+      const targetRoom = prevRooms.find((room) => room.beds.some((bed) => bed.id === targetBedId));
+      if (!sourceRoom || !targetRoom) return prevRooms;
+
+      const sourceBed = sourceRoom.beds.find((bed) => bed.id === sourceBedId);
+      const targetBed = targetRoom.beds.find((bed) => bed.id === targetBedId);
+      if (!sourceBed || !targetBed) return prevRooms;
+
+      movedReservation = sourceBed.reservations?.find((reservation) => reservation.id === guestId);
+      if (!movedReservation) return prevRooms;
+
+      return prevRooms.map((room) => ({
+        ...room,
+        beds: room.beds.map((bed) => {
+          if (bed.id === sourceBedId) {
+            const nextReservations = (bed.reservations || []).filter((reservation) => reservation.id !== guestId);
+            const nextBed = { ...bed, reservations: nextReservations };
+            return {
+              ...nextBed,
+              status: getBedStatusFromBookings(nextBed),
+            };
+          }
+          if (bed.id === targetBedId) {
+            const existingReservations = bed.reservations || [];
+            const duplicated = existingReservations.some((reservation) => reservation.id === guestId);
+            const nextReservations = duplicated ? existingReservations : [...existingReservations, movedReservation!];
+            const nextBed = { ...bed, reservations: nextReservations };
+            return {
+              ...nextBed,
+              status: getBedStatusFromBookings(nextBed),
+            };
+          }
+          return bed;
+        }),
+      }));
+    });
+  }, [getBedStatusFromBookings]);
 
   const markBedClean = useCallback((bedId: string) => {
     // Find bed info before updating
@@ -236,6 +374,11 @@ export function HostelProvider({ children }: { children: ReactNode }) {
     const room = rooms.find(r => r.beds.some(b => b.id === bedId));
     const bed = room?.beds.find(b => b.id === bedId);
     const guest = bed?.guest;
+    // Bug fix: also remove the guest from the arrivals list if a record with
+    // the same ID exists, otherwise we leave a "ghost" pending arrival.
+    if (guest) {
+      setArrivals((prev) => prev.filter((g) => g.id !== guest.id));
+    }
     setRooms((prevRooms) =>
       prevRooms.map((r) => ({
         ...r,
@@ -288,19 +431,27 @@ export function HostelProvider({ children }: { children: ReactNode }) {
   const addArrival = useCallback((guest: Omit<Guest, "id">) => {
     const newGuest: Guest = { ...guest, id: `g_${crypto.randomUUID()}` };
     setArrivals((prev) => [...prev, newGuest]);
+    return newGuest.id;
   }, []);
 
   const updateArrival = useCallback((guestId: string, updates: Partial<Pick<Guest, 'notes' | 'roomPreference' | 'source' | 'phone' | 'email' | 'totalAmount' | 'paidAmount' | 'gender' | 'dob' | 'passportOrId' | 'checkInDate' | 'checkOutDate' | 'nights'>>) => {
     setArrivals((prev) => prev.map((g) => g.id === guestId ? { ...g, ...updates } : g));
-    // Sync updates to rooms guest data
+    // Sync updates to rooms guest data AND reservations
     setRooms((prevRooms) =>
       prevRooms.map((r) => ({
         ...r,
-        beds: r.beds.map((b) =>
-          b.guest?.id === guestId
-            ? { ...b, guest: { ...b.guest, ...updates } }
-            : b,
-        ),
+        beds: r.beds.map((b) => {
+          const updated = { ...b };
+          if (b.guest?.id === guestId) {
+            updated.guest = { ...b.guest, ...updates };
+          }
+          if (b.reservations?.some(r => r.id === guestId)) {
+            updated.reservations = b.reservations.map(r =>
+              r.id === guestId ? { ...r, ...updates } : r
+            );
+          }
+          return updated;
+        }),
       })),
     );
   }, []);
@@ -374,121 +525,6 @@ export function HostelProvider({ children }: { children: ReactNode }) {
 
   const deleteShiftNote = useCallback((noteId: string) => {
     setShiftNotes((prev) => prev.filter((n) => n.id !== noteId));
-  }, []);
-
-  // ── Task operations ───────────────────────────────────────────
-
-  const addTask = useCallback((task: Omit<Task, "id" | "createdAt" | "comments">) => {
-    const newTask: Task = {
-      ...task,
-      id: `task_${crypto.randomUUID()}`,
-      createdAt: new Date().toISOString(),
-      comments: [],
-    };
-    setTasks((prev) => [newTask, ...prev]);
-  }, []);
-
-  const updateTaskStatus = useCallback((taskId: string, status: TaskStatus) => {
-    setTasks((prev) => {
-      const task = prev.find(t => t.id === taskId);
-      const updated = prev.map((t) => {
-        if (t.id !== taskId) return t;
-        return {
-          ...t,
-          status,
-          completedAt: status === "completed" ? new Date().toISOString() : undefined,
-        };
-      });
-      // Auto-generate shift note when task is completed
-      if (status === "completed" && task) {
-        addAutoNote(`Task completed: ${task.title}`, "task", taskId, "task");
-      }
-      return updated;
-    });
-  }, [addAutoNote]);
-
-  const updateTask = useCallback((taskId: string, updates: Partial<Pick<Task, "title" | "description" | "priority" | "assignee" | "dueDate" | "category">>) => {
-    setTasks((prev) =>
-      prev.map((t) => t.id === taskId ? { ...t, ...updates } : t),
-    );
-  }, []);
-
-  const deleteTask = useCallback((taskId: string) => {
-    setTasks((prev) => prev.filter((t) => t.id !== taskId));
-  }, []);
-
-  const addTaskComment = useCallback((taskId: string, author: string, content: string) => {
-    setTasks((prev) =>
-      prev.map((t) => {
-        if (t.id !== taskId) return t;
-        return {
-          ...t,
-          comments: [...t.comments, {
-            id: `tc_${crypto.randomUUID()}`,
-            author,
-            content,
-            createdAt: new Date().toISOString(),
-          }],
-        };
-      }),
-    );
-  }, []);
-
-  // ── Activity operations ───────────────────────────────────────
-
-  const addActivity = useCallback((activity: Omit<Activity, "id" | "participants">) => {
-    const newActivity: Activity = {
-      ...activity,
-      id: `act_${crypto.randomUUID()}`,
-      participants: [],
-    };
-    setActivities((prev) => [...prev, newActivity]);
-  }, []);
-
-  const updateActivityStatus = useCallback((activityId: string, status: Activity["status"]) => {
-    setActivities((prev) =>
-      prev.map((a) => a.id === activityId ? { ...a, status } : a),
-    );
-  }, []);
-
-  const addParticipant = useCallback((activityId: string, participant: Omit<ActivityParticipant, "id">) => {
-    setActivities((prev) =>
-      prev.map((a) => {
-        if (a.id !== activityId) return a;
-        if (a.participants.length >= a.capacity) return a;
-        return {
-          ...a,
-          participants: [...a.participants, { ...participant, id: `ap_${crypto.randomUUID()}` }],
-        };
-      }),
-    );
-  }, []);
-
-  const removeParticipant = useCallback((activityId: string, participantId: string) => {
-    setActivities((prev) =>
-      prev.map((a) => {
-        if (a.id !== activityId) return a;
-        return { ...a, participants: a.participants.filter((p) => p.id !== participantId) };
-      }),
-    );
-  }, []);
-
-  const toggleParticipantCheckIn = useCallback((activityId: string, participantId: string) => {
-    setActivities((prev) =>
-      prev.map((a) => {
-        if (a.id !== activityId) return a;
-        return {
-          ...a,
-          participants: a.participants.map((p) =>
-            p.id === participantId ? { ...p, checkedIn: !p.checkedIn } : p,
-          ),
-        };
-      }),
-    );
-  }, []);
-
-  const deleteActivity = useCallback((activityId: string) => {
-    setActivities((prev) => prev.filter((a) => a.id !== activityId));
   }, []);
 
   // ── Group Booking operations ──────────────────────────────────
@@ -596,11 +632,9 @@ export function HostelProvider({ children }: { children: ReactNode }) {
 
   const value = useMemo(() => ({
     rooms, arrivals,
-    moveGuest, assignArrival, occupyBed, markBedClean, checkoutGuest, settlePayment, scanPassport,
+    moveGuest, assignArrival, autoAssignBed, occupyBed, moveReservation, markBedClean, checkoutGuest, settlePayment, scanPassport,
     addArrival, updateArrival, importArrivals, addRoom, updateRoom, deleteRoom, addBedToRoom, updateBed, deleteBed,
     shiftNotes, addShiftNote, resolveShiftNote, unresolveShiftNote, deleteShiftNote,
-    tasks, addTask, updateTaskStatus, updateTask, deleteTask, addTaskComment,
-    activities, addActivity, updateActivityStatus, addParticipant, removeParticipant, toggleParticipantCheckIn, deleteActivity,
     groupBookings, addGroupBooking, updateGroupBookingPayment,
     referrals, addReferral, useReferralCode,
     hostelPage, updateHostelPage,
@@ -608,11 +642,9 @@ export function HostelProvider({ children }: { children: ReactNode }) {
     guestProfiles, addGuestProfile, updateGuestProfile, addTagToGuest, removeTagFromGuest,
     occupancyActions, applyOccupancyAction, dismissOccupancyAction,
   }), [
-    rooms, arrivals, moveGuest, assignArrival, markBedClean, checkoutGuest, settlePayment, scanPassport,
-    addArrival, updateArrival, importArrivals, addRoom, updateRoom, addBedToRoom, updateBed,
+    rooms, arrivals, moveGuest, assignArrival, autoAssignBed, occupyBed, moveReservation, markBedClean, checkoutGuest, settlePayment, scanPassport,
+    addArrival, updateArrival, importArrivals, addRoom, updateRoom, deleteRoom, addBedToRoom, updateBed, deleteBed,
     shiftNotes, addShiftNote, resolveShiftNote, unresolveShiftNote, deleteShiftNote,
-    tasks, addTask, updateTaskStatus, updateTask, deleteTask, addTaskComment,
-    activities, addActivity, updateActivityStatus, addParticipant, removeParticipant, toggleParticipantCheckIn, deleteActivity,
     groupBookings, addGroupBooking, updateGroupBookingPayment,
     referrals, addReferral, useReferralCode,
     hostelPage, updateHostelPage,

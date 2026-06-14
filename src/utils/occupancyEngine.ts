@@ -35,7 +35,10 @@ export function calculateAvailability(
     const roomAvail = rooms.map(room => {
       const roomTotal = room.beds.length;
       const roomOccupied = room.beds.filter(b => {
-        if (b.guest && b.guest.checkOutDate >= dateStr) return true;
+        // Bug fix: check-in must also be <= dateStr, otherwise a future-arriving
+        // guest is counted as occupying their previous nights. Aligned with the
+        // reservation check below (check-out day is not counted as occupied).
+        if (b.guest && b.guest.checkInDate <= dateStr && b.guest.checkOutDate > dateStr) return true;
         if (b.reservations?.some(r => r.checkInDate <= dateStr && r.checkOutDate > dateStr)) return true;
         return false;
       }).length;

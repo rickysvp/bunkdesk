@@ -26,7 +26,7 @@ import {
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { motion, AnimatePresence } from 'motion/react';
-import { format, addDays, parseISO } from 'date-fns';
+import { format, parseISO } from 'date-fns';
 import { cn } from '@/lib/utils';
 
 interface CopilotPanelProps {
@@ -43,6 +43,17 @@ export function CopilotPanel({ setActiveTab, navigateToGrow }: CopilotPanelProps
   const weekForecast = useMemo(() => generateWeekForecast(rooms), [rooms]);
   const opportunities = useMemo(() => generateOpportunities(rooms, guestProfiles, shiftNotes), [rooms, guestProfiles, shiftNotes]);
   const risks = useMemo(() => generateRisks(rooms, shiftNotes), [rooms, shiftNotes]);
+
+  // Per-day occupancy derived from the forecast so it stays consistent with
+  // calculateAvailability (counts both current guests and future reservations)
+  // and avoids recomputing on every render.
+  const dailyRates = useMemo(
+    () => weekForecast.daily.map((d) => ({
+      date: d.date,
+      rate: d.occupancyRate,
+    })),
+    [weekForecast],
+  );
 
   const activeOpportunities = opportunities.filter(i => !dismissedInsights.has(i.id));
   const activeRisks = risks.filter(i => !dismissedInsights.has(i.id));
@@ -171,17 +182,10 @@ export function CopilotPanel({ setActiveTab, navigateToGrow }: CopilotPanelProps
             </div>
 
             <div className="flex gap-1.5 items-end h-20 mb-3">
-              {Array.from({ length: 7 }, (_, i) => {
-                const date = addDays(new Date(), i);
-                const dayAvail = rooms.reduce((acc, r) => {
-                  const total = r.beds.length;
-                  const occupied = r.beds.filter(b => b.status === 'occupied').length;
-                  return { total: acc.total + total, occupied: acc.occupied + occupied };
-                }, { total: 0, occupied: 0 });
-                const rate = dayAvail.total > 0 ? Math.round((dayAvail.occupied / dayAvail.total) * 100) : 0;
-
+              {dailyRates.map(({ date, rate }) => {
+                const dayDate = parseISO(date);
                 return (
-                  <div key={i} className="flex-1 flex flex-col items-center gap-1">
+                  <div key={date} className="flex-1 flex flex-col items-center gap-1">
                     <div className="w-full relative h-16 bg-zinc-100 rounded overflow-hidden">
                       <div
                         className={cn(
@@ -193,7 +197,7 @@ export function CopilotPanel({ setActiveTab, navigateToGrow }: CopilotPanelProps
                       />
                     </div>
                     <span className="text-[10px] text-zinc-400">
-                      {format(date, 'EEE')}
+                      {format(dayDate, 'EEE')}
                     </span>
                   </div>
                 );

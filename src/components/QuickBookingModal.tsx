@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { format, addDays, parseISO } from 'date-fns';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, UserPlus } from 'lucide-react';
@@ -14,8 +14,8 @@ import {
 } from '@/components/ui/select';
 import { useTranslation } from '../i18nContext';
 import { useHostel } from '../HostelContext';
-import { Bed, Room } from '../types';
-import { getBedPrice } from './CalendarView';
+import { Guest, Bed, Room } from '../types';
+import { getBedPrice } from '../utils/bedPricing';
 
 interface QuickBookingModalProps {
   isOpen: boolean;
@@ -45,7 +45,7 @@ const COUNTRY_OPTIONS = [
 
 export function QuickBookingModal({ isOpen, onClose, bed, room, initialDate }: QuickBookingModalProps) {
   const { t } = useTranslation();
-  const { occupyBed } = useHostel();
+  const { addArrival, occupyBed } = useHostel();
 
   const [name, setName] = useState('');
   const [countryCode, setCountryCode] = useState('');
@@ -55,6 +55,18 @@ export function QuickBookingModal({ isOpen, onClose, bed, room, initialDate }: Q
   const [source, setSource] = useState<'walk-in' | 'manual'>('walk-in');
   const [isSuccess, setIsSuccess] = useState(false);
 
+  useEffect(() => {
+    if (!isOpen) return;
+
+    setName('');
+    setCountryCode('');
+    setGender('male');
+    setCheckInDate(format(initialDate, 'yyyy-MM-dd'));
+    setCheckOutDate(format(addDays(initialDate, 1), 'yyyy-MM-dd'));
+    setSource('walk-in');
+    setIsSuccess(false);
+  }, [isOpen, initialDate, bed.id, room.id]);
+
   const nights = Math.max(1, Math.round((parseISO(checkOutDate).getTime() - parseISO(checkInDate).getTime()) / (1000 * 60 * 60 * 24)));
   const pricePerNight = getBedPrice(room, bed);
   const totalAmount = nights * pricePerNight;
@@ -63,19 +75,27 @@ export function QuickBookingModal({ isOpen, onClose, bed, room, initialDate }: Q
     e.preventDefault();
     if (!name.trim() || !countryCode) return;
 
-    occupyBed(bed.id, {
+    // Build the guest payload once and reuse for both addArrival and occupyBed
+    // to keep the two states in lock-step.
+    const countryName = COUNTRY_OPTIONS.find(c => c.code === countryCode)?.name || countryCode;
+    const guestInput: Omit<Guest, 'id'> = {
       name: name.trim(),
-      country: COUNTRY_OPTIONS.find(c => c.code === countryCode)?.name || countryCode,
+      country: countryName,
       countryCode,
       gender,
       checkInDate,
       checkOutDate,
       nights,
       paymentStatus: 'unpaid',
+      paidAmount: 0,
       totalAmount,
       source,
       passportScanned: false,
-    });
+      roomPreference: room.name,
+    };
+
+    const guestId = addArrival(guestInput);
+    occupyBed(bed.id, guestInput, guestId);
 
     setIsSuccess(true);
     setTimeout(() => {
@@ -83,6 +103,10 @@ export function QuickBookingModal({ isOpen, onClose, bed, room, initialDate }: Q
       onClose();
       setName('');
       setCountryCode('');
+      setGender('male');
+      setCheckInDate(format(initialDate, 'yyyy-MM-dd'));
+      setCheckOutDate(format(addDays(initialDate, 1), 'yyyy-MM-dd'));
+      setSource('walk-in');
     }, 1200);
   };
 

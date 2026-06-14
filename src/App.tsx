@@ -8,7 +8,6 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Sidebar } from './components/Sidebar';
 import { BedBoard } from './components/BedBoard';
 import { CheckInPanel } from './components/CheckInPanel';
-import { CalendarView } from './components/CalendarView';
 import { ShiftLog } from './components/ShiftLog';
 import { StaffPanel } from './components/StaffPanel';
 import { GrowPanel } from './components/GrowPanel';
@@ -56,7 +55,6 @@ function AppContent() {
   const headerTitles: Record<string, string> = {
     dashboard: t('copilot.title') || 'Hostel Copilot',
     bedboard: t('header.visualBedBoard') || 'Bed Board',
-    calendar: t('header.calendarView') || 'Calendar',
     checkin: t('header.fastCheckInPanel') || 'Check-In',
     shiftlog: t('header.shiftLog') || 'Shift Log',
     staff: t('staff.title') || 'Staff',
@@ -110,7 +108,6 @@ function AppContent() {
             >
               {effectiveTab === 'dashboard' && <CopilotPanel setActiveTab={setActiveTab} navigateToGrow={navigateToGrow} />}
               {effectiveTab === 'bedboard' && <BedBoard navigateToGrow={navigateToGrow} setActiveTab={setActiveTab} />}
-              {effectiveTab === 'calendar' && <CalendarView />}
               {effectiveTab === 'checkin' && <CheckInPanel setActiveTab={setActiveTab} />}
               {effectiveTab === 'shiftlog' && <ShiftLog onNavigate={setActiveTab} />}
               {effectiveTab === 'staff' && <StaffPanel />}
