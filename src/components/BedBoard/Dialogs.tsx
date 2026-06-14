@@ -23,8 +23,33 @@ interface GuestDetailModalProps {
   onCheckout: (bedId: string) => void;
 }
 
+// Country code → flag emoji
+function countryFlag(code: string): string {
+  if (!code || code.length !== 2) return '🌐';
+  return String.fromCodePoint(
+    0x1f1e6 + code.toUpperCase().charCodeAt(0) - 65,
+    0x1f1e6 + code.toUpperCase().charCodeAt(1) - 65,
+  );
+}
+
 export function GuestDetailModal({ guest, bed, room, onClose, onCheckout }: GuestDetailModalProps) {
   const { t } = useTranslation();
+  const { updateArrival, scanPassport, settlePayment } = useHostel();
+  const [notesDraft, setNotesDraft] = React.useState('');
+  const [extendNights, setExtendNights] = React.useState('');
+  const [chargeAmount, setChargeAmount] = React.useState('');
+  const [chargeReason, setChargeReason] = React.useState('');
+
+  // Reset drafts whenever a new guest opens
+  React.useEffect(() => {
+    if (guest) {
+      setNotesDraft(guest.notes || '');
+      setExtendNights('');
+      setChargeAmount('');
+      setChargeReason('');
+    }
+  }, [guest?.id]);
+
   if (!guest) return null;
 
   const checkIn = parseISO(guest.checkInDate);
@@ -32,116 +57,377 @@ export function GuestDetailModal({ guest, bed, room, onClose, onCheckout }: Gues
   const totalNights = guest.nights || 0;
   const nightsStayed = Math.max(0, Math.min(totalNights, Math.floor((Date.now() - checkIn.getTime()) / 86400000)));
   const progress = totalNights > 0 ? Math.min(1, nightsStayed / totalNights) : 0;
+  const totalAmt = guest.totalAmount || 0;
+  const paidAmt = guest.paidAmount || 0;
+  const dueAmt = totalAmt - paidAmt;
+
+  const pricePerNight = room && bed ? getBedPrice(room, bed) : 0;
+
+  // ── Action handlers ──
+  const handleSaveNotes = () => {
+    if (notesDraft === guest.notes) return;
+    updateArrival(guest.id, { notes: notesDraft });
+  };
+
+  const handleExtendStay = () => {
+    const n = parseInt(extendNights, 10);
+    if (!n || n < 1) return;
+    const newNights = totalNights + n;
+    const newCheckOut = format(
+      new Date(checkOut.getTime() + n * 86400000),
+      'yyyy-MM-dd',
+    );
+    const newTotal = (pricePerNight > 0)
+      ? Math.round((totalAmt + pricePerNight * n) * 100) / 100
+      : totalAmt;
+    updateArrival(guest.id, {
+      nights: newNights,
+      checkOutDate: newCheckOut,
+      totalAmount: newTotal,
+    });
+    setExtendNights('');
+  };
+
+  const handleAddCharge = () => {
+    const amt = parseFloat(chargeAmount);
+    if (!amt || amt <= 0) return;
+    const newTotal = Math.round((totalAmt + amt) * 100) / 100;
+    const noteLine = `[${format(new Date(), 'M/d HH:mm')}] $${amt.toFixed(2)} - ${chargeReason || 'misc'}`;
+    updateArrival(guest.id, {
+      totalAmount: newTotal,
+      notes: notesDraft ? `${notesDraft}\n${noteLine}` : noteLine,
+    });
+    setNotesDraft((prev) => prev ? `${prev}\n${noteLine}` : noteLine);
+    setChargeAmount('');
+    setChargeReason('');
+  };
+
+  const handleSettleDue = () => {
+    updateArrival(guest.id, {
+      paidAmount: totalAmt,
+      paymentStatus: 'paid',
+    });
+    settlePayment(guest.id);
+  };
+
+  const handlePartialPayment = (extra: number) => {
+    const newPaid = Math.round((paidAmt + extra) * 100) / 100;
+    const newStatus = newPaid >= totalAmt ? 'paid' : 'partial';
+    updateArrival(guest.id, {
+      paidAmount: newPaid,
+      paymentStatus: newStatus as 'paid' | 'partial',
+    });
+  };
+
+  const paymentBadge =
+    guest.paymentStatus === 'paid'
+      ? 'bg-emerald-100 text-emerald-700 border-emerald-200'
+      : guest.paymentStatus === 'partial'
+      ? 'bg-amber-100 text-amber-700 border-amber-200'
+      : 'bg-red-100 text-red-700 border-red-200';
 
   return (
     <Dialog open={!!guest} onOpenChange={() => onClose()}>
-      <DialogContent className="max-w-md">
-        <DialogHeader>
-          <DialogTitle>{guest.name}</DialogTitle>
+      <DialogContent className="max-w-2xl max-h-[88vh] overflow-y-auto">
+        {/* Header — name + country + payment badge */}
+        <DialogHeader className="pb-2">
+          <div className="flex items-start gap-3">
+            <div className="text-3xl leading-none mt-1 select-none">{countryFlag(guest.countryCode)}</div>
+            <div className="flex-1 min-w-0">
+              <DialogTitle className="text-xl truncate">{guest.name}</DialogTitle>
+              <div className="flex items-center gap-2 mt-1 flex-wrap">
+                <span className={`text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full border ${paymentBadge}`}>
+                  {guest.paymentStatus}
+                </span>
+                {guest.passportScanned && (
+                  <span className="text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full border bg-blue-100 text-blue-700 border-blue-200">
+                    ID ✓
+                  </span>
+                )}
+                <span className="text-xs text-zinc-500">
+                  {guest.gender || '—'} · {guest.country} ({guest.countryCode})
+                </span>
+              </div>
+            </div>
+          </div>
         </DialogHeader>
+
         <div className="space-y-4">
-          {/* Stay progress */}
-          <div>
-            <div className="flex justify-between text-xs text-zinc-500 mb-1">
+          {/* Stay progress with extension */}
+          <div className="bg-zinc-50 rounded-lg p-3">
+            <div className="flex justify-between text-xs text-zinc-600 mb-1.5">
+              <span className="font-medium">Check-in</span>
+              <span className="font-medium">Check-out</span>
+            </div>
+            <div className="flex justify-between text-sm font-semibold text-zinc-800 mb-2">
               <span>{format(checkIn, 'MMM d, yyyy')}</span>
               <span>{format(checkOut, 'MMM d, yyyy')}</span>
             </div>
-            <div className="h-2 bg-zinc-100 rounded-full overflow-hidden">
+            <div className="h-2.5 bg-zinc-200 rounded-full overflow-hidden">
               <div
-                className="h-full bg-blue-500 rounded-full transition-all"
+                className={`h-full rounded-full transition-all ${
+                  progress >= 1 ? 'bg-emerald-500' :
+                  progress >= 0.6 ? 'bg-blue-500' : 'bg-amber-500'
+                }`}
                 style={{ width: `${progress * 100}%` }}
               />
             </div>
-            <div className="text-center text-xs text-zinc-500 mt-1">
+            <div className="text-center text-xs text-zinc-500 mt-1.5">
               {nightsStayed}/{totalNights} {t('guest.nights') || 'Nights'}
+              {room && bed && (
+                <span className="ml-2 text-zinc-400">· {room.name} / {bed.name}</span>
+              )}
+            </div>
+
+            {/* Extend stay quick form */}
+            <div className="mt-3 pt-3 border-t border-zinc-200 flex items-center gap-2">
+              <Label className="text-[11px] text-zinc-500 shrink-0">延住 +</Label>
+              <Input
+                type="number"
+                min={1}
+                placeholder="nights"
+                value={extendNights}
+                onChange={(e) => setExtendNights(e.target.value)}
+                className="h-7 text-xs w-20"
+              />
+              <span className="text-[10px] text-zinc-500">晚</span>
+              {pricePerNight > 0 && extendNights && (
+                <span className="text-[10px] text-amber-600">
+                  +${pricePerNight * (parseInt(extendNights, 10) || 0)}
+                </span>
+              )}
+              <Button
+                size="sm"
+                variant="outline"
+                className="h-7 text-xs ml-auto"
+                onClick={handleExtendStay}
+                disabled={!extendNights || parseInt(extendNights, 10) < 1}
+              >
+                延住
+              </Button>
             </div>
           </div>
 
-          {/* Details grid */}
+          {/* 2-col details grid */}
           <div className="grid grid-cols-2 gap-3 text-sm">
             <div>
-              <Label className="text-[10px] text-zinc-400">{t('guest.gender') || 'Gender'}</Label>
-              <p className="text-zinc-800">{guest.gender || '-'}</p>
+              <Label className="text-[10px] text-zinc-400 uppercase tracking-wider">Phone</Label>
+              <Input
+                className="h-7 text-xs mt-0.5"
+                defaultValue={guest.phone || ''}
+                onBlur={(e) => e.target.value !== (guest.phone || '') && updateArrival(guest.id, { phone: e.target.value })}
+                placeholder="—"
+              />
             </div>
             <div>
-              <Label className="text-[10px] text-zinc-400">{t('guest.checkIn') || 'Country'}</Label>
-              <p className="text-zinc-800">{guest.country} ({guest.countryCode})</p>
+              <Label className="text-[10px] text-zinc-400 uppercase tracking-wider">Email</Label>
+              <Input
+                className="h-7 text-xs mt-0.5"
+                defaultValue={guest.email || ''}
+                onBlur={(e) => e.target.value !== (guest.email || '') && updateArrival(guest.id, { email: e.target.value })}
+                placeholder="—"
+              />
             </div>
-            {guest.phone && (
-              <div>
-                <Label className="text-[10px] text-zinc-400">{t('guest.phone') || 'Phone'}</Label>
-                <p className="text-zinc-800">{guest.phone}</p>
-              </div>
-            )}
-            {guest.email && (
-              <div>
-                <Label className="text-[10px] text-zinc-400">{t('guest.email') || 'Email'}</Label>
-                <p className="text-zinc-800 text-xs truncate">{guest.email}</p>
-              </div>
-            )}
-            {guest.passportOrId && (
-              <div>
-                <Label className="text-[10px] text-zinc-400">{t('guest.idPassport') || 'ID/Passport'}</Label>
-                <p className="text-zinc-800 text-xs">{guest.passportOrId}</p>
-              </div>
-            )}
-            {guest.dob && (
-              <div>
-                <Label className="text-[10px] text-zinc-400">{t('guest.dob') || 'DOB'}</Label>
-                <p className="text-zinc-800">{guest.dob}</p>
-              </div>
-            )}
+            <div>
+              <Label className="text-[10px] text-zinc-400 uppercase tracking-wider">ID / Passport</Label>
+              <Input
+                className="h-7 text-xs mt-0.5"
+                defaultValue={guest.passportOrId || ''}
+                onBlur={(e) => e.target.value !== (guest.passportOrId || '') && updateArrival(guest.id, { passportOrId: e.target.value })}
+                placeholder="—"
+              />
+            </div>
+            <div>
+              <Label className="text-[10px] text-zinc-400 uppercase tracking-wider">Date of Birth</Label>
+              <Input
+                className="h-7 text-xs mt-0.5"
+                defaultValue={guest.dob || ''}
+                onBlur={(e) => e.target.value !== (guest.dob || '') && updateArrival(guest.id, { dob: e.target.value })}
+                placeholder="YYYY-MM-DD"
+              />
+            </div>
+            <div>
+              <Label className="text-[10px] text-zinc-400 uppercase tracking-wider">Gender</Label>
+              <Select
+                value={guest.gender || 'male'}
+                onValueChange={(v) => updateArrival(guest.id, { gender: v as 'male' | 'female' | 'other' })}
+              >
+                <SelectTrigger className="h-7 text-xs mt-0.5">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="male">男 Male</SelectItem>
+                  <SelectItem value="female">女 Female</SelectItem>
+                  <SelectItem value="other">其他 Other</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label className="text-[10px] text-zinc-400 uppercase tracking-wider">Source</Label>
+              <Select
+                value={guest.source}
+                onValueChange={(v) => updateArrival(guest.id, { source: v as any })}
+              >
+                <SelectTrigger className="h-7 text-xs mt-0.5">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="walk-in">Walk-in</SelectItem>
+                  <SelectItem value="booking">Booking.com</SelectItem>
+                  <SelectItem value="airbnb">Airbnb</SelectItem>
+                  <SelectItem value="expedia">Expedia</SelectItem>
+                  <SelectItem value="ical">iCal</SelectItem>
+                  <SelectItem value="direct">Direct</SelectItem>
+                  <SelectItem value="referral">Referral</SelectItem>
+                  <SelectItem value="group">Group</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
           {/* Bed info */}
           {bed && room && (
-            <div className="bg-zinc-50 rounded-lg p-3 text-sm">
-              <span className="text-zinc-500">{t('rooms.roomName')}: </span>
-              <span className="font-medium">{room.name || room.number} - {bed.name}</span>
-              <span className="text-zinc-400 ml-2">${getBedPrice(room, bed)}/night</span>
+            <div className="bg-blue-50/60 rounded-lg p-3 text-sm flex items-center gap-3 flex-wrap">
+              <div className="flex-1 min-w-0">
+                <span className="text-zinc-500">房间 </span>
+                <span className="font-semibold text-zinc-800">{room.name || room.number}</span>
+                <span className="text-zinc-400 mx-1.5">·</span>
+                <span className="font-semibold text-zinc-800">{bed.name}</span>
+                {bed.bedType && (
+                  <span className="text-zinc-400 text-xs ml-1.5">({bed.bedType})</span>
+                )}
+              </div>
+              <div className="text-xs text-zinc-500">
+                ${pricePerNight}<span className="text-zinc-400">/night</span>
+              </div>
             </div>
           )}
 
-          {/* Payment summary */}
-          <div className="border-t pt-3">
-            <div className="flex justify-between text-sm mb-1">
-              <span className="text-zinc-500">{t('guest.totalAmount') || 'Total'}</span>
-              <span className="font-medium">${guest.totalAmount || 0}</span>
+          {/* Financial card with quick actions */}
+          <div className="border border-zinc-200 rounded-lg p-3">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">财务 Financial</span>
+              {guest.roomPreference && (
+                <span className="text-[10px] text-zinc-400">
+                  偏好: {guest.roomPreference}
+                </span>
+              )}
             </div>
-            <div className="flex justify-between text-sm mb-1">
-              <span className="text-zinc-500">{t('guest.paidAmount') || 'Paid'}</span>
-              <span className="text-emerald-600">${guest.paidAmount || 0}</span>
+            <div className="grid grid-cols-3 gap-2 mb-3">
+              <div className="bg-zinc-50 rounded p-2">
+                <div className="text-[10px] text-zinc-500 uppercase">总额</div>
+                <div className="text-lg font-semibold text-zinc-800">${totalAmt}</div>
+              </div>
+              <div className="bg-emerald-50 rounded p-2">
+                <div className="text-[10px] text-emerald-600 uppercase">已付</div>
+                <div className="text-lg font-semibold text-emerald-700">${paidAmt}</div>
+              </div>
+              <div className={`rounded p-2 ${dueAmt > 0 ? 'bg-red-50' : 'bg-zinc-50'}`}>
+                <div className={`text-[10px] uppercase ${dueAmt > 0 ? 'text-red-600' : 'text-zinc-500'}`}>待付</div>
+                <div className={`text-lg font-semibold ${dueAmt > 0 ? 'text-red-600' : 'text-zinc-400'}`}>
+                  ${dueAmt}
+                </div>
+              </div>
             </div>
-            <div className="flex justify-between text-sm font-medium">
-              <span>{t('guest.dueAmount') || 'Due'}</span>
-              <span className={guest.paymentStatus === 'paid' ? 'text-emerald-600' : 'text-red-500'}>
-                ${(guest.totalAmount || 0) - (guest.paidAmount || 0)}
-              </span>
+
+            {/* Add charge row */}
+            <div className="flex items-center gap-1.5 mb-2">
+              <span className="text-[10px] text-zinc-500 shrink-0">+消费</span>
+              <Input
+                type="number"
+                min={0}
+                step="0.01"
+                placeholder="金额"
+                value={chargeAmount}
+                onChange={(e) => setChargeAmount(e.target.value)}
+                className="h-7 text-xs w-20"
+              />
+              <Input
+                placeholder="说明 (e.g. 洗衣/饮料)"
+                value={chargeReason}
+                onChange={(e) => setChargeReason(e.target.value)}
+                className="h-7 text-xs flex-1"
+              />
+              <Button
+                size="sm"
+                variant="outline"
+                className="h-7 text-xs"
+                onClick={handleAddCharge}
+                disabled={!chargeAmount || parseFloat(chargeAmount) <= 0}
+              >
+                记账
+              </Button>
+            </div>
+
+            {/* Payment actions */}
+            <div className="flex items-center gap-1.5 flex-wrap">
+              {dueAmt > 0 && (
+                <Button
+                  size="sm"
+                  className="h-7 text-xs bg-emerald-600 hover:bg-emerald-700"
+                  onClick={handleSettleDue}
+                >
+                  补差价 ${dueAmt}
+                </Button>
+              )}
+              {dueAmt > 0 && [10, 20, 50, 100].filter((n) => n <= dueAmt).map((n) => (
+                <Button
+                  key={n}
+                  size="sm"
+                  variant="outline"
+                  className="h-7 text-xs"
+                  onClick={() => handlePartialPayment(n)}
+                >
+                  +${n}
+                </Button>
+              ))}
+              {guest.paymentStatus === 'paid' && (
+                <span className="text-xs text-emerald-600 font-medium">已结清 ✓</span>
+              )}
             </div>
           </div>
 
-          {/* Notes */}
-          {guest.notes && (
-            <div className="bg-amber-50 rounded-lg p-3 text-xs text-amber-800">
-              {guest.notes}
-            </div>
-          )}
+          {/* Notes (always editable) */}
+          <div>
+            <Label className="text-[10px] text-zinc-400 uppercase tracking-wider">备注 Notes</Label>
+            <textarea
+              value={notesDraft}
+              onChange={(e) => setNotesDraft(e.target.value)}
+              onBlur={handleSaveNotes}
+              placeholder="添加备注..."
+              rows={3}
+              className="w-full mt-1 px-3 py-2 text-xs border border-zinc-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 resize-none"
+            />
+          </div>
 
-          {/* Source */}
-          <div className="text-xs text-zinc-400">
-            {t('dashboard.source') || 'Source'}: {guest.source}
-            {guest.roomPreference && ` · ${t('dashboard.roomPreference') || 'Pref'}: ${guest.roomPreference}`}
+          {/* Status toggles */}
+          <div className="flex items-center gap-2 flex-wrap">
+            <button
+              onClick={() => scanPassport(guest.id)}
+              className={`text-[11px] px-2.5 py-1 rounded-full border transition-colors ${
+                guest.passportScanned
+                  ? 'bg-blue-100 text-blue-700 border-blue-200'
+                  : 'bg-zinc-50 text-zinc-500 border-zinc-200 hover:bg-blue-50'
+              }`}
+            >
+              {guest.passportScanned ? '✓' : '○'} 护照扫描 Passport
+            </button>
+            <span className="text-[10px] text-zinc-400 ml-auto">
+              ID: <code className="bg-zinc-100 px-1 rounded">{guest.id}</code>
+            </span>
           </div>
         </div>
-        <DialogFooter className="gap-2">
-          <Button variant="outline" onClick={onClose}>{t('guest.cancel') || 'Cancel'}</Button>
+
+        {/* Footer actions */}
+        <DialogFooter className="gap-2 pt-2">
+          <Button variant="outline" onClick={onClose}>关闭</Button>
           {bed && (
             <Button
               variant="destructive"
               onClick={() => onCheckout(bed.id)}
             >
               <LogOut className="h-4 w-4 mr-1.5" />
-              {t('guest.confirmCheckout') || 'Check Out'}
+              退房 Check Out
             </Button>
           )}
         </DialogFooter>
