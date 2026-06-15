@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useHostel } from '../HostelContext';
 import { Users, Info, IdCard, CheckCircle2, ChevronRight, BedDouble, Plus, Calendar as CalendarIcon, User as UserIcon, Globe, FileText, Link as LinkIcon, ArrowRight, Search, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -45,6 +45,9 @@ export function CheckInPanel({ setActiveTab }: { setActiveTab?: (tab: string) =>
   const [scanPassportValue, setScanPassportValue] = useState('');
   const [scanDob, setScanDob] = useState('');
   const [notesValue, setNotesValue] = useState('');
+  // ── Task 13: 全勾自动完成 + 成功 banner ──
+  const [checkInSuccessName, setCheckInSuccessName] = useState<string | null>(null);
+  const hasAutoCompletedRef = useRef<string | null>(null);
 
   // New guest state
   const tomorrow = new Date();
@@ -87,6 +90,18 @@ export function CheckInPanel({ setActiveTab }: { setActiveTab?: (tab: string) =>
 
   // ── 今日待办：选中的客人（详情面板数据源）──
   const todayQueueSelected = todayQueueGuests.find(g => g.id === todayQueueSelectedId);
+
+  // ── Task 13: 今日待办 4 项全勾 → 自动完成 + 顶部 banner ──
+  useEffect(() => {
+    if (!todayQueueSelected) return;
+    const g = todayQueueSelected;
+    const breakdown = computeIncompleteness(g);
+    if (breakdown.count === 0 && hasAutoCompletedRef.current !== g.id && g.assignedBedId) {
+      hasAutoCompletedRef.current = g.id;
+      setCheckInSuccessName(g.name);
+      setTimeout(() => setCheckInSuccessName(null), 5000);
+    }
+  }, [todayQueueSelected]);
 
   // ── 今日待办：选中客人的推荐床位（复用 scoreBeds，截取前 6 个）──
   const todayQueueScoredBeds = useMemo(() => {
@@ -162,7 +177,7 @@ export function CheckInPanel({ setActiveTab }: { setActiveTab?: (tab: string) =>
 
   return (
     <div className="flex flex-col h-full pb-20 md:pb-0">
-      {/* Check-in Success Banner */}
+      {/* Check-in Success Banner (legacy pending-tab flow) */}
       <AnimatePresence>
         {checkInSuccess && (
           <motion.div
@@ -177,6 +192,21 @@ export function CheckInPanel({ setActiveTab }: { setActiveTab?: (tab: string) =>
               onClick={() => { setCheckInSuccess(null); setActiveTab?.('bedboard'); }}>
               {t('checkin.viewOnBoard') || 'View on Board'} <ArrowRight className="h-3 w-3" />
             </Button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ── Task 13: 今日待办全勾自动完成 → 顶部绿色 banner（5s 自动消失）── */}
+      <AnimatePresence>
+        {checkInSuccessName && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="fixed top-4 left-1/2 -translate-x-1/2 z-50 bg-emerald-600 text-white px-5 py-3 rounded-xl shadow-lg flex items-center gap-3"
+          >
+            <CheckCircle2 className="h-5 w-5" />
+            <span className="text-sm font-medium">{checkInSuccessName} {t('checkin.checkedInSuccess')}</span>
           </motion.div>
         )}
       </AnimatePresence>
