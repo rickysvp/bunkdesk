@@ -3,7 +3,8 @@ import { Room, Guest, Bed, ShiftNote, ShiftNoteSource, GroupBooking, Referral, H
 import { INITIAL_ROOMS, ARRIVALS, INITIAL_SHIFT_NOTES, INITIAL_GROUP_BOOKINGS, INITIAL_REFERRALS, INITIAL_HOSTEL_PAGE, INITIAL_PROMOTIONS, INITIAL_GUEST_PROFILES } from "./data";
 import { useStaff } from "./StaffContext";
 import { pickBestBed, scoreBeds, type BedScore } from "./utils/bedAllocator";
-import { getBedPrice } from "./utils/bedPricing";
+import { getBedPrice } from './utils/bedPricing';
+import { migrateGuestsDeep } from './utils/guestMigration';
 import { addDays, format, parseISO } from "date-fns";
 
 function loadState<T>(key: string, fallback: T): T {
@@ -75,7 +76,7 @@ interface HostelState {
   settlePayment: (guestId: string) => void;
   scanPassport: (guestId: string) => void;
   addArrival: (guest: Omit<Guest, "id">) => string;
-  updateArrival: (guestId: string, updates: Partial<Pick<Guest, 'notes' | 'roomPreference' | 'source' | 'phone' | 'email' | 'totalAmount' | 'paidAmount' | 'gender' | 'dob' | 'passportOrId' | 'checkInDate' | 'checkOutDate' | 'nights'>>) => void;
+  updateArrival: (guestId: string, updates: Partial<Pick<Guest, 'notes' | 'roomPreference' | 'source' | 'phone' | 'email' | 'totalAmount' | 'paidAmount' | 'gender' | 'dob' | 'passportOrId' | 'checkInDate' | 'checkOutDate' | 'nights' | 'firstName' | 'lastName' | 'idType' | 'arrivalTime' | 'referral' | 'bookingSource'>>) => void;
   importArrivals: (guests: Omit<Guest, "id">[]) => void;
   addRoom: (room: Omit<Room, "id" | "beds">) => void;
   updateRoom: (roomId: string, name: string, number: string, pricePerNight?: number, bottomBunkPremium?: number) => void;
