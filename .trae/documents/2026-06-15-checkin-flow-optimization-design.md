@@ -318,28 +318,51 @@ markNotesSkipped: (guestId: string) => void;
 
 > `completeCheckIn` 不是新 action —— 自动完成时直接调用现有 `assignArrival(guestId, assignedBedId)` 即可。assignArrival 已是幂等（已分配则跳过）。
 
-### 6.4 i18n 命名空间
+### 6.4 i18n 命名空间（中英双语，无硬编码）
+
+> 所有新增键必须在 `en.checkin` 和 `zh.checkin` **同时**补齐，缺一不可。t() 已支持参数化（`{key}`）和复数。
 
 ```ts
-checkin: {
-  // 现有键 ...
-  todayQueue: '今日待办',
-  pinToTop: '📌 置顶',
-  unpin: '取消置顶',
-  fullDetails: '查看完整信息（5 卡片只读）',
+// en.checkin（新增键）
+en: {
+  todayQueue: "Today's Queue",
+  pinToTop: "📌 Pin to top",
+  unpin: "Unpin",
+  fullDetails: "View full details (5 cards, read-only)",
+  autoCompleteNote: 'All checked → auto-merge to "Checked-in"',
+  checklistPassport: "① Scan passport",
+  checklistPayment: "② Mark as paid",
+  checklistBed: "③ Pick a bed",
+  checklistNotes: "④ Add note",
+  notesPlaceholder: "e.g. vegan / window bed / airport pickup",
+  scanConfirm: "Confirm scan",
+  skipNotes: "Skip",
+  markAsPaid: "Mark as paid",
+  paidAmountHint: "Received offline (cash / card / bank transfer / OTA pre-pay)",
+  priorityRule: "Sort: time proximity 30% + missing items 20% + 📌 pin ×∞",
+  missingBed: "⚠️ Bed not yet assigned",
+  noAvailableBeds: "No available beds",
+},
+
+// zh.checkin（新增键）
+zh: {
+  todayQueue: "今日待办",
+  pinToTop: "📌 置顶",
+  unpin: "取消置顶",
+  fullDetails: "查看完整信息（5 卡片只读）",
   autoCompleteNote: '全部勾选后自动转为"已入住"',
-  checklistPassport: '① 录护照',
-  checklistPayment: '② 收钱',
-  checklistBed: '③ 选床',
-  checklistNotes: '④ 存备注',
-  notesPlaceholder: '例：素食 / 靠窗 / 接机',
-  scanConfirm: '确认录入',
-  skipNotes: '跳过',
-  markAsPaid: 'Mark as paid',                  // 收钱只有 1 个按钮，统一切到 paid 状态
-  paidAmountHint: 'Received offline (cash / card / bank transfer)',  // 提示：实际收钱在系统外
-  priorityRule: '排序规则：时间临近 30% + 未办件数 20% + 📌 置顶 ×∞',
-  missingBed: '⚠️ 缺少床位',
-  noAvailableBeds: '无可用床位',
+  checklistPassport: "① 录护照",
+  checklistPayment: "② 收钱",
+  checklistBed: "③ 选床",
+  checklistNotes: "④ 存备注",
+  notesPlaceholder: "例：素食 / 靠窗 / 接机",
+  scanConfirm: "确认录入",
+  skipNotes: "跳过",
+  markAsPaid: "标记为已收款",
+  paidAmountHint: "实际收钱在前台线下处理（现金/刷卡/银行转账/OTA 预付等）",
+  priorityRule: "排序规则：时间临近 30% + 未办件数 20% + 📌 置顶 ×∞",
+  missingBed: "⚠️ 缺少床位",
+  noAvailableBeds: "无可用床位",
 }
 ```
 
@@ -348,6 +371,7 @@ checkin: {
 > - 客人实际付款方式（现金/刷卡/银行转账/PayPal/OTA 预付等）由前台线下处理
 > - ② 收钱 item 只有一个按钮：`Mark as paid`，点了就把 `paymentStatus` 置为 `'paid'`
 > - 目标市场：欧美独立青旅（Bali/Barcelona/Lisbon 路线），货币 `$` / `€`，不接任何支付 API
+> - **多语言硬要求**：所有 UI 文案必须中英双语，i18n key 缺一不可，无硬编码 fallback
 
 ---
 
