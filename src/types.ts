@@ -7,6 +7,12 @@ export type BedStatus =
 
 export type GuestSource = "walk-in" | "booking" | "airbnb" | "expedia" | "ical" | "manual" | "direct" | "referral" | "group";
 
+export type IdDocumentType = "passport" | "idCard" | "driverLicense";
+
+export type ArrivalSlot = "morning" | "afternoon" | "evening" | "late";
+
+export type BookingSource = "walk-in" | "phone" | "email" | "referral" | "other";
+
 export interface Guest {
   id: string;
   name: string;
@@ -26,6 +32,12 @@ export interface Guest {
   passportOrId?: string;
   dob?: string;
   policeConsent?: boolean;
+  firstName?: string;
+  lastName?: string;
+  idType?: IdDocumentType;
+  arrivalTime?: ArrivalSlot;
+  referral?: string;
+  bookingSource?: BookingSource;
   source: GuestSource;
   roomPreference?: string;
 }
