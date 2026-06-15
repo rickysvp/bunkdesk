@@ -1,5 +1,54 @@
-import React, { createContext, useContext, useState, ReactNode } from "react";
+import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
 
+/* ------------------------------------------------------------------ *
+ * i18n — BunkDesk 多语言基础设施
+ *
+ * 设计原则（v2）：
+ *  1. 零硬编码 — 所有用户可见字符串必须走 t()。
+ *  2. 参数化 — t(path, { name, count }) 用 {key} 占位符替换。
+ *  3. Plural — 支持 {n, plural, one {…} other {…}} ICU 风格（自研极简解析）。
+ *  4. 多语言可扩展 — 加新语言只需新增 namespace 对象，组件零改动。
+ *  5. 持久化 — 写入 localStorage['bunkdesk_language']。
+ *  6. 缺键严格 — 缺 key 时显示 key 字符串本身（不留空白、不静默回退英文）。
+ * ------------------------------------------------------------------ */
+
+export type Language = "en" | "zh";
+
+const STORAGE_KEY = "bunkdesk_language";
+const DEFAULT_LANGUAGE: Language = "zh";
+
+/* --------------------------- 字典数据 --------------------------- *
+ * 命名空间约定：
+ *   sidebar.*   顶部 / 侧边导航
+ *   common.*    通用词（logout / language / version / currency …）
+ *   landing.*   落地页
+ *   subnav.*    Settings 二级 tab
+ *   header.*    各模块标题（历史遗留）
+ *   dashboard.* Dashboard 卡片
+ *   bedboard.*  床位看板
+ *   checkin.*   前台入住
+ *   guest.*     客人详情
+ *   rooms.*     房间管理
+ *   reservations.*  预定管理
+ *   shiftlog.*  交接班
+ *   groupBooking.* 团订
+ *   login.*     登录
+ *   staff.*     员工
+ *   referral.*  推荐
+ *   calendarview.* 日历
+ *   booking.*   公开预订
+ *   migration.* 数据迁移
+ *   socialKit.* 营销
+ *   revenue.*   收益优化
+ *   hostelPage.* 主页
+ *   grow.*      5 大子工具标签
+ *   crm.*       客人资产
+ *   occupancy.* 空床动作
+ *   copilot.*   Copilot 卡片文案
+ *   insights.*  AI 模板（最关键的清理对象）
+ *   assistant.* 经营助手总览
+ *   subnav.*    二级菜单
+ * ------------------------------------------------------------------ */
 export const translations = {
   en: {
     sidebar: {
@@ -9,7 +58,7 @@ export const translations = {
       calendar: "Calendar",
       reservations: "Reservations",
       rooms: "Rooms & Beds",
-      hostelDesk: "Bunkly",
+      hostelDesk: "BunkDesk",
       shiftLog: "Shift Log",
       more: "More",
       grow: "Grow",
@@ -19,6 +68,200 @@ export const translations = {
       intelligence: "Intelligence",
       copilot: "Copilot",
       settings: "Settings",
+      assistant: "Assistant",
+    },
+    assistant: {
+      needsAttention: "Needs Attention",
+      needsAction: "Needs Action",
+      opportunities: "Opportunities",
+      go: "Go",
+      empty: "Empty",
+      occupied: "Occupied",
+      potentialRevenue: "Potential",
+      potentialBedNights: "bed-nights",
+      growth: "Growth",
+      subTabs: {
+        today: "Today",
+        growth: "Growth",
+      },
+      growthOverview: {
+        title: "Growth overview",
+        potential7d: "Potential 7-day revenue",
+        tools: "tools",
+        recallable: "recallable",
+        bedNights: "bed-nights",
+      },
+      todaySummary: {
+        hello: "Today",
+        checkIns: "Check-ins",
+        checkOuts: "Check-outs",
+        emptyBeds: "Empty Beds",
+        cleaning: "Cleaning",
+        thisWeek: "This Week",
+        peak: "Peak",
+        empty: "Empty",
+        bedNights: "bed-nights",
+        opportunities: "Opportunities",
+        risks: "Risks",
+        allClear: "All clear!",
+        noIssues: "No issues or opportunities right now.",
+      },
+      week: {
+        mon: "Mon",
+        tue: "Tue",
+        wed: "Wed",
+        thu: "Thu",
+        fri: "Fri",
+        sat: "Sat",
+        sun: "Sun",
+        sevenDays: "Next 7 Days",
+      },
+      hero: {
+        occupancy: "Today's Occupancy",
+        bedsFmt: "{occupied}/{total} occupied · {empty} empty",
+        comparisonUp: "{pct}% above 7-day average",
+        comparisonDown: "{pct}% below 7-day average",
+        comparisonEqual: "Same as 7-day average",
+      },
+      threeDay: {
+        title: "Next 3 Days",
+        tonight: "Tonight",
+        tomorrow: "Tomorrow",
+        dayAfter: "Day After",
+        occupancyFmt: "{pct}% occupied",
+        canFill: "{n} beds to fill",
+        fullHouse: "Full",
+        action: "See action",
+        noAction: "—",
+      },
+      instantActions: "Instant Actions",
+    },
+    landing: {
+      heroBadge: "Built for hostel owners · Bed-level",
+      heroTitle1: "Bed-level",
+      heroTitle2: "hostel management",
+      heroSubtitle: "Visual bed board, direct booking page, and built-in CRM. No commissions, no API headaches — $19/month, all in.",
+      heroCta: "Start 14-day trial",
+      heroSecondary: "See it in action",
+      socialProof: "Used by 5+ independent hostels in Europe, the Americas & SE Asia",
+      realityEyebrow: "The Reality Check",
+      realityTitle: "Running a small hostel shouldn't run you",
+      pain1Title: "Spreadsheet chaos",
+      pain1Desc: "Tracking which of your 6 beds in a mixed dorm is taken, in Excel? One miscount = an awkward conversation at the front desk.",
+      pain2Title: "Endless walk-in typing",
+      pain2Desc: "Manually entering name, passport, room, dates, payment — for every single guest. Twenty arrivals = twenty minutes of typing.",
+      pain3Title: "Lost commission on every booking",
+      pain3Desc: "Hostelworld, Booking.com and Airbnb take 15–25% per booking. $24k+/year disappears to channels you can't control.",
+      pain4Title: "No view of what's coming",
+      pain4Desc: "Can't tell at a glance: who's checking out, who hasn't paid, which beds are dirty, which need a deep-clean.",
+      realityQuote: "I was running a hostel, not running a spreadsheet",
+      realityQuoteSource: "— from 12 hostel owner interviews",
+      wayEyebrow: "The BunkDesk Way",
+      wayTitle: "Your day, with BunkDesk",
+      beforeTitle: "Without BunkDesk",
+      afterTitle: "With BunkDesk",
+      hoursPerDay: "hours/day",
+      minutesPerDay: "min/day",
+      before1: "Open 4 browser tabs to check Hostelworld, Booking.com and Airbnb calendars",
+      before2: "Manually enter 5+ walk-ins before noon, one passport at a time",
+      before3: "Text 12 guests individually on WhatsApp for check-in instructions",
+      before4: "Excel crashed. Yesterday's file is gone.",
+      before5: "Guest asks for a bottom bunk, but you can't tell which is free",
+      before6: "End the day exhausted, still behind on clean sheets",
+      after1: "Bed board shows the full week at a glance",
+      after2: "Drag guest from arrivals to a free bed — done in 8 seconds",
+      after3: "Direct booking page shares check-in info automatically",
+      after4: "All data lives in the browser, exports to CSV anytime",
+      after5: "Color-coded beds show mixed/female/private + empty at a glance",
+      after6: "End the day early. Chat with guests.",
+      featEyebrow: "Features",
+      featTitle: "Everything a small hostel needs, nothing it doesn't",
+      feat1Title: "Bed-level inventory",
+      feat1Desc: "Mixed dorm, female dorm, private room. Top bunk vs bottom bunk, with bottom-bunk premium pricing. Sell Bed #4 of a 6-bed dorm without selling the whole room.",
+      feat2Title: "Direct booking page",
+      feat2Desc: "Public hostel page with your photos, prices and a 4-step booking flow. Guests book direct, you skip the 15–25% OTA commission. Every booking grows your guest CRM.",
+      feat3Title: "Built-in guest CRM",
+      feat3Desc: "Phone-number-keyed guest profiles with stay history, total spent and tags (digital nomad, repeat guest, VIP, group leader). The 4th visit feels like the 1st.",
+      feat4Title: "Pricing & occupancy insights",
+      feat4Desc: "Suggested prices for peak, off-peak, weekend and weekday. Forward-looking 7-day occupancy forecast. Spot the empty nights before they hit.",
+      more1: "Group bookings (shared or split payment)",
+      more2: "Gender-specific dorms with conflict guardrails",
+      more3: "Cleaning task assignment & tracking",
+      more4: "Per-bed-night revenue (RevPAB) analytics",
+      more5: "Stripe, PayPal & cash payments",
+      more6: "Bilingual UI (English & 中文)",
+      more7: "Mobile-friendly for staff on the go",
+      more8: "CSV import from Cloudbeds, BananaDesk, Sirvoy",
+      bedGapEyebrow: "The Bed-Level Gap",
+      bedGapTitle: "Hotel software doesn't get hostels",
+      bedGapSubtitle: "Traditional PMS thinks in rooms. Hostels operate on beds. That mismatch shows up as lost revenue every week.",
+      bedGapOther: "Traditional PMS",
+      bedGapOtherTag: "Whole-room inventory",
+      bedGapOtherCaption: "Whole 6-bed dorm: 'full'. But 1 bed was free the whole time.",
+      bedGapOurTag: "Bed-level inventory",
+      bedGapOurCaption: "Bed #4 — sell direct, save the 18% commission.",
+      bedGapQuote: "Hotel PMS thinks in rooms. Hostels think in beds.",
+      howEyebrow: "How BunkDesk works",
+      howTitle: "From walk-in to checkout, in one screen",
+      howSubtitle: "No API integrations. No AI hype. Just the exact tools a small hostel needs to run a shift.",
+      how1Title: "Capture",
+      how1Desc: "Guest walks in. Click their country flag, scan the passport, drop them on a free bed. Auto-assigns by gender and room preference.",
+      how2Title: "Track",
+      how2Desc: "Bed board shows the full week. Color codes: empty, occupied, cleaning, reserved, late-arrival. Drag a guest to swap beds.",
+      how3Title: "Sell",
+      how3Desc: "Publish your direct booking page. Share it on Instagram, WhatsApp, your website. Guests book in 4 steps.",
+      how4Title: "Grow",
+      how4Desc: "Every guest joins the CRM (keyed by phone). 7-day forecast shows empty nights. Create a promotion in 30 seconds.",
+      pricingEyebrow: "Simple Pricing",
+      pricingTitle: "One price. Everything included.",
+      pricingSubtitle: "14-day free trial, no credit card. Cancel anytime.",
+      pricingFreeName: "Trial",
+      pricingFreeDesc: "Try everything free for 14 days.",
+      pricingFree1: "Unlimited beds & rooms",
+      pricingFree2: "Bed board, direct booking, CRM",
+      pricingFree3: "CSV import (Cloudbeds, BananaDesk, Sirvoy)",
+      pricingFree4: "Email support",
+      pricingFreeCta: "Start trial",
+      pricingProName: "Standard",
+      pricingProBadge: "Most popular",
+      pricingProDesc: "For hostels ready to grow. $19/month, billed monthly.",
+      pricingPro1: "Everything in Trial, plus:",
+      pricingPro2: "Unlimited direct booking page traffic",
+      pricingPro3: "Promotions & referral program",
+      pricingPro4: "Multi-staff (manager, reception, cleaning)",
+      pricingPro5: "Priority email support",
+      pricingProCta: "Get started",
+      perMonth: "/month",
+      perYear: "/year",
+      ctaTitle: "Run your hostel, not your spreadsheet",
+      ctaSubtitle: "14-day free trial. No credit card. Set up in an afternoon.",
+      ctaButton: "Start free trial",
+      footerTagline: "BunkDesk · Bed-level hostel management",
+      footerFree: "14-day free trial",
+      footerNoCredit: "No credit card",
+    },
+    subnav: {
+      overview: "Overview",
+      grow: "Grow",
+      staff: "Staff",
+      migrate: "Migrate",
+      rooms: "Rooms",
+      growth: "Growth",
+      general: "General",
+    },
+    common: {
+      logout: "Sign Out",
+      version: "Version",
+      language: "Language",
+      theme: "Theme",
+      resetData: "Reset data",
+      confirmReset: "This will erase all locally stored hostel data and return to the landing page. Continue?",
+      edit: "Edit",
+      currency: "$",
+      currencyCode: "USD",
+      locale: "en-US",
+      resetDataDesc: "Wipe all bunkdesk_* keys from localStorage and return to the landing page.",
+      currentLanguage: "English",
     },
     header: {
       visualBedBoard: "Visual Bed Board",
@@ -486,122 +729,6 @@ export const translations = {
       back: "Back",
       next: "Next",
     },
-    landing: {
-      heroBadge: "BUILT FOR HOSTELS THAT FILL EMPTY BEDS",
-      heroTitle1: "Don't Let Empty Beds",
-      heroTitle2: "Go to Waste",
-      heroSubtitle: "Free hostel management that helps you fill empty beds and keep more revenue. OTA is great for bringing guests — BunkDesk helps you keep more of that revenue and find guests outside of OTA too.",
-      heroCta: "Try It Now",
-      heroSecondary: "Watch Demo",
-      socialProof: "100+ hostels tried the demo",
-      socialLocations: "from Lisbon, Bali, Barcelona, Shanghai & more",
-      painTitle: "Your empty beds are costing you every night",
-      painSubtitle: "Every unsold bed is revenue you'll never recover. And the beds you do sell? A big chunk goes to OTAs. Sound familiar?",
-      pain1Title: "Empty Beds = Wasted Revenue",
-      pain1Desc: "Average hostel runs 40-60% occupancy off-season. Every empty bed is revenue you'll never recover.",
-      pain2Title: "OTA Commissions Eat Your Profit",
-      pain2Desc: "Booking.com takes 15-25% per booking. That adds up fast.",
-      pain3Title: "Hotel PMS Doesn't Understand Beds",
-      pain3Desc: "Selling bed #4 in a 6-bed dorm? Traditional PMS thinks in rooms.",
-      pain4Title: "No Guidance for Slow Nights",
-      pain4Desc: "When beds are empty, you have no tools or suggestions to help fill them.",
-      painQuote: "I lose more money to empty beds and OTA commissions than I do on any other cost",
-      painQuoteAttr: "— Every hostel owner we interviewed",
-      beforeTitle: "Before BunkDesk",
-      before1: "3 empty beds go unsold tonight",
-      before2: "Pay 20% commission to OTAs",
-      before3: "No idea what to do about slow nights",
-      before4: "Excel can't tell you which beds are empty",
-      beforeTime: "Revenue lost: every empty bed is gone forever",
-      afterTitle: "After BunkDesk",
-      after1: "Get tips when beds are empty",
-      after2: "Direct bookings with 0% commission",
-      after3: "Simple pricing reference at your fingertips",
-      after4: "See every bed at a glance",
-      afterTime: "More beds filled, more revenue kept",
-      showcaseTitle: "Simple Tools That Actually Help",
-      showcaseSubtitle: "No AI hype, no magic promises — just straightforward tools to help you fill beds and keep more revenue.",
-      showcase1Title: "Empty Bed Alerts",
-      showcase1Desc: "Know which beds are empty and get simple suggestions to help fill them.",
-      showcase2Title: "Direct Booking Engine",
-      showcase2Desc: "Your own hostel page, 0% commission bookings. Share the link anywhere.",
-      showcase3Title: "Referral Rewards",
-      showcase3Desc: "Guests bring friends, both get rewarded. Word-of-mouth that costs you nothing.",
-      showcase4Title: "Easy Migration",
-      showcase4Desc: "Import from Cloudbeds, BananaDesk, or any CSV. No data left behind.",
-      diffTitle: "We're Not Here to Replace OTAs",
-      diffSubtitle: "OTA is great for bringing guests. BunkDesk helps you keep more of that revenue and find guests outside of OTA too.",
-      diff1: "Keep using Booking.com and Hostelworld",
-      diff2: "Add direct bookings with 0% commission",
-      diff3: "Get suggestions when beds are empty",
-      diff4: "Build your own guest base over time",
-      compareTitle: "How BunkDesk Compares",
-      compareSubtitle: "See why hostels are switching from Cloudbeds and BananaDesk.",
-      compareColCloudbeds: "Cloudbeds",
-      compareColBananaDesk: "BananaDesk",
-      compareColBunkDesk: "BunkDesk",
-      compareRowPrice: "Price",
-      compareRowPriceCloudbeds: "$100-300/mo",
-      compareRowPriceBananaDesk: "$35-155/mo",
-      compareRowPriceBunkDesk: "Free",
-      compareRowCommission: "Commission",
-      compareRowCommissionCloudbeds: "N/A",
-      compareRowCommissionBananaDesk: "4%",
-      compareRowCommissionBunkDesk: "0%",
-      compareRowBeds: "Bed-level management",
-      compareRowBedsCloudbeds: "Room-based",
-      compareRowBedsBananaDesk: "✅",
-      compareRowBedsBunkDesk: "✅",
-      compareRowGuidance: "Empty bed guidance",
-      compareRowGuidanceCloudbeds: "❌",
-      compareRowGuidanceBananaDesk: "❌",
-      compareRowGuidanceBunkDesk: "✅",
-      compareRowPage: "Hostel page + booking",
-      compareRowPageCloudbeds: "❌",
-      compareRowPageBananaDesk: "❌",
-      compareRowPageBunkDesk: "✅",
-      compareRowReferral: "Referral program",
-      compareRowReferralCloudbeds: "❌",
-      compareRowReferralBananaDesk: "❌",
-      compareRowReferralBunkDesk: "✅",
-      compareRowMigration: "Migration tools",
-      compareRowMigrationCloudbeds: "❌",
-      compareRowMigrationBananaDesk: "❌",
-      compareRowMigrationBunkDesk: "✅",
-      compareRowSetup: "Setup time",
-      compareRowSetupCloudbeds: "2-4 weeks",
-      compareRowSetupBananaDesk: "1-2 days",
-      compareRowSetupBunkDesk: "30 min",
-      pricingTitle: "Simple pricing for all hostels",
-      pricingSubtitle: "No hidden fees. No per-booking commissions. Start free, upgrade when you need to.",
-      pricingFree: "Free",
-      pricingFreePrice: "$0",
-      pricingFreePeriod: "/month",
-      pricingFreeDesc: "Perfect for small hostels",
-      pricingFree1: "Up to 30 beds",
-      pricingFree2: "iCal sync",
-      pricingFree3: "Hostel page + booking engine",
-      pricingFree4: "Referral program",
-      pricingFree5: "Empty bed tips",
-      pricingFreeCta: "Get Started Free",
-      pricingPro: "Pro",
-      pricingProPrice: "$49",
-      pricingProPeriod: "/month",
-      pricingProDesc: "For growing hostels",
-      pricingPro1: "Unlimited beds",
-      pricingPro2: "Pricing reference",
-      pricingPro3: "WhatsApp marketing",
-      pricingPro4: "Priority support",
-      pricingPro5: "Everything in Free",
-      pricingProCta: "Start Free Trial",
-      pricingProBadge: "Most Popular",
-      ctaTitle: "Don't let another empty bed go to waste",
-      ctaSubtitle: "BunkDesk is free, ready, and built to help you fill empty beds. No waitlist, no demo calls, no credit card.",
-      ctaButton: "Try BunkDesk — Free",
-      footerTagline: "Don't let empty beds go to waste.",
-      footerFree: "Free forever",
-      footerNoCredit: "No credit card required",
-    },
     migration: {
       title: "Migration Center",
       subtitle: "Import your data from other PMS platforms",
@@ -702,6 +829,7 @@ export const translations = {
       typeEarlyBird: "Early Bird",
       typeLongStay: "Long Stay",
       typeGroupDiscount: "Group Discount",
+      lastMinuteForDay: "Last Minute — {day} {date}",
     },
     hostelPage: {
       title: "Hostel Page",
@@ -776,6 +904,22 @@ export const translations = {
       dismiss: "Dismiss",
       allGood: "All good!",
       noActionsNeeded: "No occupancy actions needed right now.",
+      longStay: {
+        title: "Open Long Stay Discount",
+        description: "{empty} empty bed-nights in next {days} days. Offer 15% off for 7+ night stays to fill empty beds.",
+      },
+      recall: {
+        title: "Recall {count} Previous Guests",
+        description: "{count} guests haven't returned in 3+ months. Send them a 10% off offer to fill {empty} empty bed-nights.",
+      },
+      lastMinute: {
+        title: "Open Last Minute Deal",
+        description: "{empty} empty beds in next 3 days. Offer 20% off for immediate bookings.",
+      },
+      conversion: {
+        title: "Convert {count} Beds from Female to Mixed",
+        description: "Female dorm is {femaleRate}% occupied while Mixed dorm is {mixedRate}%. Converting {count} beds could increase bookings.",
+      },
     },
     copilot: {
       comingSoon: "Hostel Copilot",
@@ -795,6 +939,34 @@ export const translations = {
       allClear: "All clear!",
       noIssues: "No issues or opportunities right now.",
     },
+    insights: {
+      listSeparator: ", ",
+      femaleRoom: {
+        title: "{name} has high vacancy",
+        description: "{empty}/{total} beds empty. Consider converting {count} beds to Mixed Dorm to increase bookings.",
+        actionLabel: "View Occupancy Actions",
+      },
+      emptyBeds3d: {
+        title: "{count} empty beds in next 3 days",
+        description: "Push long-stay discount or last-minute deal to fill empty beds.",
+        actionLabel: "Create Promotion",
+      },
+      recall6m: {
+        title: "{count, plural, one {# guest hasn't returned in 6+ months} other {# guests haven't returned in 6+ months}}",
+        description: "Send them a personalized offer to come back.",
+        actionLabel: "View Guest CRM",
+      },
+      overbooking: {
+        title: "Overbooking on {date}",
+        description: "{occupied} guests but only {total} beds available.",
+        actionLabel: "View Bed Board",
+      },
+      unconfirmed: {
+        title: "{count, plural, one {# unconfirmed reservation} other {# unconfirmed reservations}}",
+        description: "{details}",
+        actionLabel: "View Reservations",
+      },
+    },
   },
   zh: {
     sidebar: {
@@ -804,7 +976,7 @@ export const translations = {
       calendar: "日历视图",
       reservations: "预定管理",
       rooms: "房间与床位",
-      hostelDesk: "Bunkly",
+      hostelDesk: "BunkDesk",
       shiftLog: "交接班日志",
       more: "更多",
       grow: "获客增长",
@@ -814,6 +986,206 @@ export const translations = {
       intelligence: "智能",
       copilot: "经营助手",
       settings: "设置",
+      assistant: "经营助手",
+    },
+    assistant: {
+      needsAttention: "需关注",
+      needsAction: "需要立刻处理",
+      opportunities: "抓住机会",
+      go: "处理",
+      empty: "空",
+      occupied: "已住",
+      tools: "获客工具",
+      toolsHint: "点击展开",
+      toolSheetHint: "在侧边面板中编辑后关闭即可保存。",
+      subtitle: "今日运营 · 关注要点 · 获客工具",
+      toolsMovedHint: "工具已迁至",
+      toolsMovedHintSuffix: "子 tab",
+      growth: "获客",
+      potentialRevenue: "潜在",
+      potentialBedNights: "床晚",
+      subTabs: {
+        today: "今日",
+        growth: "获客",
+      },
+      growthOverview: {
+        title: "获客概览",
+        potential7d: "未来 7 天潜在营收",
+        tools: "个工具",
+        recallable: "位待召回",
+        bedNights: "床晚",
+      },
+      todaySummary: {
+        hello: "今日",
+        checkIns: "入住",
+        checkOuts: "退房",
+        emptyBeds: "空床",
+        cleaning: "待清洁",
+        thisWeek: "本周",
+        peak: "高峰",
+        empty: "空床",
+        bedNights: "床晚",
+        opportunities: "机会",
+        risks: "风险",
+        allClear: "一切正常！",
+        noIssues: "当前没有需要关注的问题或机会。",
+      },
+      week: {
+        mon: "周一",
+        tue: "周二",
+        wed: "周三",
+        thu: "周四",
+        fri: "周五",
+        sat: "周六",
+        sun: "周日",
+        sevenDays: "接下来 7 天",
+      },
+      hero: {
+        occupancy: "今日入住率",
+        bedsFmt: "{occupied}/{total} 已住 · {empty} 张空床",
+        comparisonUp: "高于 7 天均值 {pct}%",
+        comparisonDown: "低于 7 天均值 {pct}%",
+        comparisonEqual: "与 7 天均值持平",
+      },
+      threeDay: {
+        title: "接下来 3 天",
+        tonight: "今晚",
+        tomorrow: "明天",
+        dayAfter: "后天",
+        occupancyFmt: "{pct}% 占用",
+        canFill: "可填 {n} 张",
+        fullHouse: "满房",
+        action: "查看对策",
+        noAction: "—",
+      },
+      instantActions: "即时动作",
+    },
+    landing: {
+      heroBadge: "为青旅老板打造 · 床位级管理",
+      heroTitle1: "床位级",
+      heroTitle2: "青旅管理系统",
+      heroSubtitle: "可视化床位看板 · 直订主页 · 内置 CRM。免抽成、免 API 对接——$19/月，全包。",
+      heroCta: "14 天免费试用",
+      heroSecondary: "看截图",
+      socialProof: "已有 5+ 独立青旅在用，覆盖欧洲、美洲与东南亚",
+      realityEyebrow: "The Reality Check",
+      realityTitle: "开小青旅，不该被运营压垮",
+      pain1Title: "电子表格的混乱",
+      pain1Desc: "用 Excel 跟混宿 6 张床哪张有人？一次数错 = 前台尴尬道歉。",
+      pain2Title: "散客录入重复劳动",
+      pain2Desc: "姓名、护照、房号、日期、付款——一个一个手输。20 位到达 = 20 分钟的键盘。",
+      pain3Title: "OTA 抽成年年失血",
+      pain3Desc: "Hostelworld、Booking.com、Airbnb 抽 15–25%。$24k+/年流向你控制不了的渠道。",
+      pain4Title: "看不清今天要做什么",
+      pain4Desc: "谁退房、谁没付钱、哪张床要清洁、哪张要换被套——一眼看不出来。",
+      realityQuote: "我本该在经营青旅，不该在折腾表格",
+      realityQuoteSource: "— 12 位青旅老板访谈",
+      wayEyebrow: "The BunkDesk Way",
+      wayTitle: "用上 BunkDesk 后，你的一天",
+      beforeTitle: "用 BunkDesk 之前",
+      afterTitle: "用 BunkDesk 之后",
+      hoursPerDay: "小时/天",
+      minutesPerDay: "分钟/天",
+      before1: "开 4 个标签页查 Hostelworld、Booking.com、Airbnb 日历",
+      before2: "一个一个录入 5+ 散客的护照信息",
+      before3: "单独给 12 位客人发 WhatsApp 通知入住",
+      before4: "Excel 崩溃了，昨天的文件找不回来",
+      before5: "客人要下铺，但你分不清哪张是空的",
+      before6: "一天结束了，又累又没换完被套",
+      after1: "床位看板一眼看完整周",
+      after2: "拖一下，8 秒完成分配",
+      after3: "直订主页自动发送入住信息",
+      after4: "数据存在本地浏览器，随时导 CSV",
+      after5: "颜色区分混宿/女宿/单间 + 空床",
+      after6: "早早收工，跟客人聊聊天。",
+      featEyebrow: "Features",
+      featTitle: "小青旅需要的一切，不多不少",
+      feat1Title: "床位级库存",
+      feat1Desc: "混宿、女宿、单间。上下铺分层定价，下铺可加价。单卖 6 床混宿里的 #4 床，不用整房打包。",
+      feat2Title: "直订主页",
+      feat2Desc: "带照片、价格、4 步下单的公开青旅主页。客人直订，跳过 OTA 15–25% 抽成；每次预订自动沉淀到你的 CRM。",
+      feat3Title: "内置客人 CRM",
+      feat3Desc: "以手机号为主键的客人档案，含入住历史、总消费额、标签（数字游民、回访客、VIP、团长）。第 4 次来像第 1 次。",
+      feat4Title: "定价与上座率洞察",
+      feat4Desc: "旺季/淡季/周末/工作日 4 档建议价。前瞻 7 天上座率预测。空床夜出现前就能发现。",
+      more1: "团订管理（统一或拆分付款）",
+      more2: "性别专属宿舍 + 冲突拦截",
+      more3: "清洁任务分配与追踪",
+      more4: "RevPAB（每床晚营收）分析",
+      more5: "Stripe / PayPal / 现金收款",
+      more6: "中英双语界面",
+      more7: "员工移动端友好",
+      more8: "CSV 导入：Cloudbeds / BananaDesk / Sirvoy",
+      bedGapEyebrow: "The Bed-Level Gap",
+      bedGapTitle: "酒店软件装不下青旅",
+      bedGapSubtitle: "传统 PMS 按房算库存，青旅是按床算的。这个错配每周都在让你少赚钱。",
+      bedGapOther: "传统 PMS",
+      bedGapOtherTag: "整房库存",
+      bedGapOtherCaption: "系统显示：6 床混宿「满房」（其实有 1 张空床）",
+      bedGapOurTag: "床位单独库存",
+      bedGapOurCaption: "#4 床单独上架——直订，省 18% 抽成",
+      bedGapQuote: "酒店 PMS 按房算，青旅按床算。",
+      howEyebrow: "How BunkDesk works",
+      howTitle: "从入住到退房，一屏搞定",
+      howSubtitle: "没有 API 集成，没有 AI 噱头。只有小青旅跑一班真正需要的工具。",
+      how1Title: "录入",
+      how1Desc: "客人 walk-in。点国家旗、扫护照、拖到空床。系统按性别 + 房型偏好自动匹配。",
+      how2Title: "追踪",
+      how2Desc: "床位看板看完整周。颜色：空、已住、待清洁、已预订、晚到。拖一下换床。",
+      how3Title: "卖房",
+      how3Desc: "发布直订主页，发到 Instagram、WhatsApp、官网。客人 4 步下单。",
+      how4Title: "增长",
+      how4Desc: "每位客人入 CRM（按手机号）。7 天预测显示空床夜。30 秒创建促销。",
+      pricingEyebrow: "Simple Pricing",
+      pricingTitle: "一个价，全包",
+      pricingSubtitle: "14 天免费试用，不绑信用卡。随时取消。",
+      pricingFreeName: "试用版",
+      pricingFreeDesc: "14 天免费，全功能体验。",
+      pricingFree1: "不限床位与房型",
+      pricingFree2: "床位看板 · 直订 · CRM",
+      pricingFree3: "CSV 导入（Cloudbeds / BananaDesk / Sirvoy）",
+      pricingFree4: "邮件支持",
+      pricingFreeCta: "开始试用",
+      pricingProName: "标准版",
+      pricingProBadge: "最受欢迎",
+      pricingProDesc: "准备增长的青旅。$19/月，按月付费。",
+      pricingPro1: "试用版全部功能，加：",
+      pricingPro2: "直订主页不限流量",
+      pricingPro3: "促销活动 + 推荐返佣",
+      pricingPro4: "多员工账号（店长 / 前台 / 清洁）",
+      pricingPro5: "优先邮件支持",
+      pricingProCta: "立即开通",
+      perMonth: "/月",
+      perYear: "/年",
+      ctaTitle: "经营你的青旅，别经营你的表格",
+      ctaSubtitle: "14 天免费试用，不绑信用卡，一个下午完成设置。",
+      ctaButton: "开始免费试用",
+      footerTagline: "BunkDesk · 床位级青旅管理",
+      footerFree: "14 天免费试用",
+      footerNoCredit: "不绑信用卡",
+    },
+    subnav: {
+      overview: "概览",
+      grow: "获客增长",
+      staff: "员工管理",
+      migrate: "数据迁移",
+      rooms: "房间",
+      growth: "获客",
+      general: "通用",
+    },
+    common: {
+      logout: "退出登录",
+      version: "版本",
+      language: "语言",
+      theme: "主题",
+      resetData: "重置数据",
+      confirmReset: "这将清空所有本地存储的旅舍数据并返回登录页，确定继续吗？",
+      edit: "编辑",
+      currency: "¥",
+      currencyCode: "CNY",
+      locale: "zh-CN",
+      resetDataDesc: "清空 localStorage 中所有 bunkdesk_* 键并返回登录页。",
+      currentLanguage: "中文",
     },
     header: {
       visualBedBoard: "可视化床位看板",
@@ -1038,6 +1410,11 @@ export const translations = {
       bottomBunkTotal: "下铺总价",
       deleteRoom: "删除房间",
       deleteBed: "删除床位",
+      subtitle: "添加、编辑房间和床位。所有更改实时同步到床位看板。",
+      occupied: "已入住",
+      confirmDelete: "确认删除这个房间？",
+      cannotDeleteOccupied: "有客人的房间不能删除",
+      empty: "还没有房间。点击右上角「添加房间」开始。",
     },
     reservations: {
       searchBookings: "搜索订单...",
@@ -1135,7 +1512,7 @@ export const translations = {
       role: "角色",
       phone: "电话",
       pin: "PIN 码",
-      resetPin: "重置 PIN",
+      resetPin: "重置 PIN 码",
       manager: "经理",
       reception: "前台",
       cleaning: "保洁",
@@ -1281,122 +1658,6 @@ export const translations = {
       back: "返回",
       next: "下一步",
     },
-    landing: {
-      heroBadge: "为想填满空床的青旅打造",
-      heroTitle1: "别让空床",
-      heroTitle2: "白白浪费",
-      heroSubtitle: "免费青旅管理系统，帮你填满空床、留住更多收入。OTA 带来客人很好——BunkDesk 帮你留住更多收入，还能在 OTA 之外找到客人。",
-      heroCta: "立即体验",
-      heroSecondary: "观看演示",
-      socialProof: "100+ 家青旅已体验 demo",
-      socialLocations: "来自里斯本、巴厘岛、巴塞罗那、上海等地",
-      painTitle: "你的空床每晚都在亏钱",
-      painSubtitle: "每张没卖出去的床都是永远收不回来的收入。而卖出去的床？一大块被 OTA 拿走了。听着耳熟？",
-      pain1Title: "空床 = 浪费收入",
-      pain1Desc: "青旅淡季平均入住率只有 40-60%。每张空床都是你永远收不回来的收入。",
-      pain2Title: "OTA 佣金吞噬你的利润",
-      pain2Desc: "Booking.com 每笔预订抽 15-25%。积少成多，很快就是一大笔。",
-      pain3Title: "酒店 PMS 不懂床位",
-      pain3Desc: "想卖 6 人宿舍的第 4 张床？传统 PMS 按房间思考，不按床位。",
-      pain4Title: "淡季没有指引",
-      pain4Desc: "床位空着的时候，你没有工具也没有建议来帮忙填满它们。",
-      painQuote: "我亏在空床和 OTA 佣金上的钱比任何其他成本都多",
-      painQuoteAttr: "— 我们采访的每一位青旅老板",
-      beforeTitle: "用 BunkDesk 之前",
-      before1: "今晚 3 张空床无人住",
-      before2: "向 OTA 支付 20% 佣金",
-      before3: "淡季不知道该怎么办",
-      before4: "Excel 告诉不了你哪张床空着",
-      beforeTime: "收入流失：每张空床都永远回不来",
-      afterTitle: "用 BunkDesk 之后",
-      after1: "空床时收到提醒和建议",
-      after2: "直客预订 0% 佣金",
-      after3: "定价参考触手可及",
-      after4: "一眼看到每张床的状态",
-      afterTime: "更多床位填满，更多收入留住",
-      showcaseTitle: "真正有用的简单工具",
-      showcaseSubtitle: "没有 AI 噱头，没有神奇承诺——就是帮你填满床位、留住收入的实在工具。",
-      showcase1Title: "空床提醒",
-      showcase1Desc: "知道哪些床空着，并收到简单的建议来帮忙填满它们。",
-      showcase2Title: "直客预订引擎",
-      showcase2Desc: "你的青旅主页，0% 佣金预订。链接随处分享。",
-      showcase3Title: "推荐奖励",
-      showcase3Desc: "客人带朋友来，双方都获奖。零成本的口碑营销。",
-      showcase4Title: "轻松迁移",
-      showcase4Desc: "从 Cloudbeds、BananaDesk 或任何 CSV 导入。数据一个不落。",
-      diffTitle: "我们不是要取代 OTA",
-      diffSubtitle: "OTA 带来客人很好。BunkDesk 帮你留住更多收入，还能在 OTA 之外找到客人。",
-      diff1: "继续使用 Booking.com 和 Hostelworld",
-      diff2: "增加 0% 佣金的直客预订",
-      diff3: "空床时收到建议",
-      diff4: "逐步建立自己的客源",
-      compareTitle: "BunkDesk 对比",
-      compareSubtitle: "看看青旅为什么从 Cloudbeds 和 BananaDesk 切换过来。",
-      compareColCloudbeds: "Cloudbeds",
-      compareColBananaDesk: "BananaDesk",
-      compareColBunkDesk: "BunkDesk",
-      compareRowPrice: "价格",
-      compareRowPriceCloudbeds: "$100-300/月",
-      compareRowPriceBananaDesk: "$35-155/月",
-      compareRowPriceBunkDesk: "免费",
-      compareRowCommission: "佣金",
-      compareRowCommissionCloudbeds: "无",
-      compareRowCommissionBananaDesk: "4%",
-      compareRowCommissionBunkDesk: "0%",
-      compareRowBeds: "床位级管理",
-      compareRowBedsCloudbeds: "按房间",
-      compareRowBedsBananaDesk: "✅",
-      compareRowBedsBunkDesk: "✅",
-      compareRowGuidance: "空床指引",
-      compareRowGuidanceCloudbeds: "❌",
-      compareRowGuidanceBananaDesk: "❌",
-      compareRowGuidanceBunkDesk: "✅",
-      compareRowPage: "青旅主页+预订",
-      compareRowPageCloudbeds: "❌",
-      compareRowPageBananaDesk: "❌",
-      compareRowPageBunkDesk: "✅",
-      compareRowReferral: "推荐计划",
-      compareRowReferralCloudbeds: "❌",
-      compareRowReferralBananaDesk: "❌",
-      compareRowReferralBunkDesk: "✅",
-      compareRowMigration: "迁移工具",
-      compareRowMigrationCloudbeds: "❌",
-      compareRowMigrationBananaDesk: "❌",
-      compareRowMigrationBunkDesk: "✅",
-      compareRowSetup: "上线时间",
-      compareRowSetupCloudbeds: "2-4 周",
-      compareRowSetupBananaDesk: "1-2 天",
-      compareRowSetupBunkDesk: "30 分钟",
-      pricingTitle: "简单定价，适合所有青旅",
-      pricingSubtitle: "无隐藏费用。无按预订抽成。免费开始，需要时再升级。",
-      pricingFree: "免费版",
-      pricingFreePrice: "$0",
-      pricingFreePeriod: "/月",
-      pricingFreeDesc: "适合小型青旅",
-      pricingFree1: "最多 30 张床",
-      pricingFree2: "iCal 同步",
-      pricingFree3: "青旅主页 + 预订引擎",
-      pricingFree4: "推荐计划",
-      pricingFree5: "空床建议",
-      pricingFreeCta: "免费开始",
-      pricingPro: "专业版",
-      pricingProPrice: "$49",
-      pricingProPeriod: "/月",
-      pricingProDesc: "适合成长中的青旅",
-      pricingPro1: "无限床位",
-      pricingPro2: "定价参考",
-      pricingPro3: "WhatsApp 营销",
-      pricingPro4: "优先支持",
-      pricingPro5: "免费版全部功能",
-      pricingProCta: "开始免费试用",
-      pricingProBadge: "最受欢迎",
-      ctaTitle: "别再让空床白白浪费了",
-      ctaSubtitle: "BunkDesk 免费、即用、帮你填满空床。没有等候名单，没有演示电话，没有信用卡。",
-      ctaButton: "体验 BunkDesk — 免费",
-      footerTagline: "别让空床白白浪费。",
-      footerFree: "永久免费",
-      footerNoCredit: "无需信用卡",
-    },
     migration: {
       title: "数据迁移中心",
       subtitle: "从其他 PMS 平台导入您的数据",
@@ -1497,6 +1758,7 @@ export const translations = {
       typeEarlyBird: "早鸟优惠",
       typeLongStay: "长住优惠",
       typeGroupDiscount: "团体折扣",
+      lastMinuteForDay: "尾房特惠 — {day} {date}",
     },
     hostelPage: {
       title: "青旅主页",
@@ -1571,6 +1833,22 @@ export const translations = {
       dismiss: "忽略",
       allGood: "一切正常！",
       noActionsNeeded: "当前无需空床动作。",
+      longStay: {
+        title: "开放长住折扣",
+        description: "未来 {days} 天有 {empty} 个空床夜。7 晚以上住宿享 85 折以填满空床。",
+      },
+      recall: {
+        title: "召回 {count} 位老客",
+        description: "{count} 位客人 3 个月以上未回访。发 9 折优惠邀请回来填满 {empty} 个空床夜。",
+      },
+      lastMinute: {
+        title: "开放尾房特惠",
+        description: "未来 3 天有 {empty} 张空床。立即预订享 8 折。",
+      },
+      conversion: {
+        title: "将 {count} 张床位从女宿改为混宿",
+        description: "女宿入住率 {femaleRate}%，混宿入住率 {mixedRate}%。改 {count} 张可增加预订。",
+      },
     },
     copilot: {
       comingSoon: "经营助手",
@@ -1590,43 +1868,145 @@ export const translations = {
       allClear: "一切正常！",
       noIssues: "当前没有需要关注的问题或机会。",
     },
+    insights: {
+      listSeparator: "、",
+      femaleRoom: {
+        title: "{name} 空置率较高",
+        description: "{empty}/{total} 张床位空置。建议将 {count} 张改为混合宿舍以增加预订。",
+        actionLabel: "查看空床动作",
+      },
+      emptyBeds3d: {
+        title: "未来 3 天有 {count} 张空床",
+        description: "推长住折扣或尾房特惠来填满这些床位。",
+        actionLabel: "创建促销",
+      },
+      recall6m: {
+        title: "{count} 位客人 6 个月以上未回访",
+        description: "给他们发个性化优惠邀请回来。",
+        actionLabel: "查看客人资产",
+      },
+      overbooking: {
+        title: "{date} 存在超售风险",
+        description: "已分配 {occupied} 位客人但只有 {total} 张床可用。",
+        actionLabel: "查看床位看板",
+      },
+      unconfirmed: {
+        title: "{count} 条未确认预订",
+        description: "{details}",
+        actionLabel: "查看预定管理",
+      },
+    },
   },
 };
 
-type Language = "en" | "zh";
+/* --------------------------- t() 解析器 --------------------------- *
+ * 解析两类占位符：
+ *  1. 简单占位符：{name} / {count}  →  从 params 取值
+ *  2. 复数占位符：{count, plural, one {# item} other {# items}}
+ *     - 取 count 字段，# 替换为 count
+ *     - one 用 count=1 时的形式（中文 one/other 一致）
+ * ------------------------------------------------------------------ */
+function interpolate(template: string, params: Record<string, string | number> | undefined, language: Language): string {
+  if (!template) return template;
+  let out = template;
+  // 1. Plural 解析
+  const pluralRe = /\{(\w+),\s*plural,\s*one\s*\{([^}]*)\}\s*other\s*\{([^}]*)\}\s*\}/g;
+  out = out.replace(pluralRe, (_, key, oneForm, otherForm) => {
+    const v = params?.[key];
+    const n = typeof v === 'number' ? v : Number(v);
+    if (language === 'zh') {
+      // 中文 one/other 都用 other（不区分单复数）
+      return otherForm.replace(/#/g, String(n));
+    }
+    return (n === 1 ? oneForm : otherForm).replace(/#/g, String(n));
+  });
+  // 2. 简单占位符 {key}
+  if (params) {
+    out = out.replace(/\{(\w+)\}/g, (m, key) => {
+      const v = params[key];
+      return v === undefined || v === null ? m : String(v);
+    });
+  }
+  return out;
+}
 
+function lookupPath(obj: any, keys: string[]): any {
+  let cur = obj;
+  for (const k of keys) {
+    if (cur && typeof cur === 'object' && k in cur) {
+      cur = cur[k];
+    } else {
+      return undefined;
+    }
+  }
+  return cur;
+}
+
+/* --------------------------- 类型 + 上下文 --------------------------- */
 interface I18nState {
   language: Language;
   setLanguage: (lang: Language) => void;
-  t: (path: string) => string;
+  t: (
+    path: string,
+    params?: Record<string, string | number>,
+    options?: { defaultValue?: string },
+  ) => string;
 }
 
 const I18nContext = createContext<I18nState | undefined>(undefined);
 
-export function I18nProvider({ children }: { children: ReactNode }) {
-  const [language, setLanguage] = useState<Language>("zh");
+/* --------------------------- 持久化 helper --------------------------- */
+function readStoredLanguage(): Language {
+  if (typeof window === 'undefined') return DEFAULT_LANGUAGE;
+  try {
+    const v = window.localStorage.getItem(STORAGE_KEY);
+    return v === 'en' || v === 'zh' ? v : DEFAULT_LANGUAGE;
+  } catch {
+    return DEFAULT_LANGUAGE;
+  }
+}
 
-  const t = (path: string) => {
-    const keys = path.split(".");
-    let current: any = translations[language];
-    for (const key of keys) {
-      if (current && current[key] !== undefined) {
-        current = current[key];
-      } else {
-        let fallback: any = translations["en"];
-        let found = true;
-        for (const k of keys) {
-          if (fallback && fallback[k] !== undefined) {
-            fallback = fallback[k];
-          } else {
-            found = false;
-            break;
-          }
-        }
-        return found ? fallback : path;
+function writeStoredLanguage(lang: Language) {
+  if (typeof window === 'undefined') return;
+  try {
+    window.localStorage.setItem(STORAGE_KEY, lang);
+  } catch {
+    /* ignore quota / private mode errors */
+  }
+}
+
+/* --------------------------- Provider --------------------------- */
+export function I18nProvider({ children }: { children: ReactNode }) {
+  const [language, setLanguageState] = useState<Language>(readStoredLanguage);
+
+  // 跨标签页同步
+  useEffect(() => {
+    const onStorage = (e: StorageEvent) => {
+      if (e.key === STORAGE_KEY && (e.newValue === 'en' || e.newValue === 'zh')) {
+        setLanguageState(e.newValue);
       }
+    };
+    window.addEventListener('storage', onStorage);
+    return () => window.removeEventListener('storage', onStorage);
+  }, []);
+
+  const setLanguage = (lang: Language) => {
+    setLanguageState(lang);
+    writeStoredLanguage(lang);
+  };
+
+  const t: I18nState['t'] = (path, params, options) => {
+    const keys = path.split('.');
+    let raw = lookupPath(translations[language], keys);
+    if (raw === undefined) {
+      // 严格：缺 key 不再回退英文（避免硬编码侥幸），直接显示 key
+      return options?.defaultValue ?? path;
     }
-    return current;
+    if (typeof raw !== 'string') {
+      // 路径指向对象（例如 copilot.subTabs）—— 视为配置错误
+      return options?.defaultValue ?? path;
+    }
+    return interpolate(raw, params, language);
   };
 
   return (
@@ -1636,8 +2016,28 @@ export function I18nProvider({ children }: { children: ReactNode }) {
   );
 }
 
+/* --------------------------- Hook --------------------------- */
 export const useTranslation = () => {
   const ctx = useContext(I18nContext);
-  if (!ctx) throw new Error("useTranslation must be used within I18nProvider");
+  if (!ctx) throw new Error('useTranslation must be used within I18nProvider');
   return ctx;
 };
+
+/* --------------------------- 货币格式化 helper --------------------------- *
+ * 基于当前 language 的货币偏好（common.currency / common.currencyCode / common.locale）
+ * 用 Intl.NumberFormat 做 locale-aware 格式化。组件直接 import 此函数。
+ * ------------------------------------------------------------------ */
+export function formatCurrency(amount: number, language: Language): string {
+  const locale = (translations[language].common as any).locale as string;
+  const code = (translations[language].common as any).currencyCode as string;
+  try {
+    return new Intl.NumberFormat(locale, {
+      style: 'currency',
+      currency: code,
+      maximumFractionDigits: 0,
+    }).format(amount);
+  } catch {
+    const sym = (translations[language].common as any).currency as string;
+    return `${sym}${amount.toLocaleString()}`;
+  }
+}

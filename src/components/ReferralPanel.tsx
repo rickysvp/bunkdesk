@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useHostel } from "../HostelContext";
-import { useTranslation } from "../i18nContext";
+import { useTranslation, formatCurrency } from "../i18nContext";
 
 const REWARD_OPTIONS = [
   { key: "reward10Off", value: "10% off" },
@@ -27,12 +27,12 @@ function generateCode(name: string): string {
   const suffix = Array.from({ length: 3 }, () =>
     chars[Math.floor(Math.random() * chars.length)]
   ).join("");
-  return `BUNKDESK-${upper || "GUEST"}-${suffix}`;
+  return `BUNKDESK-${upper}-${suffix}`;
 }
 
 export function ReferralPanel() {
   const { referrals, addReferral } = useHostel();
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
 
   const [guestName, setGuestName] = useState("");
   const [reward, setReward] = useState(REWARD_OPTIONS[0].value);
@@ -73,8 +73,7 @@ export function ReferralPanel() {
     setGuestName("");
   };
 
-  const formatCurrency = (amount: number) =>
-    `¥${amount.toLocaleString()}`;
+  const formatMoney = (amount: number) => formatCurrency(amount, language);
 
   return (
     <div className="max-w-3xl mx-auto">
@@ -116,7 +115,7 @@ export function ReferralPanel() {
             </span>
           </div>
           <p className="text-2xl font-bold text-emerald-600">
-            {formatCurrency(totalCommissionSaved)}
+            {formatMoney(totalCommissionSaved)}
           </p>
         </div>
       </div>
@@ -214,7 +213,7 @@ export function ReferralPanel() {
                       {ref.commissionSaved > 0 && (
                         <span className="text-emerald-600 font-medium">
                           {t("referral.commission")}:{" "}
-                          {formatCurrency(ref.commissionSaved)}
+                          {formatMoney(ref.commissionSaved)}
                         </span>
                       )}
                     </div>

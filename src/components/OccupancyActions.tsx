@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useHostel } from '../HostelContext';
-import { useTranslation } from '../i18nContext';
+import { useTranslation, formatCurrency } from '../i18nContext';
 import { OccupancyAction } from '../types';
 import { generateOccupancyActions, calculateAvailability, getActionTypeLabel } from '../utils/occupancyEngine';
 import { Zap, TrendingUp, Bed, BarChart3, Check, X } from 'lucide-react';
@@ -16,7 +16,7 @@ export function OccupancyActions() {
   const { t, language } = useTranslation();
   const [dismissedIds, setDismissedIds] = useState<Set<string>>(new Set());
 
-  const actions = useMemo(() => generateOccupancyActions(rooms, guestProfiles, 7), [rooms, guestProfiles]);
+  const actions = useMemo(() => generateOccupancyActions(rooms, guestProfiles, 7, t), [rooms, guestProfiles, t]);
 
   const activeActions = actions.filter(a => !dismissedIds.has(a.id));
 
@@ -42,10 +42,10 @@ export function OccupancyActions() {
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-sm font-semibold text-zinc-900 flex items-center gap-2">
               <BarChart3 className="h-4 w-4 text-zinc-400" />
-              {t('occupancy.next7Days') || 'Next 7 Days'}
+              {t('occupancy.next7Days')}
             </h3>
             <span className="text-xs text-zinc-500">
-              {t('occupancy.avgOccupancy') || 'Avg Occupancy'}: {Math.round(avgOccupancy)}%
+              {t('occupancy.avgOccupancy')}: {Math.round(avgOccupancy)}%
             </span>
           </div>
 
@@ -70,8 +70,8 @@ export function OccupancyActions() {
           </div>
 
           <div className="mt-3 flex items-center justify-between text-xs text-zinc-500">
-            <span>{totalEmptyBedNights} {t('occupancy.emptyBedNights') || 'empty bed-nights'}</span>
-            <span>{t('occupancy.potentialRevenue') || 'Potential'}: <span className="font-medium text-emerald-600">${totalPotentialRevenue}</span></span>
+            <span>{totalEmptyBedNights} {t('occupancy.emptyBedNights')}</span>
+            <span>{t('occupancy.potentialRevenue')}: <span className="font-medium text-emerald-600">${totalPotentialRevenue}</span></span>
           </div>
         </CardContent>
       </Card>
@@ -81,7 +81,7 @@ export function OccupancyActions() {
         <div className="flex items-center justify-between mb-3">
           <h3 className="text-sm font-semibold text-zinc-900 flex items-center gap-2">
             <Zap className="h-4 w-4 text-amber-500" />
-            {t('occupancy.suggestedActions') || 'Suggested Actions'}
+            {t('occupancy.suggestedActions')}
             <Badge variant="secondary" className="text-[10px]">{activeActions.length}</Badge>
           </h3>
         </div>
@@ -114,21 +114,21 @@ export function OccupancyActions() {
                           <div className="flex items-center gap-4 mb-3">
                             <div className="flex items-center gap-1.5">
                               <Bed className="h-3.5 w-3.5 text-emerald-500" />
-                              <span className="text-xs font-medium text-emerald-600">+{action.estimatedBedNights} {t('occupancy.bedNights') || 'bed-nights'}</span>
+                              <span className="text-xs font-medium text-emerald-600">+{action.estimatedBedNights} {t('occupancy.bedNights')}</span>
                             </div>
                             <div className="flex items-center gap-1.5">
                               <TrendingUp className="h-3.5 w-3.5 text-emerald-500" />
-                              <span className="text-xs font-medium text-emerald-600">+${action.estimatedRevenue}</span>
+                              <span className="text-xs font-medium text-emerald-600">+{formatCurrency(action.estimatedRevenue, language)}</span>
                             </div>
                           </div>
 
                           <div className="flex items-center gap-2">
                             <Button size="sm" className="h-7 text-xs gap-1.5" onClick={() => handleApply(action)}>
                               <Check className="h-3 w-3" />
-                              {t('occupancy.apply') || 'Apply'}
+                              {t('occupancy.apply')}
                             </Button>
                             <Button variant="ghost" size="sm" className="h-7 text-xs text-zinc-400" onClick={() => handleDismiss(action.id)}>
-                              {t('occupancy.dismiss') || 'Dismiss'}
+                              {t('occupancy.dismiss')}
                             </Button>
                           </div>
                         </div>
@@ -145,8 +145,8 @@ export function OccupancyActions() {
               <div className="h-12 w-12 bg-emerald-50 rounded-xl flex items-center justify-center mx-auto mb-3">
                 <Check className="h-6 w-6 text-emerald-500" />
               </div>
-              <p className="text-sm font-medium text-zinc-900">{t('occupancy.allGood') || 'All good!'}</p>
-              <p className="text-xs text-zinc-500 mt-1">{t('occupancy.noActionsNeeded') || 'No occupancy actions needed right now.'}</p>
+              <p className="text-sm font-medium text-zinc-900">{t('occupancy.allGood')}</p>
+              <p className="text-xs text-zinc-500 mt-1">{t('occupancy.noActionsNeeded')}</p>
             </div>
           )}
         </div>

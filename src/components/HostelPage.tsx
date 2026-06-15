@@ -91,10 +91,10 @@ export function HostelPage() {
       <div>
         <h1 className="text-2xl font-semibold tracking-tight text-zinc-900 flex items-center gap-2">
           <Globe className="h-6 w-6 text-emerald-500" />
-          {t('hostelPage.title') || 'Hostel Page'}
+          {t('hostelPage.title')}
         </h1>
         <p className="text-sm text-zinc-500 mt-1">
-          {t('hostelPage.subtitle') || 'Create and customize your shareable hostel page with booking engine'}
+          {t('hostelPage.subtitle')}
         </p>
       </div>
 
@@ -103,7 +103,7 @@ export function HostelPage() {
         <motion.div variants={item}>
           <h2 className="text-sm font-semibold text-zinc-900 flex items-center gap-2 mb-3">
             <Palette className="h-4 w-4 text-zinc-400" />
-            {t('hostelPage.templateSelector') || 'Choose Template'}
+            {t('hostelPage.templateSelector')}
           </h2>
           <div className="grid grid-cols-3 gap-3">
             {TEMPLATES.map((tpl) => {
@@ -121,7 +121,7 @@ export function HostelPage() {
                   </div>
                   <div className="p-2.5 bg-white">
                     <span className="text-xs font-semibold text-zinc-800">
-                      {t(tpl.labelKey) || tpl.id.charAt(0).toUpperCase() + tpl.id.slice(1)}
+                      {t(tpl.labelKey)}
                     </span>
                   </div>
                   {selected && (
@@ -141,14 +141,14 @@ export function HostelPage() {
           <motion.div variants={item} className="space-y-4">
             <h2 className="text-sm font-semibold text-zinc-900 flex items-center gap-2">
               <Pencil className="h-4 w-4 text-zinc-400" />
-              {t('hostelPage.editor') || 'Page Editor'}
+              {t('hostelPage.editor')}
             </h2>
 
             <div className="bg-white rounded-xl border border-zinc-200 shadow-sm p-5 space-y-4">
               {/* Hostel Name */}
               <div>
                 <label className="block text-xs font-medium text-zinc-600 mb-1.5">
-                  {t('hostelPage.hostelName') || 'Hostel Name'}
+                  {t('hostelPage.hostelName')}
                 </label>
                 <input
                   type="text"
@@ -161,7 +161,7 @@ export function HostelPage() {
               {/* Description */}
               <div>
                 <label className="block text-xs font-medium text-zinc-600 mb-1.5">
-                  {t('hostelPage.description') || 'Description'}
+                  {t('hostelPage.description')}
                 </label>
                 <textarea
                   value={hostelPage.description}
@@ -174,7 +174,7 @@ export function HostelPage() {
               {/* Cover Image URL */}
               <div>
                 <label className="block text-xs font-medium text-zinc-600 mb-1.5">
-                  {t('hostelPage.coverImage') || 'Cover Image URL'}
+                  {t('hostelPage.coverImage')}
                 </label>
                 <div className="flex items-center gap-2">
                   <input
@@ -197,7 +197,7 @@ export function HostelPage() {
               {/* Facilities */}
               <div>
                 <label className="block text-xs font-medium text-zinc-600 mb-2">
-                  {t('hostelPage.facilities') || 'Facilities'}
+                  {t('hostelPage.facilities')}
                 </label>
                 <div className="flex flex-wrap gap-1.5">
                   {FACILITIES.map(({ key, icon: Icon }) => {
@@ -224,7 +224,7 @@ export function HostelPage() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-medium text-zinc-600 mb-1.5">
-                    {t('hostelPage.contactEmail') || 'Contact Email'}
+                    {t('hostelPage.contactEmail')}
                   </label>
                   <input
                     type="email"
@@ -235,7 +235,7 @@ export function HostelPage() {
                 </div>
                 <div>
                   <label className="block text-xs font-medium text-zinc-600 mb-1.5">
-                    {t('hostelPage.contactPhone') || 'Phone'}
+                    {t('hostelPage.contactPhone')}
                   </label>
                   <input
                     type="tel"
@@ -248,7 +248,7 @@ export function HostelPage() {
 
               <div>
                 <label className="block text-xs font-medium text-zinc-600 mb-1.5">
-                  {t('hostelPage.address') || 'Address'}
+                  {t('hostelPage.address')}
                 </label>
                 <input
                   type="text"
@@ -262,12 +262,12 @@ export function HostelPage() {
               <div className="flex items-center justify-between pt-2 border-t border-zinc-100">
                 <div>
                   <span className="text-sm font-medium text-zinc-800">
-                    {t('hostelPage.published') || 'Published'}
+                    {t('hostelPage.published')}
                   </span>
                   <p className="text-xs text-zinc-500">
                     {hostelPage.published
-                      ? t('hostelPage.publishedDesc') || 'Your page is live and shareable'
-                      : t('hostelPage.unpublishedDesc') || 'Your page is hidden from the public'}
+                      ? t('hostelPage.publishedDesc')
+                      : t('hostelPage.unpublishedDesc')}
                   </p>
                 </div>
                 <button
@@ -291,8 +291,8 @@ export function HostelPage() {
             <h2 className="text-sm font-semibold text-zinc-900 flex items-center gap-2 mb-3">
               <Eye className="h-4 w-4 text-zinc-400" />
               {showBooking
-                ? t('hostelPage.directBooking') || 'Direct Booking'
-                : t('hostelPage.preview') || 'Preview'}
+                ? t('hostelPage.directBooking')
+                : t('hostelPage.preview')}
             </h2>
 
             {showBooking ? (
@@ -304,11 +304,11 @@ export function HostelPage() {
                     className="inline-flex items-center gap-1.5 text-sm font-medium text-zinc-600 hover:text-zinc-900 transition-colors cursor-pointer"
                   >
                     <ArrowLeft className="h-4 w-4" />
-                    {t('hostelPage.back') || 'Back'}
+                    {t('hostelPage.back')}
                   </button>
                   <div className="flex items-center gap-2 text-sm font-semibold text-zinc-800">
                     <CalendarDays className="h-4 w-4 text-emerald-500" />
-                    {t('hostelPage.directBooking') || 'Direct Booking'}
+                    {t('hostelPage.directBooking')}
                   </div>
                 </div>
                 {/* Booking Engine */}
@@ -388,7 +388,7 @@ export function HostelPage() {
                   onClick={() => setShowBooking(true)}
                   className="w-full py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-semibold rounded-lg transition-colors flex items-center justify-center gap-2 cursor-pointer"
                 >
-                  {t('hostelPage.bookNow') || 'Book Now'}
+                  {t('hostelPage.bookNow')}
                   <ExternalLink className="h-3.5 w-3.5" />
                 </button>
               </div>
@@ -401,7 +401,7 @@ export function HostelPage() {
         <motion.div variants={item}>
           <h2 className="text-sm font-semibold text-zinc-900 flex items-center gap-2 mb-3">
             <Share2 className="h-4 w-4 text-zinc-400" />
-            {t('hostelPage.share') || 'Share'}
+            {t('hostelPage.share')}
           </h2>
 
           <div className="bg-white rounded-xl border border-zinc-200 shadow-sm p-5">
@@ -409,7 +409,7 @@ export function HostelPage() {
               {/* Share Link */}
               <div className="space-y-3">
                 <label className="block text-xs font-medium text-zinc-600">
-                  {t('hostelPage.shareLink') || 'Share Link'}
+                  {t('hostelPage.shareLink')}
                 </label>
                 <div className="flex items-center gap-2">
                   <div className="flex-1 bg-zinc-50 border border-zinc-200 rounded-lg px-3 py-2 text-sm text-zinc-700 font-mono truncate">
@@ -420,7 +420,7 @@ export function HostelPage() {
                     className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium bg-zinc-900 text-white hover:bg-zinc-800 transition-colors cursor-pointer shrink-0"
                   >
                     {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-                    {copied ? (t('hostelPage.copied') || 'Copied!') : (t('hostelPage.copy') || 'Copy')}
+                    {copied ? (t('hostelPage.copied')) : (t('hostelPage.copy'))}
                   </button>
                 </div>
 
@@ -454,12 +454,12 @@ export function HostelPage() {
               {/* QR Code Placeholder */}
               <div className="space-y-3">
                 <label className="block text-xs font-medium text-zinc-600">
-                  {t('hostelPage.qrCode') || 'QR Code'}
+                  {t('hostelPage.qrCode')}
                 </label>
                 <div className="bg-zinc-50 border border-zinc-200 rounded-xl h-40 flex flex-col items-center justify-center gap-2">
                   <QrCode className="h-10 w-10 text-zinc-300" />
                   <span className="text-xs text-zinc-400 font-medium">
-                    {t('hostelPage.qrCodePlaceholder') || 'QR Code'}
+                    {t('hostelPage.qrCodePlaceholder')}
                   </span>
                 </div>
               </div>

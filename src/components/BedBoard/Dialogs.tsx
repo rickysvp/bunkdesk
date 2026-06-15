@@ -129,6 +129,21 @@ export function GuestDetailModal({ guest, bed, room, onClose, onCheckout }: Gues
     }
   }, [liveGuest?.id]);
 
+  // Audit log for this guest: prefer the phone key to link across visits.
+  // IMPORTANT: this `useMemo` MUST live above the `if (!liveGuest) return null`
+  // guard, otherwise the hook is skipped on the first render (when guest
+  // is still null) and added on the second render (when guest is found) —
+  // which violates the Rules of Hooks and crashes the modal with
+  // "Rendered more hooks than during the previous render". That crash
+  // was the "card click shows white screen" symptom.
+  const guestHistory: GuestLogEntry[] = React.useMemo(() => {
+    if (!liveGuest) return [];
+    if (liveGuest.phone) {
+      return guestLogs.filter((l) => l.phone === liveGuest.phone);
+    }
+    return guestLogs.filter((l) => l.guestId === liveGuest.id);
+  }, [guestLogs, liveGuest?.id, liveGuest?.phone]);
+
   if (!liveGuest) return null;
 
   // ── Derived values ──
@@ -141,14 +156,6 @@ export function GuestDetailModal({ guest, bed, room, onClose, onCheckout }: Gues
   const paidAmt = liveGuest.paidAmount || 0;
   const dueAmt = Math.max(0, totalAmt - paidAmt);
   const pricePerNight = liveRoom && liveBed ? getBedPrice(liveRoom, liveBed) : 0;
-
-  // Audit log for this guest: prefer the phone key to link across visits.
-  const guestHistory: GuestLogEntry[] = React.useMemo(() => {
-    if (liveGuest.phone) {
-      return guestLogs.filter((l) => l.phone === liveGuest.phone);
-    }
-    return guestLogs.filter((l) => l.guestId === liveGuest.id);
-  }, [guestLogs, liveGuest.id, liveGuest.phone]);
 
   const visibleLog = showFullLog ? guestHistory : guestHistory.slice(0, 8);
 

@@ -69,7 +69,7 @@ export function GuestCRM() {
             </div>
             <div>
               <p className="text-2xl font-semibold text-zinc-900 leading-none">{totalGuests}</p>
-              <p className="text-xs text-zinc-500 mt-0.5">{t('crm.totalGuests') || 'Total Guests'}</p>
+              <p className="text-xs text-zinc-500 mt-0.5">{t('crm.totalGuests')}</p>
             </div>
           </CardContent>
         </Card>
@@ -80,7 +80,7 @@ export function GuestCRM() {
             </div>
             <div>
               <p className="text-2xl font-semibold text-zinc-900 leading-none">{totalRepeatGuests}</p>
-              <p className="text-xs text-zinc-500 mt-0.5">{t('crm.repeatGuests') || 'Repeat Guests'}</p>
+              <p className="text-xs text-zinc-500 mt-0.5">{t('crm.repeatGuests')}</p>
             </div>
           </CardContent>
         </Card>
@@ -91,7 +91,7 @@ export function GuestCRM() {
             </div>
             <div>
               <p className="text-2xl font-semibold text-zinc-900 leading-none">{totalRecallable}</p>
-              <p className="text-xs text-zinc-500 mt-0.5">{t('crm.toRecall') || 'To Recall'}</p>
+              <p className="text-xs text-zinc-500 mt-0.5">{t('crm.toRecall')}</p>
             </div>
           </CardContent>
         </Card>
@@ -101,9 +101,9 @@ export function GuestCRM() {
       <div className="flex flex-col sm:flex-row gap-3">
         <div className="flex gap-1 bg-zinc-100 rounded-xl p-1">
           {([
-            { id: 'all' as CRMView, label: t('crm.allGuests') || 'All Guests' },
-            { id: 'recall' as CRMView, label: t('crm.recallCandidates') || 'Recall' },
-            { id: 'tags' as CRMView, label: t('crm.byTag') || 'By Tag' },
+            { id: 'all' as CRMView, label: t('crm.allGuests') },
+            { id: 'recall' as CRMView, label: t('crm.recallCandidates') },
+            { id: 'tags' as CRMView, label: t('crm.byTag') },
           ]).map(tab => (
             <button
               key={tab.id}
@@ -121,7 +121,7 @@ export function GuestCRM() {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
           <Input
             className="pl-9 h-9"
-            placeholder={t('crm.searchGuests') || 'Search guests...'}
+            placeholder={t('crm.searchGuests')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
@@ -154,11 +154,11 @@ export function GuestCRM() {
         <Card className="border-amber-200 bg-amber-50/50 shadow-sm">
           <CardContent className="p-3 flex items-center justify-between">
             <span className="text-xs text-amber-700">
-              {syncResult.toAdd.length} {t('crm.newProfilesToSync') || 'new guest profiles to sync'}
+              {syncResult.toAdd.length} {t('crm.newProfilesToSync')}
             </span>
             <Button variant="outline" size="sm" className="h-7 text-xs gap-1.5">
               <RefreshCw className="h-3 w-3" />
-              {t('crm.syncNow') || 'Sync'}
+              {t('crm.syncNow')}
             </Button>
           </CardContent>
         </Card>
@@ -189,7 +189,7 @@ export function GuestCRM() {
                       <span className="text-[10px] text-zinc-400">{profile.countryCode}</span>
                     </div>
                     <div className="flex items-center gap-3 mt-1">
-                      <span className="text-xs text-zinc-500">{profile.totalStays}x {t('crm.stays') || 'stays'}</span>
+                      <span className="text-xs text-zinc-500">{profile.totalStays}x {t('crm.stays')}</span>
                       <span className="text-xs text-zinc-500">{profile.totalNights}N</span>
                       <span className="text-xs font-medium text-emerald-600">${profile.totalSpent}</span>
                     </div>
@@ -220,8 +220,8 @@ export function GuestCRM() {
         {filteredProfiles.length === 0 && (
           <div className="py-12 text-center text-sm text-zinc-500">
             {view === 'recall'
-              ? (t('crm.noRecallCandidates') || 'No recall candidates found')
-              : (t('crm.noGuests') || 'No guests found')
+              ? (t('crm.noRecallCandidates'))
+              : (t('crm.noGuests'))
             }
           </div>
         )}
@@ -262,19 +262,19 @@ export function GuestCRM() {
               <div className="p-5 grid grid-cols-3 gap-3">
                 <div className="bg-zinc-50 rounded-lg p-3 text-center">
                   <p className="text-lg font-semibold text-zinc-900">{selectedProfile.totalStays}</p>
-                  <p className="text-[10px] text-zinc-500 uppercase">{t('crm.stays') || 'Stays'}</p>
+                  <p className="text-[10px] text-zinc-500 uppercase">{t('crm.stays')}</p>
                 </div>
                 <div className="bg-zinc-50 rounded-lg p-3 text-center">
                   <p className="text-lg font-semibold text-zinc-900">{selectedProfile.totalNights}</p>
-                  <p className="text-[10px] text-zinc-500 uppercase">{t('crm.nights') || 'Nights'}</p>
+                  <p className="text-[10px] text-zinc-500 uppercase">{t('crm.nights')}</p>
                 </div>
                 <div className="bg-zinc-50 rounded-lg p-3 text-center">
                   <p className="text-lg font-semibold text-emerald-600">${selectedProfile.totalSpent}</p>
-                  <p className="text-[10px] text-zinc-500 uppercase">{t('crm.spent') || 'Spent'}</p>
+                  <p className="text-[10px] text-zinc-500 uppercase">{t('crm.spent')}</p>
                 </div>
               </div>
               <div className="px-5 pb-4">
-                <p className="text-[10px] font-semibold text-zinc-400 uppercase mb-2">{t('crm.tags') || 'Tags'}</p>
+                <p className="text-[10px] font-semibold text-zinc-400 uppercase mb-2">{t('crm.tags')}</p>
                 <div className="flex flex-wrap gap-1.5">
                   {selectedProfile.tags.map(tag => {
                     const label = getTagLabel(tag);
@@ -285,12 +285,12 @@ export function GuestCRM() {
                     );
                   })}
                   {selectedProfile.tags.length === 0 && (
-                    <span className="text-xs text-zinc-400">{t('crm.noTags') || 'No tags'}</span>
+                    <span className="text-xs text-zinc-400">{t('crm.noTags')}</span>
                   )}
                 </div>
               </div>
               <div className="px-5 pb-4 space-y-2">
-                <p className="text-[10px] font-semibold text-zinc-400 uppercase mb-2">{t('crm.contact') || 'Contact'}</p>
+                <p className="text-[10px] font-semibold text-zinc-400 uppercase mb-2">{t('crm.contact')}</p>
                 {selectedProfile.email && (
                   <div className="flex items-center gap-2 text-xs text-zinc-600">
                     <Mail className="h-3.5 w-3.5 text-zinc-400" /> {selectedProfile.email}
@@ -307,26 +307,26 @@ export function GuestCRM() {
                   </div>
                 )}
                 {!selectedProfile.email && !selectedProfile.phone && !selectedProfile.whatsapp && (
-                  <span className="text-xs text-zinc-400">{t('crm.noContact') || 'No contact info'}</span>
+                  <span className="text-xs text-zinc-400">{t('crm.noContact')}</span>
                 )}
               </div>
               <div className="px-5 pb-5">
-                <p className="text-[10px] font-semibold text-zinc-400 uppercase mb-2">{t('crm.stayHistory') || 'Stay History'}</p>
+                <p className="text-[10px] font-semibold text-zinc-400 uppercase mb-2">{t('crm.stayHistory')}</p>
                 <div className="text-xs text-zinc-500">
-                  {t('crm.firstStay') || 'First stay'}: {format(parseISO(selectedProfile.firstStayDate), 'MMM d, yyyy')}
+                  {t('crm.firstStay')}: {format(parseISO(selectedProfile.firstStayDate), 'MMM d, yyyy')}
                 </div>
                 <div className="text-xs text-zinc-500">
-                  {t('crm.lastStay') || 'Last stay'}: {format(parseISO(selectedProfile.lastStayDate), 'MMM d, yyyy')}
+                  {t('crm.lastStay')}: {format(parseISO(selectedProfile.lastStayDate), 'MMM d, yyyy')}
                 </div>
               </div>
               <div className="p-4 border-t border-zinc-100 flex gap-2">
                 <Button variant="outline" size="sm" className="flex-1 text-xs gap-1.5">
                   <Tag className="h-3 w-3" />
-                  {t('crm.editTags') || 'Edit Tags'}
+                  {t('crm.editTags')}
                 </Button>
                 <Button size="sm" className="flex-1 text-xs gap-1.5">
                   <MessageCircle className="h-3 w-3" />
-                  {t('crm.sendOffer') || 'Send Offer'}
+                  {t('crm.sendOffer')}
                 </Button>
               </div>
             </motion.div>

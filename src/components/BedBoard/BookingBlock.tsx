@@ -3,7 +3,7 @@ import { Guest } from '../../types';
 import { parseISO, differenceInDays, format, addDays } from 'date-fns';
 import { useDraggable } from '@dnd-kit/core';
 import { cn } from '@/lib/utils';
-import { LogOut, Pencil } from 'lucide-react';
+import { LogIn, LogOut, Pencil } from 'lucide-react';
 
 interface BookingBlockProps {
   booking: Guest;
@@ -145,9 +145,20 @@ export function BookingBlock({
         handle.removeEventListener('pointermove', onMove);
         handle.removeEventListener('pointerup', onUp);
 
+        // Restore the inline styles to the React-controlled values
+        // instead of clearing them. Clearing `block.style.width = ''`
+        // removes the inline width entirely, and since the block is
+        // `position: absolute` with no CSS-specified width, the DOM
+        // collapses to 0 — the block becomes invisible and looks
+        // like "the accommodation info disappeared". By setting the
+        // inline style back to the same values React would compute,
+        // we keep the DOM consistent with React's render output even
+        // when no re-render is triggered (e.g. on a simple click
+        // with no actual resize).
+        const pctPerDay = 100 / visibleDays;
         block.style.boxShadow = '';
-        block.style.left = '';
-        block.style.width = '';
+        block.style.left = `${dateIndex * pctPerDay}%`;
+        block.style.width = `${visibleNights * pctPerDay}%`;
 
         let dayDelta = Math.round(deltaPx / dayWidth);
 
@@ -183,9 +194,15 @@ export function BookingBlock({
   const left = `${dateIndex * pctPerDay}%`;
   const width = `${visibleNights * pctPerDay}%`;
 
-  if (isContinuation) {
-    return null;
-  }
+  // Render continuations (bookings that start before the visible date
+  // range) as a partial block at the left edge instead of hiding them
+  // entirely. Hiding them caused the "住宿信息消失了" bug: after a
+  // left-edge resize pulled the check-in date outside the visible
+  // window, the entire block vanished from the timeline with no way
+  // to see it (until the user manually scrolled back). Rendering
+  // the clipped block + a `←` chevron + the actual start date in
+  // the text label makes the truncation obvious and recoverable.
+  if (visibleNights <= 0) return null;
 
   return (
     <div
@@ -201,24 +218,28 @@ export function BookingBlock({
         isDragging && 'opacity-50 ring-2 ring-blue-400 ring-offset-1',
       )}
       style={{ left, width, touchAction: 'none' }}
-      onClick={(e) => {
-        e.stopPropagation();
-        if (suppressClickRef.current) {
-          suppressClickRef.current = false;
-          return;
-        }
-        onClick?.();
-      }}
     >
-      {/* The full color block is the drag handle. The invisible overlay
-          below captures pointer events for dnd-kit, while the resize edges
-          and action buttons sit on top with their own pointer handlers
+      {/* The full color block is the drag + click target. The dnd-kit
+          attributes/listeners live on the SAME element as the onClick
+          handler — this is the dnd-kit recommended pattern. Splitting
+          them onto a sibling overlay (the previous approach) caused
+          the click event to never reach the parent, so the detail
+          modal opened against a stale (or missing) guest snapshot
+          and rendered as a blank dialog. The resize edges and action
+          buttons sit on top with their own pointer handlers
           (stopping propagation) so they remain usable. */}
       <div
         className="absolute inset-0 z-[1]"
-        aria-hidden="true"
         {...attributes}
         {...dragListeners}
+        onClick={(e) => {
+          e.stopPropagation();
+          if (suppressClickRef.current) {
+            suppressClickRef.current = false;
+            return;
+          }
+          onClick?.();
+        }}
       />
 
       {/* Left resize handle (20%) */}
@@ -230,39 +251,66 @@ export function BookingBlock({
         />
       )}
 
-      {/* Center text label */}
-      <div className="absolute left-[20%] right-[20%] top-0 bottom-0 z-[5] flex items-center px-2 min-w-0 pointer-events-none">
-        <div className="truncate text-xs">
-          <span className="font-medium truncate">{booking.name}</span>
-          <span className="text-zinc-400 mx-1">·</span>
-          <span>{booking.countryCode}</span>
-          {visibleNights >= 3 && (
+      {/* Center text label. 2-line layout so the dates are always
+          visible even on short blocks: line 1 = name, line 2 = country
+          + nights + dates. The previous 1-line layout got truncated
+          to "John Doe · US ·..." on 3-night blocks because the full
+          text was ~143px wide while the inner 60% container was only
+          ~118px. 2 lines comfortably fit in the 44px block height.
+          When the booking is a continuation (starts before the
+          visible range) we prefix the name with a `←` chevron and
+          show the *actual* check-in date so the user knows the
+          block extends back further than they can see. */}
+      <div className="absolute left-[20%] right-[20%] top-0 bottom-0 z-[5] flex flex-col justify-center px-2 min-w-0 pointer-events-none overflow-hidden">
+        <div className="truncate text-xs font-medium leading-tight">
+          {isContinuation && <span className="text-zinc-500 mr-0.5">←</span>}
+          {booking.name}
+        </div>
+        <div className="truncate text-[10px] leading-tight opacity-75 mt-0.5">
+          {booking.countryCode}
+          {typeof booking.nights === 'number' && booking.nights > 0 && (
             <>
-              <span className="text-zinc-400 mx-1">·</span>
-              <span className="opacity-75">
-                {format(checkIn, 'M/d')} – {format(checkOut, 'M/d')}
-              </span>
+              <span className="text-zinc-400 mx-0.5">·</span>
+              <span>{booking.nights}n</span>
             </>
           )}
+          {/* Always show the booking's *real* check-in/check-out,
+              not the visible window's. For a continuation that means
+              showing dates like "6/13 – 6/19" even though only 6/14
+              onward is rendered, so the user understands the block
+              is clipped. */}
+          <span className="text-zinc-400 mx-0.5">·</span>
+          <span>{format(checkIn, 'M/d')} – {format(checkOut, 'M/d')}</span>
         </div>
       </div>
 
-      {/* Hover action buttons (center) */}
+      {/* Hover action buttons (center). The wrapper is always
+          `pointer-events-none` so the click area around the buttons
+          passes through to the booking block's onClick. Only the
+          individual `<button>` elements get `group-hover:pointer-events-auto`,
+          so the actual button rectangles are clickable on hover but
+          the pill's padding (between/around the buttons) is NOT a
+          click target. If we made the pill pointer-events-auto, the
+          pill's padding would silently swallow every click on the
+          booking block. */}
       <div className="absolute left-[20%] right-[20%] top-0 bottom-0 opacity-0 group-hover:opacity-100 flex items-center justify-center gap-1 z-30 pointer-events-none">
-        <div className="flex items-center gap-0.5 bg-white/90 rounded-md shadow-sm px-1 py-0.5 pointer-events-auto">
+        <div className="flex items-center gap-0.5 bg-white/90 rounded-md shadow-sm px-1 py-0.5 pointer-events-none">
           {onCheckIn && (
             <button
-              className="p-1 hover:bg-emerald-100 rounded text-emerald-600"
-              title="Check-in"
+              className="p-1 rounded text-emerald-600 pointer-events-auto group-hover:pointer-events-auto hover:bg-emerald-100 active:scale-90 transition-transform"
+              title="Assign to this bed (check-in)"
               onPointerDown={(e) => e.stopPropagation()}
               onClick={(e) => { e.stopPropagation(); onCheckIn(); }}
             >
-              <LogOut className="h-3.5 w-3.5 rotate-180" />
+              {/* Use LogIn (not LogOut rotate-180) so the arrow
+                  unambiguously points INTO the bed — the previous
+                  rotated icon was easy to misread as "log out". */}
+              <LogIn className="h-3.5 w-3.5" />
             </button>
           )}
           <button
-            className="p-1 hover:bg-zinc-100 rounded text-zinc-500"
-            title="Edit"
+            className="p-1 rounded text-zinc-500 pointer-events-auto group-hover:pointer-events-auto hover:bg-zinc-100 active:scale-90 transition-transform"
+            title="Edit guest details"
             onPointerDown={(e) => e.stopPropagation()}
             onClick={(e) => { e.stopPropagation(); onClick?.(); }}
           >
@@ -270,7 +318,7 @@ export function BookingBlock({
           </button>
           {onCheckOut && (
             <button
-              className="p-1 hover:bg-red-100 rounded text-red-500"
+              className="p-1 rounded text-red-500 pointer-events-auto group-hover:pointer-events-auto hover:bg-red-100 active:scale-90 transition-transform"
               title="Check-out"
               onPointerDown={(e) => e.stopPropagation()}
               onClick={(e) => { e.stopPropagation(); onCheckOut(); }}

@@ -10,9 +10,16 @@ function loadState<T>(key: string, fallback: T): T {
 }
 
 const ROLE_TABS: Record<StaffRole, string[]> = {
-  manager: ["dashboard", "bedboard", "shiftlog", "checkin", "staff", "grow", "migrate"],
-  reception: ["dashboard", "bedboard", "shiftlog", "checkin"],
-  cleaning: ["dashboard", "bedboard", "shiftlog"],
+  // After the nav refactor (assistant merges dashboard + grow,
+  // settings merges staff + migrate), the tab IDs are:
+  //   assistant  — 经营助手 (Copilot overview + Grow sub-tabs)
+  //   bedboard   — 床位看板
+  //   checkin    — 前台入住
+  //   shiftlog   — 交接班日志
+  //   settings   — 设置 (staff + migrate + general sub-tabs)
+  manager:  ["assistant", "bedboard", "shiftlog", "checkin", "settings"],
+  reception:["assistant", "bedboard", "shiftlog", "checkin"],
+  cleaning: ["assistant", "bedboard", "shiftlog"],
 };
 
 interface StaffState {

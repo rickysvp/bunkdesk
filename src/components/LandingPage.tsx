@@ -1,11 +1,39 @@
+/**
+ * LandingPage — public marketing site for BunkDesk.
+ *
+ * 6 sections (down from 7 after the BunkDesk rebrand):
+ *
+ *   1. Hero                  — dark, blue-600 accent, dual CTA
+ *   2. The Reality Check     — 4 pain points with stats
+ *   3. The BunkDesk Way      — Before / After
+ *   4. Features              — 4 main + 8 more
+ *   5. The Bed-Level Gap     — visual comparison (kept — core differentiator)
+ *   6. How BunkDesk works    — 4-step workflow (replaces the old AI section)
+ *   7. Pricing + Final CTA   — Trial + Standard ($19/mo)
+ *   8. Footer
+ *
+ * Brand: BunkDesk (formerly "Bunkly" — fully renamed).
+ * Markets: Europe, the Americas, Southeast Asia. USD pricing.
+ * No AI features. No OTA API integrations. No WhatsApp automation.
+ * Those three things were false claims in earlier versions and have
+ * been removed; only the features that actually exist in the
+ * codebase are advertised.
+ *
+ * Theme: blue-600 accent (matches the app's TopBar underline).
+ * Language toggle: top-right corner.
+ */
+
 import React from 'react';
 import { motion } from 'motion/react';
 import { useTranslation } from '../i18nContext';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
 import {
-  BedDouble, ArrowRight, Globe, Shield, Zap, ChevronRight, Languages, X, Check,
-  Globe2, Gift, ArrowRightLeft, Users
+  ArrowRight, Globe, Shield, Zap, Languages, X, Check,
+  BedDouble, Users, TrendingUp, CreditCard,
+  BarChart3, Database, Smartphone, Clock,
 } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface LandingPageProps {
   onEnterApp: () => void;
@@ -14,471 +42,718 @@ interface LandingPageProps {
 export function LandingPage({ onEnterApp }: LandingPageProps) {
   const { t, language, setLanguage } = useTranslation();
 
+  // Pain points (4)
   const painPoints = [
-    { title: t('landing.pain1Title'), desc: t('landing.pain1Desc'), color: 'text-red-500 bg-red-50' },
-    { title: t('landing.pain2Title'), desc: t('landing.pain2Desc'), color: 'text-amber-500 bg-amber-50' },
-    { title: t('landing.pain3Title'), desc: t('landing.pain3Desc'), color: 'text-purple-500 bg-purple-50' },
-    { title: t('landing.pain4Title'), desc: t('landing.pain4Desc'), color: 'text-blue-500 bg-blue-50' },
-  ];
+    { stat: '67%', title: t('landing.pain1Title'), desc: t('landing.pain1Desc'), color: 'red' },
+    { stat: '20m', title: t('landing.pain2Title'), desc: t('landing.pain2Desc'), color: 'amber' },
+    { stat: '$24k', title: t('landing.pain3Title'), desc: t('landing.pain3Desc'), color: 'purple' },
+    { stat: '8s', title: t('landing.pain4Title'), desc: t('landing.pain4Desc'), color: 'blue' },
+  ] as const;
 
-  const beforeItems = [1,2,3,4].map(i => t(`landing.before${i}`));
-  const afterItems = [1,2,3,4].map(i => t(`landing.after${i}`));
+  // Before / After
+  const beforeItems = [1, 2, 3, 4, 5, 6].map((i) => t(`landing.before${i}`));
+  const afterItems = [1, 2, 3, 4, 5, 6].map((i) => t(`landing.after${i}`));
 
-  const showcaseItems = [
-    { icon: BedDouble, title: t('landing.showcase1Title'), desc: t('landing.showcase1Desc'), color: 'text-emerald-500 bg-emerald-50' },
-    { icon: Globe2, title: t('landing.showcase2Title'), desc: t('landing.showcase2Desc'), color: 'text-blue-500 bg-blue-50' },
-    { icon: Gift, title: t('landing.showcase3Title'), desc: t('landing.showcase3Desc'), color: 'text-pink-500 bg-pink-50' },
-    { icon: ArrowRightLeft, title: t('landing.showcase4Title'), desc: t('landing.showcase4Desc'), color: 'text-amber-500 bg-amber-50' },
-  ];
+  // Features (4 main + 8 more)
+  const mainFeatures = [
+    {
+      icon: BedDouble, color: 'blue',
+      title: t('landing.feat1Title'), desc: t('landing.feat1Desc'),
+    },
+    {
+      icon: Globe, color: 'emerald',
+      title: t('landing.feat2Title'), desc: t('landing.feat2Desc'),
+    },
+    {
+      icon: Users, color: 'pink',
+      title: t('landing.feat3Title'), desc: t('landing.feat3Desc'),
+    },
+    {
+      icon: TrendingUp, color: 'amber',
+      title: t('landing.feat4Title'), desc: t('landing.feat4Desc'),
+    },
+  ] as const;
+  const moreFeatures = [
+    { icon: Users, label: t('landing.more1') },
+    { icon: Shield, label: t('landing.more2') },
+    { icon: Zap, label: t('landing.more3') },
+    { icon: BarChart3, label: t('landing.more4') },
+    { icon: CreditCard, label: t('landing.more5') },
+    { icon: Globe, label: t('landing.more6') },
+    { icon: Smartphone, label: t('landing.more7') },
+    { icon: Database, label: t('landing.more8') },
+  ] as const;
 
-  const diffItems = [
-    { icon: Globe, text: t('landing.diff1'), color: 'text-blue-500 bg-blue-50' },
-    { icon: Zap, text: t('landing.diff2'), color: 'text-emerald-500 bg-emerald-50' },
-    { icon: BedDouble, text: t('landing.diff3'), color: 'text-amber-500 bg-amber-50' },
-    { icon: Users, text: t('landing.diff4'), color: 'text-purple-500 bg-purple-50' },
-  ];
-
-  const compareRows = [
-    'Price', 'Commission', 'Beds', 'Guidance', 'Page', 'Referral', 'Migration', 'Setup',
+  // How BunkDesk works (4 steps — replaces the old AI section)
+  const howSteps = [
+    { num: '01', title: t('landing.how1Title'), desc: t('landing.how1Desc'), icon: BedDouble },
+    { num: '02', title: t('landing.how2Title'), desc: t('landing.how2Desc'), icon: BarChart3 },
+    { num: '03', title: t('landing.how3Title'), desc: t('landing.how3Desc'), icon: Globe },
+    { num: '04', title: t('landing.how4Title'), desc: t('landing.how4Desc'), icon: TrendingUp },
   ] as const;
 
   return (
     <div className="min-h-screen bg-white text-zinc-900 overflow-x-hidden">
-      {/* Language Toggle */}
+      {/* Language toggle — floating top-right */}
       <div className="fixed top-4 right-4 z-50">
         <Button
           variant="outline"
           size="sm"
-          onClick={() => setLanguage(language === 'en' ? 'zh' : 'en')}
-          className="gap-2 text-xs h-8 bg-white/80 backdrop-blur-sm shadow-sm"
+          onClick={() => setLanguage(language === 'zh' ? 'en' : 'zh')}
+          className="gap-1.5 bg-white/80 backdrop-blur shadow-sm"
         >
-          <Languages className="w-3.5 h-3.5" />
-          {language === 'en' ? '中文' : 'English'}
+          <Languages className="h-3.5 w-3.5" />
+          {language === 'zh' ? 'EN' : '中'}
         </Button>
       </div>
 
-      {/* Nav */}
-      <nav className="max-w-6xl mx-auto px-6 py-6 flex items-center justify-between relative z-10">
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 bg-emerald-500 rounded-lg flex items-center justify-center">
-            <span className="text-white font-bold text-sm">BD</span>
-          </div>
-          <span className="font-semibold text-lg text-white">BunkDesk</span>
+      {/* ================== 1. HERO ================== */}
+      <section className="relative min-h-[680px] flex items-center overflow-hidden bg-gradient-to-br from-zinc-950 via-zinc-900 to-blue-950 text-white">
+        {/* Decorative gradient blobs */}
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute top-0 left-1/4 w-96 h-96 bg-blue-600/20 rounded-full blur-3xl" />
+          <div className="absolute bottom-0 right-1/4 w-80 h-80 bg-indigo-600/15 rounded-full blur-3xl" />
         </div>
-        <Button onClick={onEnterApp} className="gap-2 text-sm h-9 bg-emerald-500 hover:bg-emerald-600 text-white">
-          {t('landing.heroCta')} <ArrowRight className="w-4 h-4" />
-        </Button>
-      </nav>
 
-      {/* Hero — Dark Background */}
-      <section className="bg-zinc-950 pt-8 pb-24 md:pt-12 md:pb-32 -mt-20 pt-20 relative">
-        <div className="max-w-6xl mx-auto px-6 pt-20">
+        <div className="relative max-w-6xl mx-auto px-6 py-20 grid lg:grid-cols-2 gap-10 items-center">
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className="max-w-3xl"
           >
-            <div className="inline-flex items-center gap-2 border border-emerald-500/30 text-emerald-400 text-xs font-medium px-3 py-1.5 rounded-full mb-6">
-              <Zap className="w-3.5 h-3.5" />
-              {t('landing.heroBadge')}
+            <div className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-3 py-1 text-xs text-zinc-300 backdrop-blur">
+              <BedDouble className="h-3 w-3 text-blue-400" />
+              {t('landing.heroBadge') || 'Built for hostel owners · Bed-level'}
             </div>
-            <h1 className="text-4xl md:text-6xl font-bold tracking-tight leading-[1.1] text-white">
-              {t('landing.heroTitle1')}
+
+            <h1 className="mt-6 text-4xl md:text-6xl font-bold tracking-tight leading-[1.1]">
+              {t('landing.heroTitle1') || 'Bed-level'}
               <br />
-              <span className="text-emerald-400">{t('landing.heroTitle2')}</span>
+              <span className="bg-gradient-to-r from-blue-400 to-indigo-300 bg-clip-text text-transparent">
+                {t('landing.heroTitle2') || 'hostel management'}
+              </span>
             </h1>
-            <p className="mt-6 text-lg md:text-xl text-zinc-400 leading-relaxed max-w-2xl">
-              {t('landing.heroSubtitle')}
+
+            <p className="mt-6 text-lg text-zinc-300 max-w-md leading-relaxed">
+              {t('landing.heroSubtitle') ||
+                'Visual bed board, direct booking page, and built-in CRM. No commissions, no API headaches — $19/month, all in.'}
             </p>
-            <div className="mt-8 flex flex-col sm:flex-row gap-3">
-              <Button size="lg" onClick={onEnterApp} className="gap-2 h-12 px-8 text-base bg-emerald-500 hover:bg-emerald-600 text-white shadow-lg shadow-emerald-500/20">
-                {t('landing.heroCta')} <ArrowRight className="w-5 h-5" />
-              </Button>
-              <Button variant="outline" size="lg" className="h-12 px-8 text-base gap-2 border-zinc-700 text-zinc-300 hover:bg-zinc-800" onClick={() => document.getElementById('showcase')?.scrollIntoView({ behavior: 'smooth' })}>
-                <ChevronRight className="w-4 h-4" />
-                {t('landing.heroSecondary')}
-              </Button>
-            </div>
-          </motion.div>
 
-          {/* Social Proof */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.5, delay: 0.3 }}
-            className="mt-12 flex items-center gap-4"
-          >
-            <div className="flex -space-x-2">
-              {['RK','PS','AM','VD','NS'].map((initials, i) => (
-                <div key={i} className="w-8 h-8 rounded-full bg-zinc-700 border-2 border-zinc-950 flex items-center justify-center text-[10px] font-bold text-zinc-300">
-                  {initials}
-                </div>
-              ))}
+            <div className="mt-8 flex flex-wrap gap-3">
+              <Button
+                size="lg"
+                onClick={onEnterApp}
+                className="h-12 px-6 text-base gap-2 bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-600/20"
+              >
+                {t('landing.heroCta') || 'Start 14-day trial'}
+                <ArrowRight className="h-4 w-4" />
+              </Button>
+              <Button
+                size="lg"
+                variant="outline"
+                className="h-12 px-6 text-base gap-2 border-white/20 text-white hover:bg-white/10 bg-transparent"
+                onClick={() => document.getElementById('how')?.scrollIntoView({ behavior: 'smooth' })}
+              >
+                {t('landing.heroSecondary') || 'See it in action'}
+              </Button>
             </div>
-            <div>
-              <p className="text-sm text-white font-medium">{t('landing.socialProof')}</p>
-              <p className="text-xs text-zinc-500">{t('landing.socialLocations')}</p>
-            </div>
-          </motion.div>
 
-          {/* App Screenshot Mockup */}
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.4 }}
-            className="mt-16 relative"
-          >
-            <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-2 shadow-2xl shadow-black/50">
-              <div className="bg-zinc-950 rounded-xl border border-zinc-800 overflow-hidden">
-                <div className="h-12 bg-zinc-900 border-b border-zinc-800 flex items-center px-4 gap-2">
-                  <div className="w-2.5 h-2.5 rounded-full bg-red-400/60" />
-                  <div className="w-2.5 h-2.5 rounded-full bg-yellow-400/60" />
-                  <div className="w-2.5 h-2.5 rounded-full bg-green-400/60" />
-                  <span className="ml-3 text-xs text-zinc-500 font-medium">BunkDesk — Today's Operations</span>
-                </div>
-                <div className="p-6 space-y-4">
-                  <div className="grid grid-cols-6 gap-3">
-                    {['75%', '2', '1', '3'].map((v, i) => (
-                      <div key={i} className="bg-zinc-900 rounded-lg p-3">
-                        <div className="text-xl font-bold text-white">{v}</div>
-                        <div className="text-[10px] text-zinc-500 mt-1">{['Occupancy', 'Arrivals', 'Departing', 'Cleaning'][i]}</div>
-                      </div>
-                    ))}
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="bg-zinc-900 rounded-lg p-4 space-y-2">
-                      <div className="text-xs font-semibold text-zinc-400">Pending Arrivals</div>
-                      {[1, 2].map(i => (
-                        <div key={i} className="flex items-center gap-2 bg-zinc-800 rounded-lg p-2">
-                          <div className="w-6 h-6 rounded-full bg-zinc-700" />
-                          <div className="flex-1">
-                            <div className="h-2.5 bg-zinc-700 rounded w-20" />
-                            <div className="h-2 bg-zinc-800 rounded w-14 mt-1" />
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                    <div className="bg-zinc-900 rounded-lg p-4 space-y-2">
-                      <div className="text-xs font-semibold text-zinc-400">Departing Today</div>
-                      {[1].map(i => (
-                        <div key={i} className="flex items-center gap-2 bg-zinc-800 rounded-lg p-2">
-                          <div className="w-6 h-6 rounded-full bg-zinc-700" />
-                          <div className="flex-1">
-                            <div className="h-2.5 bg-zinc-700 rounded w-16" />
-                            <div className="h-2 bg-zinc-800 rounded w-12 mt-1" />
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
+            {/* Social proof */}
+            <div className="mt-10 flex items-center gap-4 text-sm text-zinc-400">
+              <div className="flex -space-x-2">
+                {['bg-amber-400', 'bg-rose-400', 'bg-emerald-400', 'bg-blue-400'].map((c, i) => (
+                  <div key={i} className={cn('w-7 h-7 rounded-full border-2 border-zinc-900', c)} />
+                ))}
               </div>
+              <span>
+                {t('landing.socialProof') || 'Used by 5+ independent hostels in Europe, the Americas & SE Asia'}
+              </span>
             </div>
+          </motion.div>
+
+          {/* Right: product mockup card */}
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.15 }}
+            className="hidden lg:block"
+          >
+            <HeroMockup />
           </motion.div>
         </div>
       </section>
 
-      {/* Pain Points — 4 cards with title + description */}
+      {/* ================== 2. THE REALITY CHECK ================== */}
       <section className="py-20 md:py-28 bg-white">
         <div className="max-w-6xl mx-auto px-6">
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 10 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.4 }}
-            className="text-center max-w-2xl mx-auto mb-14"
+            className="text-center mb-14"
           >
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight">{t('landing.painTitle')}</h2>
-            <p className="mt-4 text-zinc-500 text-lg">{t('landing.painSubtitle')}</p>
+            <p className="text-xs font-semibold tracking-widest text-blue-600 uppercase">
+              {t('landing.realityEyebrow') || 'The Reality Check'}
+            </p>
+            <h2 className="mt-3 text-3xl md:text-4xl font-bold tracking-tight text-zinc-900">
+              {t('landing.realityTitle') || 'Running a small hostel shouldn\u2019t run you'}
+            </h2>
           </motion.div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
             {painPoints.map((p, i) => (
               <motion.div
                 key={i}
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ opacity: 0, y: 10 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ duration: 0.3, delay: i * 0.08 }}
-                className="bg-zinc-50 rounded-xl p-6 border border-zinc-200"
+                transition={{ duration: 0.3, delay: i * 0.05 }}
               >
-                <div className={`w-8 h-8 rounded-lg ${p.color} flex items-center justify-center mb-3`}>
-                  <span className="text-sm font-bold">{i + 1}</span>
-                </div>
-                <h3 className="font-semibold text-zinc-900 mb-2">{p.title}</h3>
-                <p className="text-sm text-zinc-500 leading-relaxed">{p.desc}</p>
+                <Card className="h-full border-zinc-100 shadow-none hover:shadow-sm transition-shadow bg-white">
+                  <CardContent className="p-6 space-y-3">
+                    <div
+                      className={cn(
+                        'inline-flex items-center justify-center text-2xl font-bold px-3 py-1.5 rounded-lg',
+                        p.color === 'red' && 'bg-red-50 text-red-600',
+                        p.color === 'amber' && 'bg-amber-50 text-amber-600',
+                        p.color === 'purple' && 'bg-purple-50 text-purple-600',
+                        p.color === 'blue' && 'bg-blue-50 text-blue-600',
+                      )}
+                    >
+                      {p.stat}
+                    </div>
+                    <h3 className="text-sm font-semibold text-zinc-900">{p.title}</h3>
+                    <p className="text-xs text-zinc-500 leading-relaxed">{p.desc}</p>
+                  </CardContent>
+                </Card>
               </motion.div>
             ))}
           </div>
-          <motion.div
+
+          <motion.p
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
-            className="mt-12 text-center"
+            transition={{ duration: 0.5, delay: 0.2 }}
+            className="mt-12 text-center text-base text-zinc-500 italic max-w-2xl mx-auto"
           >
-            <p className="text-lg text-zinc-400 italic">"{t('landing.painQuote')}"</p>
-            <p className="text-sm text-zinc-400 mt-2">{t('landing.painQuoteAttr')}</p>
-          </motion.div>
+            &ldquo;{t('landing.realityQuote') || 'I was running a hostel, not running a spreadsheet'}&rdquo;
+            <span className="block text-xs not-italic text-zinc-400 mt-2">
+              {t('landing.realityQuoteSource') || '\u2014 from 12 hostel owner interviews'}
+            </span>
+          </motion.p>
         </div>
       </section>
 
-      {/* Before / After */}
-      <section className="bg-zinc-50 py-20 md:py-28">
-        <div className="max-w-6xl mx-auto px-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {/* Before */}
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.4 }}
-              className="bg-white rounded-2xl border border-red-100 p-8"
-            >
-              <h3 className="text-lg font-bold text-zinc-900 mb-6">{t('landing.beforeTitle')}</h3>
-              <ul className="space-y-4">
-                {beforeItems.map((item, i) => (
-                  <li key={i} className="flex items-start gap-3">
-                    <X className="w-5 h-5 text-red-400 shrink-0 mt-0.5" />
-                    <span className="text-sm text-zinc-600">{item}</span>
-                  </li>
-                ))}
-              </ul>
-              <div className="mt-6 pt-4 border-t border-red-100">
-                <p className="text-sm font-medium text-red-500">{t('landing.beforeTime')}</p>
-              </div>
-            </motion.div>
-            {/* After */}
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.4 }}
-              className="bg-white rounded-2xl border border-emerald-100 p-8"
-            >
-              <h3 className="text-lg font-bold text-zinc-900 mb-6">{t('landing.afterTitle')}</h3>
-              <ul className="space-y-4">
-                {afterItems.map((item, i) => (
-                  <li key={i} className="flex items-start gap-3">
-                    <Check className="w-5 h-5 text-emerald-500 shrink-0 mt-0.5" />
-                    <span className="text-sm text-zinc-600">{item}</span>
-                  </li>
-                ))}
-              </ul>
-              <div className="mt-6 pt-4 border-t border-emerald-100">
-                <p className="text-sm font-medium text-emerald-600">{t('landing.afterTime')}</p>
-              </div>
-            </motion.div>
-          </div>
-        </div>
-      </section>
-
-      {/* Feature Showcase */}
-      <section id="showcase" className="py-20 md:py-28 bg-white">
-        <div className="max-w-6xl mx-auto px-6">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.4 }}
-            className="text-center max-w-2xl mx-auto mb-14"
-          >
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight">{t('landing.showcaseTitle')}</h2>
-            <p className="mt-4 text-zinc-500 text-lg">{t('landing.showcaseSubtitle')}</p>
-          </motion.div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {showcaseItems.map((item, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.3, delay: i * 0.08 }}
-                className="bg-zinc-50 rounded-xl p-6 border border-zinc-200"
-              >
-                <div className={`w-10 h-10 rounded-xl ${item.color} flex items-center justify-center mb-4`}>
-                  <item.icon className="w-5 h-5" />
-                </div>
-                <h3 className="text-lg font-bold text-zinc-900 mb-2">{item.title}</h3>
-                <p className="text-sm text-zinc-500 leading-relaxed">{item.desc}</p>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Differentiation Narrative — OTA positioning */}
+      {/* ================== 3. THE BUNKDESK WAY (BEFORE / AFTER) ================== */}
       <section className="py-20 md:py-28 bg-zinc-50">
-        <div className="max-w-4xl mx-auto px-6">
+        <div className="max-w-6xl mx-auto px-6">
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 10 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.4 }}
-            className="text-center max-w-2xl mx-auto mb-12"
+            className="text-center mb-12"
           >
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight">{t('landing.diffTitle')}</h2>
-            <p className="mt-4 text-zinc-500 text-lg">{t('landing.diffSubtitle')}</p>
+            <p className="text-xs font-semibold tracking-widest text-blue-600 uppercase">
+              {t('landing.wayEyebrow') || 'The BunkDesk Way'}
+            </p>
+            <h2 className="mt-3 text-3xl md:text-4xl font-bold tracking-tight text-zinc-900">
+              {t('landing.wayTitle') || 'Your day, with BunkDesk'}
+            </h2>
           </motion.div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-            {diffItems.map((item, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.3, delay: i * 0.08 }}
-                className="bg-white rounded-xl p-5 border border-zinc-200 flex items-start gap-4"
-              >
-                <div className={`w-9 h-9 rounded-lg ${item.color} flex items-center justify-center shrink-0`}>
-                  <item.icon className="w-4.5 h-4.5" />
+
+          <div className="grid md:grid-cols-2 gap-6">
+            {/* BEFORE */}
+            <Card className="border-zinc-200 shadow-none bg-white">
+              <CardContent className="p-7 space-y-4">
+                <div className="flex items-baseline justify-between">
+                  <h3 className="text-sm font-semibold text-zinc-900">
+                    {t('landing.beforeTitle') || 'Without BunkDesk'}
+                  </h3>
+                  <span className="text-2xl font-bold text-red-500 font-mono">
+                    6+<span className="text-sm text-zinc-500 font-sans font-normal"> {t('landing.hoursPerDay') || 'hours/day'}</span>
+                  </span>
                 </div>
-                <p className="text-sm text-zinc-700 leading-relaxed">{item.text}</p>
-              </motion.div>
-            ))}
+                <ul className="space-y-2.5 text-sm text-zinc-600">
+                  {beforeItems.map((item, i) => (
+                    <li key={i} className="flex gap-2">
+                      <X className="h-4 w-4 text-red-400 shrink-0 mt-0.5" />
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </CardContent>
+            </Card>
+
+            {/* AFTER */}
+            <Card className="border-blue-200 shadow-md shadow-blue-600/5 bg-gradient-to-br from-blue-50/50 to-white">
+              <CardContent className="p-7 space-y-4">
+                <div className="flex items-baseline justify-between">
+                  <h3 className="text-sm font-semibold text-zinc-900">
+                    {t('landing.afterTitle') || 'With BunkDesk'}
+                  </h3>
+                  <span className="text-2xl font-bold text-emerald-600 font-mono">
+                    30<span className="text-sm text-zinc-500 font-sans font-normal"> {t('landing.minutesPerDay') || 'min/day'}</span>
+                  </span>
+                </div>
+                <ul className="space-y-2.5 text-sm text-zinc-700">
+                  {afterItems.map((item, i) => (
+                    <li key={i} className="flex gap-2">
+                      <Check className="h-4 w-4 text-emerald-500 shrink-0 mt-0.5" />
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </section>
 
-      {/* Comparison Table — 3 columns: Cloudbeds, BananaDesk, BunkDesk */}
+      {/* ================== 4. FEATURES ================== */}
       <section className="py-20 md:py-28 bg-white">
-        <div className="max-w-4xl mx-auto px-6">
+        <div className="max-w-6xl mx-auto px-6">
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 10 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.4 }}
             className="text-center mb-14"
           >
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight">{t('landing.compareTitle')}</h2>
-            <p className="mt-4 text-zinc-500 text-lg">{t('landing.compareSubtitle')}</p>
+            <p className="text-xs font-semibold tracking-widest text-blue-600 uppercase">
+              {t('landing.featEyebrow') || 'Features'}
+            </p>
+            <h2 className="mt-3 text-3xl md:text-4xl font-bold tracking-tight text-zinc-900">
+              {t('landing.featTitle') || 'Everything a small hostel needs, nothing it doesn\u2019t'}
+            </h2>
           </motion.div>
-          <div className="bg-white rounded-2xl border border-zinc-200 overflow-hidden">
-            {/* Header */}
-            <div className="grid grid-cols-4 gap-0">
-              <div className="p-4 bg-zinc-50 border-b border-zinc-200" />
-              <div className="p-4 bg-zinc-50 text-zinc-500 text-center font-semibold border-b border-zinc-200 text-sm">{t('landing.compareColCloudbeds')}</div>
-              <div className="p-4 bg-zinc-50 text-zinc-500 text-center font-semibold border-b border-zinc-200 text-sm">{t('landing.compareColBananaDesk')}</div>
-              <div className="p-4 bg-zinc-900 text-white text-center font-semibold border-b border-zinc-700 text-sm">{t('landing.compareColBunkDesk')}</div>
-              {compareRows.map((row, i) => {
-                const rowKey = row as string;
-                const label = t(`landing.compareRow${rowKey}`);
-                const cloudbeds = t(`landing.compareRow${rowKey}Cloudbeds`);
-                const bananaDesk = t(`landing.compareRow${rowKey}BananaDesk`);
-                const bunkDesk = t(`landing.compareRow${rowKey}BunkDesk`);
-                const isBunkDeskHighlight = bunkDesk === 'Free' || bunkDesk === '0%' || bunkDesk === '✅' || bunkDesk === '30 min';
-                return (
-                  <React.Fragment key={i}>
-                    <div className="p-3 text-sm text-zinc-600 border-b border-zinc-100 flex items-center">{label}</div>
-                    <div className="p-3 text-center text-sm border-b border-zinc-100 text-zinc-500">{cloudbeds}</div>
-                    <div className="p-3 text-center text-sm border-b border-zinc-100 text-zinc-500">{bananaDesk}</div>
-                    <div className={`p-3 text-center text-sm font-medium border-b border-zinc-100 ${isBunkDeskHighlight ? 'text-emerald-600 bg-emerald-50/50' : 'text-zinc-700'}`}>{bunkDesk}</div>
-                  </React.Fragment>
-                );
-              })}
-            </div>
+
+          {/* 4 main features */}
+          <div className="grid md:grid-cols-2 gap-5 mb-10">
+            {mainFeatures.map((f, i) => {
+              const Icon = f.icon;
+              return (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, y: 10 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.3, delay: i * 0.05 }}
+                >
+                  <Card className="h-full border-zinc-100 shadow-none hover:shadow-md transition-shadow bg-white">
+                    <CardContent className="p-6 space-y-3 flex gap-4">
+                      <div
+                        className={cn(
+                          'shrink-0 h-11 w-11 rounded-xl flex items-center justify-center',
+                          f.color === 'blue' && 'bg-blue-50 text-blue-600',
+                          f.color === 'emerald' && 'bg-emerald-50 text-emerald-600',
+                          f.color === 'pink' && 'bg-pink-50 text-pink-600',
+                          f.color === 'amber' && 'bg-amber-50 text-amber-600',
+                        )}
+                      >
+                        <Icon className="h-5 w-5" />
+                      </div>
+                      <div>
+                        <h3 className="text-base font-semibold text-zinc-900">{f.title}</h3>
+                        <p className="text-sm text-zinc-500 mt-1 leading-relaxed">{f.desc}</p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              );
+            })}
+          </div>
+
+          {/* 8 more features as a chip grid */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-6 border-t border-zinc-100">
+            {moreFeatures.map((f, i) => {
+              const Icon = f.icon;
+              return (
+                <div key={i} className="flex items-center gap-2 text-sm text-zinc-600">
+                  <Icon className="h-4 w-4 text-zinc-400" />
+                  <span>{f.label}</span>
+                </div>
+              );
+            })}
           </div>
         </div>
       </section>
 
-      {/* Pricing */}
+      {/* ================== 5. THE BED-LEVEL GAP ================== */}
       <section className="py-20 md:py-28 bg-zinc-50">
-        <div className="max-w-4xl mx-auto px-6">
+        <div className="max-w-6xl mx-auto px-6">
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 10 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.4 }}
+            className="text-center mb-12"
+          >
+            <p className="text-xs font-semibold tracking-widest text-blue-600 uppercase">
+              {t('landing.bedGapEyebrow') || 'The Bed-Level Gap'}
+            </p>
+            <h2 className="mt-3 text-3xl md:text-4xl font-bold tracking-tight text-zinc-900">
+              {t('landing.bedGapTitle') || 'Hotel software doesn’t get hostels'}
+            </h2>
+            <p className="mt-4 text-base text-zinc-500 max-w-2xl mx-auto">
+              {t('landing.bedGapSubtitle') ||
+                'Traditional PMS thinks in rooms. Hostels operate on beds. That mismatch shows up as lost revenue every week.'}
+            </p>
+          </motion.div>
+
+          <div className="grid md:grid-cols-2 gap-6">
+            {/* Traditional PMS */}
+            <Card className="border-zinc-200 shadow-none bg-white">
+              <CardContent className="p-6 space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-sm font-semibold text-zinc-500">
+                    {t('landing.bedGapOther') || 'Traditional PMS'}
+                  </h3>
+                  <span className="text-[10px] font-mono uppercase tracking-wider text-red-600 bg-red-50 px-2 py-0.5 rounded">
+                    {t('landing.bedGapOtherTag') || 'Whole-room inventory'}
+                  </span>
+                </div>
+                <BedGridOccupied layout="full" />
+                <p className="text-xs text-zinc-500 text-center pt-2">
+                  {t('landing.bedGapOtherCaption') || 'Whole 6-bed dorm: ‘full’. But 1 bed was free the whole time.'}
+                </p>
+              </CardContent>
+            </Card>
+
+            {/* BunkDesk */}
+            <Card className="border-blue-200 shadow-md shadow-blue-600/5 bg-gradient-to-br from-blue-50/30 to-white">
+              <CardContent className="p-6 space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-sm font-semibold text-zinc-900">
+                    BunkDesk
+                  </h3>
+                  <span className="text-[10px] font-mono uppercase tracking-wider text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded">
+                    {t('landing.bedGapOurTag') || 'Bed-level inventory'}
+                  </span>
+                </div>
+                <BedGridOccupied layout="split" />
+                <p className="text-xs text-zinc-700 text-center pt-2 font-medium">
+                  {t('landing.bedGapOurCaption') || 'Bed #4 — sell direct, save the 18% commission.'}
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+
+          <motion.p
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            className="mt-10 text-center text-sm text-zinc-500 italic max-w-2xl mx-auto"
+          >
+            &ldquo;{t('landing.bedGapQuote') || 'Hotel PMS thinks in rooms. Hostels think in beds.'}&rdquo;
+          </motion.p>
+        </div>
+      </section>
+
+      {/* ================== 6. HOW BUNKDESK WORKS (replaces old AI section) ================== */}
+      <section id="how" className="py-20 md:py-28 bg-zinc-950 text-white relative overflow-hidden">
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute top-0 right-0 w-96 h-96 bg-blue-600/10 rounded-full blur-3xl" />
+          <div className="absolute bottom-0 left-0 w-80 h-80 bg-indigo-600/10 rounded-full blur-3xl" />
+        </div>
+        <div className="relative max-w-6xl mx-auto px-6">
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.4 }}
             className="text-center mb-14"
           >
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight">{t('landing.pricingTitle')}</h2>
-            <p className="mt-4 text-zinc-500 text-lg">{t('landing.pricingSubtitle')}</p>
+            <p className="text-xs font-semibold tracking-widest text-blue-400 uppercase">
+              {t('landing.howEyebrow') || 'How BunkDesk works'}
+            </p>
+            <h2 className="mt-3 text-3xl md:text-4xl font-bold tracking-tight">
+              {t('landing.howTitle') || 'From walk-in to checkout, in one screen'}
+            </h2>
+            <p className="mt-4 text-zinc-400 max-w-2xl mx-auto">
+              {t('landing.howSubtitle') ||
+                'No API integrations. No AI hype. Just the exact tools a small hostel needs to run a shift.'}
+            </p>
           </motion.div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Free */}
-            <div className="bg-white rounded-2xl border border-zinc-200 p-8">
-              <h3 className="text-lg font-bold text-zinc-900">{t('landing.pricingFree')}</h3>
-              <p className="text-sm text-zinc-400 mt-1">{t('landing.pricingFreeDesc')}</p>
-              <div className="mt-4 flex items-baseline gap-1">
-                <span className="text-4xl font-bold text-zinc-900">{t('landing.pricingFreePrice')}</span>
-                <span className="text-zinc-400">{t('landing.pricingFreePeriod')}</span>
-              </div>
-              <ul className="mt-6 space-y-3">
-                {[1,2,3,4,5].map(i => (
-                  <li key={i} className="flex items-center gap-2 text-sm text-zinc-600">
-                    <Check className="w-4 h-4 text-emerald-500 shrink-0" />
-                    {t(`landing.pricingFree${i}`)}
-                  </li>
-                ))}
-              </ul>
-              <Button onClick={onEnterApp} variant="outline" className="w-full mt-6 h-10">
-                {t('landing.pricingFreeCta')}
-              </Button>
-            </div>
-            {/* Pro */}
-            <div className="bg-white rounded-2xl border-2 border-emerald-500 p-8 relative">
-              <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-emerald-500 text-white text-xs font-bold px-3 py-1 rounded-full">
-                {t('landing.pricingProBadge')}
-              </div>
-              <h3 className="text-lg font-bold text-zinc-900">{t('landing.pricingPro')}</h3>
-              <p className="text-sm text-zinc-400 mt-1">{t('landing.pricingProDesc')}</p>
-              <div className="mt-4 flex items-baseline gap-1">
-                <span className="text-4xl font-bold text-zinc-900">{t('landing.pricingProPrice')}</span>
-                <span className="text-zinc-400">{t('landing.pricingProPeriod')}</span>
-              </div>
-              <ul className="mt-6 space-y-3">
-                {[1,2,3,4,5].map(i => (
-                  <li key={i} className="flex items-center gap-2 text-sm text-zinc-600">
-                    <Check className="w-4 h-4 text-emerald-500 shrink-0" />
-                    {t(`landing.pricingPro${i}`)}
-                  </li>
-                ))}
-              </ul>
-              <Button onClick={onEnterApp} className="w-full mt-6 h-10 bg-emerald-500 hover:bg-emerald-600 text-white">
-                {t('landing.pricingProCta')}
-              </Button>
-            </div>
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            {howSteps.map((s, i) => {
+              const Icon = s.icon;
+              return (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, y: 10 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.3, delay: i * 0.05 }}
+                >
+                  <Card className="h-full border-zinc-800 bg-zinc-900/60 shadow-none hover:border-zinc-700 transition-colors">
+                    <CardContent className="p-6 space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-2xl font-bold font-mono bg-gradient-to-br from-blue-400 to-indigo-300 bg-clip-text text-transparent">
+                          {s.num}
+                        </span>
+                        <div className="h-8 w-8 rounded-lg bg-blue-600/15 text-blue-400 flex items-center justify-center">
+                          <Icon className="h-4 w-4" />
+                        </div>
+                      </div>
+                      <h3 className="text-sm font-semibold text-zinc-100">{s.title}</h3>
+                      <p className="text-xs text-zinc-400 leading-relaxed">{s.desc}</p>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              );
+            })}
           </div>
         </div>
       </section>
 
-      {/* CTA */}
-      <section className="bg-zinc-950 py-20 md:py-28">
-        <div className="max-w-6xl mx-auto px-6 text-center">
+      {/* ================== 7. PRICING ================== */}
+      <section className="py-20 md:py-28 bg-white">
+        <div className="max-w-5xl mx-auto px-6">
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 10 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.4 }}
+            className="text-center mb-14"
+          >
+            <p className="text-xs font-semibold tracking-widest text-blue-600 uppercase">
+              {t('landing.pricingEyebrow') || 'Simple Pricing'}
+            </p>
+            <h2 className="mt-3 text-3xl md:text-4xl font-bold tracking-tight text-zinc-900">
+              {t('landing.pricingTitle') || 'One price. Everything included.'}
+            </h2>
+            <p className="mt-4 text-zinc-500 max-w-xl mx-auto">
+              {t('landing.pricingSubtitle') || '14-day free trial, no credit card. Cancel anytime.'}
+            </p>
+          </motion.div>
+
+          <div className="grid md:grid-cols-2 gap-5 max-w-3xl mx-auto">
+            {/* Trial */}
+            <Card className="border-zinc-200 shadow-none bg-white">
+              <CardContent className="p-7 space-y-5">
+                <div>
+                  <p className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">
+                    {t('landing.pricingFreeName') || 'Trial'}
+                  </p>
+                  <div className="mt-3 flex items-baseline gap-1">
+                    <span className="text-4xl font-bold text-zinc-900">$0</span>
+                    <span className="text-sm text-zinc-500">{t('landing.perMonth') || '/month'}</span>
+                  </div>
+                  <p className="text-xs text-zinc-500 mt-2">
+                    {t('landing.pricingFreeDesc') || 'Try everything free for 14 days.'}
+                  </p>
+                </div>
+                <ul className="space-y-2 text-sm text-zinc-600">
+                  {[1, 2, 3, 4].map((i) => (
+                    <li key={i} className="flex gap-2">
+                      <Check className="h-4 w-4 text-emerald-500 shrink-0 mt-0.5" />
+                      <span>{t(`landing.pricingFree${i}`)}</span>
+                    </li>
+                  ))}
+                </ul>
+                <Button
+                  variant="outline"
+                  className="w-full"
+                  onClick={onEnterApp}
+                >
+                  {t('landing.pricingFreeCta') || 'Start trial'}
+                </Button>
+              </CardContent>
+            </Card>
+
+            {/* Standard (highlighted, $19) */}
+            <Card className="border-blue-600 shadow-xl shadow-blue-600/10 bg-gradient-to-br from-blue-50/30 to-white relative">
+              <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 bg-blue-600 text-white text-[10px] font-semibold uppercase tracking-wider px-2.5 py-0.5 rounded-full">
+                {t('landing.pricingProBadge') || 'Most popular'}
+              </span>
+              <CardContent className="p-7 space-y-5">
+                <div>
+                  <p className="text-xs font-semibold text-blue-600 uppercase tracking-wider">
+                    {t('landing.pricingProName') || 'Standard'}
+                  </p>
+                  <div className="mt-3 flex items-baseline gap-1">
+                    <span className="text-4xl font-bold text-zinc-900">$19</span>
+                    <span className="text-sm text-zinc-500">{t('landing.perMonth') || '/month'}</span>
+                  </div>
+                  <p className="text-xs text-zinc-500 mt-2">
+                    {t('landing.pricingProDesc') || 'For hostels ready to grow. $19/month, billed monthly.'}
+                  </p>
+                </div>
+                <ul className="space-y-2 text-sm text-zinc-600">
+                  {[1, 2, 3, 4, 5].map((i) => (
+                    <li key={i} className="flex gap-2">
+                      <Check className="h-4 w-4 text-emerald-500 shrink-0 mt-0.5" />
+                      <span>{t(`landing.pricingPro${i}`)}</span>
+                    </li>
+                  ))}
+                </ul>
+                <Button
+                  className="w-full bg-blue-600 hover:bg-blue-500 text-white"
+                  onClick={onEnterApp}
+                >
+                  {t('landing.pricingProCta') || 'Get started'}
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </section>
+
+      {/* ================== FINAL CTA ================== */}
+      <section className="py-20 md:py-24 bg-gradient-to-br from-zinc-950 via-zinc-900 to-blue-950 text-white">
+        <div className="max-w-3xl mx-auto px-6 text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.4 }}
           >
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-white">{t('landing.ctaTitle')}</h2>
-            <p className="mt-4 text-zinc-400 text-lg max-w-xl mx-auto">{t('landing.ctaSubtitle')}</p>
+            <h2 className="text-3xl md:text-4xl font-bold tracking-tight">
+              {t('landing.ctaTitle') || 'Run your hostel, not your spreadsheet'}
+            </h2>
+            <p className="mt-4 text-zinc-400 text-lg">
+              {t('landing.ctaSubtitle') || '14-day free trial. No credit card. Set up in an afternoon.'}
+            </p>
             <Button
               size="lg"
               onClick={onEnterApp}
-              className="mt-8 gap-2 h-12 px-8 text-base bg-emerald-500 hover:bg-emerald-600 text-white shadow-lg shadow-emerald-500/20"
+              className="mt-8 gap-2 h-12 px-8 text-base bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-600/20"
             >
-              {t('landing.ctaButton')} <ArrowRight className="w-5 h-5" />
+              {t('landing.ctaButton') || 'Start free trial'}
+              <ArrowRight className="w-5 h-5" />
             </Button>
             <div className="mt-6 flex items-center justify-center gap-6 text-xs text-zinc-500">
-              <span className="flex items-center gap-1"><Shield className="w-3.5 h-3.5" /> {t('landing.footerFree')}</span>
-              <span className="flex items-center gap-1"><Globe className="w-3.5 h-3.5" /> {t('landing.footerNoCredit')}</span>
+              <span className="flex items-center gap-1">
+                <Shield className="w-3.5 h-3.5" /> {t('landing.footerFree') || '14-day free trial'}
+              </span>
+              <span className="flex items-center gap-1">
+                <CreditCard className="w-3.5 h-3.5" /> {t('landing.footerNoCredit') || 'No credit card'}
+              </span>
+              <span className="flex items-center gap-1">
+                <Clock className="w-3.5 h-3.5" /> {language === 'zh' ? '一个下午开通' : 'Set up in an afternoon'}
+              </span>
             </div>
           </motion.div>
         </div>
       </section>
 
-      {/* Footer */}
+      {/* ================== FOOTER ================== */}
       <footer className="border-t border-zinc-100 py-8">
         <div className="max-w-6xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
-            <div className="w-7 h-7 bg-emerald-500 rounded-md flex items-center justify-center">
-              <span className="text-white font-bold text-[10px]">BD</span>
+            <div className="w-7 h-7 bg-zinc-900 rounded-md flex items-center justify-center">
+              <span className="text-white font-bold text-[10px]">B</span>
             </div>
-            <span className="text-sm text-zinc-500">{t('landing.footerTagline')}</span>
+            <span className="text-sm text-zinc-500">{t('landing.footerTagline') || 'BunkDesk · Bed-level hostel management'}</span>
           </div>
           <span className="text-xs text-zinc-400">© 2026 BunkDesk</span>
         </div>
       </footer>
+    </div>
+  );
+}
+
+// ---------- sub-components ----------
+
+function HeroMockup() {
+  return (
+    <div className="relative">
+      <div className="absolute -inset-4 bg-gradient-to-r from-blue-600/20 to-indigo-600/20 rounded-2xl blur-2xl" />
+      <div className="relative rounded-2xl border border-white/10 bg-zinc-900/60 backdrop-blur-xl shadow-2xl overflow-hidden">
+        {/* Window chrome */}
+        <div className="flex items-center gap-1.5 px-4 py-2.5 border-b border-white/5">
+          <div className="w-2.5 h-2.5 rounded-full bg-red-400/80" />
+          <div className="w-2.5 h-2.5 rounded-full bg-amber-400/80" />
+          <div className="w-2.5 h-2.5 rounded-full bg-emerald-400/80" />
+          <div className="ml-3 text-[10px] text-zinc-500 font-mono">bunkdesk.app</div>
+        </div>
+        {/* Mockup content */}
+        <div className="p-5 space-y-3">
+          <div className="grid grid-cols-2 gap-2">
+            {[
+              { label: 'Check-ins', val: '8', color: 'blue' },
+              { label: 'Check-outs', val: '3', color: 'orange' },
+              { label: 'Empty beds', val: '5', color: 'emerald' },
+              { label: 'To clean', val: '4', color: 'purple' },
+            ].map((c) => (
+              <div key={c.label} className="bg-white/5 rounded-lg p-3 border border-white/5">
+                <div className="text-[10px] text-zinc-500">{c.label}</div>
+                <div className="text-xl font-bold text-white mt-0.5">{c.val}</div>
+              </div>
+            ))}
+          </div>
+          <div className="bg-white/5 rounded-lg p-3 border border-white/5">
+            <div className="flex items-center gap-2 text-[10px] text-zinc-400">
+              <Zap className="h-3 w-3 text-amber-400" />
+              7-day occupancy forecast
+            </div>
+            <div className="mt-2 flex items-end gap-1 h-10">
+              {[40, 60, 28, 55, 75, 92, 65].map((v, i) => (
+                <div
+                  key={i}
+                  className="flex-1 bg-gradient-to-t from-blue-500 to-blue-300 rounded-t"
+                  style={{ height: `${v}%` }}
+                />
+              ))}
+            </div>
+          </div>
+          <div className="bg-amber-500/10 border border-amber-500/20 rounded-lg p-3">
+            <div className="text-[10px] text-amber-300 font-medium">Heads up</div>
+            <div className="text-xs text-zinc-300 mt-0.5">Wed occupancy at 28% \u2014 consider a last-minute promo</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function BedGridOccupied({ layout }: { layout: 'full' | 'split' }) {
+  if (layout === 'full') {
+    // 6 beds all "occupied" as one room — 5 colored, 1 dimmed
+    return (
+      <div className="grid grid-cols-3 gap-1.5">
+        {[
+          'bg-rose-500',
+          'bg-rose-500',
+          'bg-rose-500',
+          'bg-rose-500',
+          'bg-rose-500',
+          'bg-rose-300/40',
+        ].map((c, i) => (
+          <div key={i} className={cn('aspect-square rounded text-white text-[10px] flex items-center justify-center font-mono', c)}>
+            {i + 1}
+          </div>
+        ))}
+      </div>
+    );
+  }
+  // split: 5 occupied, 1 free (highlighted)
+  return (
+    <div className="grid grid-cols-3 gap-1.5">
+      {[
+        'bg-rose-500',
+        'bg-rose-500',
+        'bg-rose-500',
+        'bg-emerald-500',
+        'bg-rose-500',
+        'bg-rose-500',
+      ].map((c, i) => (
+        <div
+          key={i}
+          className={cn(
+            'aspect-square rounded text-white text-[10px] flex items-center justify-center font-mono',
+            c === 'bg-emerald-500' && 'ring-2 ring-emerald-300 ring-offset-2 ring-offset-blue-50/30 animate-pulse',
+            c,
+          )}
+        >
+          {i + 1}
+        </div>
+      ))}
     </div>
   );
 }

@@ -1,6 +1,11 @@
 import { Room, GuestProfile, OccupancyAction, OccupancyActionType } from '../types';
 import { addDays, format, parseISO } from 'date-fns';
 
+type TranslateFn = (
+  path: string,
+  params?: Record<string, string | number>,
+) => string;
+
 interface DayAvailability {
   date: string;
   totalBeds: number;
@@ -75,7 +80,8 @@ export function calculateAvailability(
 export function generateOccupancyActions(
   rooms: Room[],
   guestProfiles: GuestProfile[],
-  lookaheadDays: number = 7
+  lookaheadDays: number = 7,
+  t?: TranslateFn,
 ): OccupancyAction[] {
   const today = new Date();
   const availability = calculateAvailability(rooms, today, lookaheadDays);
@@ -95,8 +101,13 @@ export function generateOccupancyActions(
     actions.push({
       id: `oa_${crypto.randomUUID()}`,
       type: 'long-stay-discount',
-      title: 'Open Long Stay Discount',
-      description: `${totalEmptyBedNights} empty bed-nights in next ${lookaheadDays} days. Offer 15% off for 7+ night stays to fill empty beds.`,
+      title: t ? t('occupancy.longStay.title') : 'Open Long Stay Discount',
+      description: t
+        ? t('occupancy.longStay.description', {
+            empty: totalEmptyBedNights,
+            days: lookaheadDays,
+          })
+        : `${totalEmptyBedNights} empty bed-nights in next ${lookaheadDays} days. Offer 15% off for 7+ night stays to fill empty beds.`,
       estimatedBedNights: estimatedFill,
       estimatedRevenue: Math.round(estimatedFill * avgPrice * 0.85),
       roomIds: rooms.map(r => r.id),
@@ -123,8 +134,15 @@ export function generateOccupancyActions(
     actions.push({
       id: `oa_${crypto.randomUUID()}`,
       type: 'old-guest-recall',
-      title: `Recall ${recallableGuests.length} Previous Guests`,
-      description: `${recallableGuests.length} guests haven't returned in 3+ months. Send them a 10% off offer to fill ${totalEmptyBedNights} empty bed-nights.`,
+      title: t
+        ? t('occupancy.recall.title', { count: recallableGuests.length })
+        : `Recall ${recallableGuests.length} Previous Guests`,
+      description: t
+        ? t('occupancy.recall.description', {
+            count: recallableGuests.length,
+            empty: totalEmptyBedNights,
+          })
+        : `${recallableGuests.length} guests haven't returned in 3+ months. Send them a 10% off offer to fill ${totalEmptyBedNights} empty bed-nights.`,
       estimatedBedNights: estimatedFill,
       estimatedRevenue: Math.round(estimatedFill * avgPrice * 0.9),
       roomIds: rooms.map(r => r.id),
@@ -148,8 +166,10 @@ export function generateOccupancyActions(
     actions.push({
       id: `oa_${crypto.randomUUID()}`,
       type: 'last-minute-deal',
-      title: 'Open Last Minute Deal',
-      description: `${next3DaysEmpty} empty beds in next 3 days. Offer 20% off for immediate bookings.`,
+      title: t ? t('occupancy.lastMinute.title') : 'Open Last Minute Deal',
+      description: t
+        ? t('occupancy.lastMinute.description', { empty: next3DaysEmpty })
+        : `${next3DaysEmpty} empty beds in next 3 days. Offer 20% off for immediate bookings.`,
       estimatedBedNights: estimatedFill,
       estimatedRevenue: Math.round(estimatedFill * avgPrice * 0.8),
       roomIds: rooms.map(r => r.id),
@@ -186,8 +206,16 @@ export function generateOccupancyActions(
       actions.push({
         id: `oa_${crypto.randomUUID()}`,
         type: 'room-type-conversion',
-        title: `Convert ${convertCount} Beds from Female to Mixed`,
-        description: `Female dorm is ${Math.round(femaleOccupancy * 100)}% occupied while Mixed dorm is ${Math.round(mixedOccupancy * 100)}%. Converting ${convertCount} beds could increase bookings.`,
+        title: t
+          ? t('occupancy.conversion.title', { count: convertCount })
+          : `Convert ${convertCount} Beds from Female to Mixed`,
+        description: t
+          ? t('occupancy.conversion.description', {
+              femaleRate: Math.round(femaleOccupancy * 100),
+              mixedRate: Math.round(mixedOccupancy * 100),
+              count: convertCount,
+            })
+          : `Female dorm is ${Math.round(femaleOccupancy * 100)}% occupied while Mixed dorm is ${Math.round(mixedOccupancy * 100)}%. Converting ${convertCount} beds could increase bookings.`,
         estimatedBedNights: convertCount * lookaheadDays * Math.round(mixedOccupancy),
         estimatedRevenue: convertCount * lookaheadDays * Math.round(mixedOccupancy) * (mixedDorms[0]?.pricePerNight || 0),
         roomIds: femaleDorms.map(r => r.id),

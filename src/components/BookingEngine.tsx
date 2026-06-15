@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useHostel } from '../HostelContext';
-import { useTranslation } from '../i18nContext';
+import { useTranslation, formatCurrency } from '../i18nContext';
 import {
   CalendarDays,
   Users,
@@ -40,7 +40,7 @@ interface RoomOption {
 
 export function BookingEngine() {
   const { rooms, referrals, promotions, addArrival, addReferral, occupyBed } = useHostel();
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
 
   const [step, setStep] = useState<Step>(1);
   const [checkIn, setCheckIn] = useState('');
@@ -393,8 +393,8 @@ export function BookingEngine() {
                     <div className="text-right">
                       <p className="font-semibold text-emerald-700">
                         {room.priceRange.min === room.priceRange.max
-                          ? `$${room.priceRange.min}`
-                          : `$${room.priceRange.min}–$${room.priceRange.max}`}
+                          ? formatCurrency(room.priceRange.min, language)
+                          : `${formatCurrency(room.priceRange.min, language)}–${formatCurrency(room.priceRange.max, language)}`}
                       </p>
                       <p className="text-[10px] text-zinc-400">{t('booking.perBedNight')}</p>
                     </div>

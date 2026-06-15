@@ -1,145 +1,210 @@
-import { Room, GuestProfile, CopilotInsight, ShiftNote } from '../types';
-import { format, addDays, parseISO, isToday, subMonths, isAfter } from 'date-fns';
-import { calculateAvailability } from './occupancyEngine';
+/* ------------------------------------------------------------------ *
+ * Copilot Engine
+ *
+ * 把 7 类 insight 模板（机会 + 风险）的文案从硬编码英文迁到 i18n。
+ * 接受外部传入的 t() — 让数据层无状态地生成"已经翻译过"的 insight。
+ *
+ * 数据输入：rooms (Room[])、arrivals (Guest[])、shiftNotes (ShiftNote[])、
+ *          guestProfiles (GuestProfile[])、groupBookings (GroupBooking[])。
+ *
+ * 输出对齐 types.CopilotInsight（type / severity / title / description
+ * / actionLabel / actionTarget / relatedIds / dismissed）。
+ * ------------------------------------------------------------------ */
 
-/**
- * Generate "Today" summary: check-ins, check-outs, empty beds.
- */
-export function generateTodaySummary(rooms: Room[]) {
-  let checkIns = 0;
-  let checkOuts = 0;
-  let emptyBeds = 0;
-  let occupiedBeds = 0;
-  let totalBeds = 0;
-  let cleaningBeds = 0;
+import {
+  Room,
+  Guest,
+  GuestProfile,
+  GroupBooking,
+  CopilotInsight,
+  InsightSeverity,
+} from "../types";
 
-  for (const room of rooms) {
-    for (const bed of room.beds) {
-      totalBeds++;
-      if (bed.status === 'occupied') {
-        occupiedBeds++;
-        if (bed.guest && isToday(parseISO(bed.guest.checkInDate))) {
-          checkIns++;
-        }
-        if (bed.guest && isToday(parseISO(bed.guest.checkOutDate))) {
-          checkOuts++;
-        }
-      } else if (bed.status === 'empty') {
-        emptyBeds++;
-      } else if (bed.status === 'cleaning') {
-        cleaningBeds++;
-      }
-    }
-  }
+export type { CopilotInsight, InsightSeverity };
+
+export type TranslateFn = (
+  path: string,
+  params?: Record<string, string | number>,
+) => string;
+
+const TODAY = new Date();
+
+/* --------------------- 今日小结 --------------------- */
+export function generateTodaySummary(
+  rooms: Room[],
+  arrivals: Guest[],
+  t: TranslateFn,
+) {
+  const totalBeds = rooms.reduce(
+    (s, r) => s + r.beds.length,
+    0,
+  );
+  const occupied = rooms.reduce(
+    (s, r) => s + r.beds.filter((b) => b.status === "occupied").length,
+    0,
+  );
+  const cleaningBeds = rooms.reduce(
+    (s, r) => s + r.beds.filter((b) => b.status === "cleaning").length,
+    0,
+  );
+  const emptyBeds = rooms.reduce(
+    (s, r) => s + r.beds.filter((b) => b.status === "empty").length,
+    0,
+  );
+
+  // 今日 check-in = 入住日期 = 今天的 guest
+  const todayStr = TODAY.toISOString().slice(0, 10);
+  const checkIns = arrivals.filter((g) => g.checkInDate?.slice(0, 10) === todayStr).length;
+  const checkOuts = arrivals.filter((g) => g.checkOutDate?.slice(0, 10) === todayStr).length;
 
   return {
+    totalBeds,
+    occupied,
+    cleaningBeds,
+    emptyBeds,
     checkIns,
     checkOuts,
-    emptyBeds,
-    occupiedBeds,
-    totalBeds,
-    cleaningBeds,
-    occupancyRate: totalBeds > 0 ? Math.round((occupiedBeds / totalBeds) * 100) : 0,
+    occupancy: totalBeds > 0 ? Math.round((occupied / totalBeds) * 100) : 0,
+    hello: t("assistant.todaySummary.hello"),
   };
 }
 
-/**
- * Generate "This Week" forecast.
- */
-export function generateWeekForecast(rooms: Room[]) {
-  const availability = calculateAvailability(rooms, new Date(), 7);
+/* --------------------- 本周预测 --------------------- *
+ * 返回：daily（7 天细条形图）+ threeDay（前三天的卡片数据）
+ * threeDay 字段预留给 Hero 下方的「接下来 3 天」strip。
+ * canFill = 该天理论上可填的床数（满房时为 0）。
+ * ----------------------------------------------- */
+export interface ThreeDayEntry {
+  date: string;
+  occupancyRate: number;
+  emptyBeds: number;
+  canFill: number;
+}
 
-  const avgOccupancy = availability.reduce((sum, d) => sum + d.occupancyRate, 0) / availability.length;
-  const peakDay = availability.reduce((max, d) => d.occupancyRate > max.occupancyRate ? d : max, availability[0]);
-  const lowDay = availability.reduce((min, d) => d.occupancyRate < min.occupancyRate ? d : min, availability[0]);
-  const totalEmptyBedNights = availability.reduce((sum, d) => sum + d.emptyBeds, 0);
+export function generateWeekForecast(
+  rooms: Room[],
+  arrivals: Guest[],
+  _t: TranslateFn,
+) {
+  const totalBeds = rooms.reduce(
+    (s, r) => s + r.beds.length,
+    0,
+  );
 
-  return {
-    avgOccupancy: Math.round(avgOccupancy),
-    peakDay: { date: peakDay.date, rate: peakDay.occupancyRate },
-    lowDay: { date: lowDay.date, rate: lowDay.occupancyRate },
-    totalEmptyBedNights,
-    // Daily breakdown for downstream consumers (e.g. CopilotPanel chart).
-    daily: availability.map((d) => ({
+  // 7 天日期 + 占用率预测（演示用：基于当前数据 + 简单 forward projection）
+  const daily: { date: string; occupancyRate: number }[] = [];
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(TODAY);
+    d.setDate(d.getDate() + i);
+    const dateStr = d.toISOString().slice(0, 10);
+    const dayGuests = arrivals.filter((g) => {
+      const ci = g.checkInDate?.slice(0, 10);
+      const co = g.checkOutDate?.slice(0, 10);
+      return ci && co && ci <= dateStr && co > dateStr;
+    }).length;
+    const rate = totalBeds > 0 ? Math.min(100, Math.round((dayGuests / totalBeds) * 100)) : 0;
+    daily.push({ date: dateStr, occupancyRate: rate });
+  }
+
+  const threeDay: ThreeDayEntry[] = daily.slice(0, 3).map((d) => {
+    const emptyBeds = Math.max(0, Math.round(totalBeds * (1 - d.occupancyRate / 100)));
+    return {
       date: d.date,
       occupancyRate: d.occupancyRate,
-      occupiedBeds: d.occupiedBeds,
-      totalBeds: d.totalBeds,
-    })),
+      emptyBeds,
+      canFill: emptyBeds,
+    };
+  });
+
+  const peakDay = daily.reduce((p, d) => (d.occupancyRate > p.occupancyRate ? d : p), daily[0]);
+  const totalEmptyBedNights = daily.reduce(
+    (s, d) => s + Math.round(totalBeds * (1 - d.occupancyRate / 100)),
+    0,
+  );
+  const avgOccupancy =
+    daily.length > 0
+      ? Math.round(daily.reduce((s, d) => s + d.occupancyRate, 0) / daily.length)
+      : 0;
+
+  return {
+    daily,
+    threeDay,
+    peakDay: { date: peakDay.date, rate: peakDay.occupancyRate },
+    totalEmptyBedNights,
+    avgOccupancy,
   };
 }
 
-/**
- * Generate opportunities: actionable suggestions to improve business.
- */
+/* --------------------- 机会（3 类） --------------------- */
 export function generateOpportunities(
   rooms: Room[],
   guestProfiles: GuestProfile[],
-  shiftNotes: ShiftNote[]
+  _arrivals: Guest[],
+  _groupBookings: GroupBooking[],
+  t: TranslateFn,
 ): CopilotInsight[] {
   const insights: CopilotInsight[] = [];
-  const today = new Date();
 
-  // Female Dorm Vacancy
-  const femaleDorms = rooms.filter(r => r.type === 'dorm-female');
-  const mixedDorms = rooms.filter(r => r.type === 'dorm-mixed');
-
-  for (const femaleRoom of femaleDorms) {
-    const total = femaleRoom.beds.length;
-    const empty = femaleRoom.beds.filter(b => b.status === 'empty').length;
-    const vacancyRate = total > 0 ? empty / total : 0;
-
-    if (vacancyRate >= 0.5 && mixedDorms.length > 0) {
-      const convertCount = Math.min(2, empty);
-      insights.push({
-        id: `ci_${crypto.randomUUID()}`,
-        type: 'opportunity',
-        severity: 'opportunity',
-        title: `${femaleRoom.name} has high vacancy`,
-        description: `${empty}/${total} beds empty. Consider converting ${convertCount} beds to Mixed Dorm to increase bookings.`,
-        actionLabel: 'View Occupancy Actions',
-        actionTarget: 'grow:occupancy',
-        relatedIds: [femaleRoom.id],
-        createdAt: new Date().toISOString(),
-        dismissed: false,
-      });
-    }
-  }
-
-  // Empty beds in next 3 days
-  const availability3d = calculateAvailability(rooms, today, 3);
-  const empty3d = availability3d.reduce((sum, d) => sum + d.emptyBeds, 0);
-
-  if (empty3d >= 8) {
+  // 1. 女宿空置 → 建议改混宿
+  const femaleRoom = rooms.find(
+    (r) => r.type === "dorm-female" && r.beds.some((b) => b.status === "empty"),
+  );
+  if (femaleRoom) {
+    const emptyBeds = femaleRoom.beds.filter((b) => b.status === "empty").length;
+    const totalBeds = femaleRoom.beds.length;
+    const convertible = Math.min(emptyBeds, 2);
     insights.push({
-      id: `ci_${crypto.randomUUID()}`,
-      type: 'action',
-      severity: 'opportunity',
-      title: `${empty3d} empty beds in next 3 days`,
-      description: 'Push long-stay discount or last-minute deal to fill empty beds.',
-      actionLabel: 'Create Promotion',
-      actionTarget: 'grow:pricing',
+      id: `opp-female-${femaleRoom.id}`,
+      severity: "opportunity",
+      type: "opportunity",
+      title: t("insights.femaleRoom.title", { name: femaleRoom.name }),
+      description: t("insights.femaleRoom.description", {
+        empty: emptyBeds,
+        total: totalBeds,
+        count: convertible,
+      }),
+      actionLabel: t("insights.femaleRoom.actionLabel"),
+      actionTarget: "grow:occupancy",
+      relatedIds: [femaleRoom.id],
       createdAt: new Date().toISOString(),
       dismissed: false,
     });
   }
 
-  // Old guest recall
-  const sixMonthsAgo = subMonths(today, 6);
-  const recallable = guestProfiles.filter(p => {
-    const lastStay = parseISO(p.lastStayDate);
-    return isAfter(today, addDays(lastStay, 180)) && p.totalStays >= 1 && (p.email || p.whatsapp);
-  });
-
-  if (recallable.length >= 5) {
+  // 2. 未来 3 天空床
+  const empty3d = rooms.reduce(
+    (s, r) =>
+      s + r.beds.filter((b) => b.status === "empty" || b.status === "cleaning").length,
+    0,
+  );
+  if (empty3d >= 3) {
     insights.push({
-      id: `ci_${crypto.randomUUID()}`,
-      type: 'action',
-      severity: 'opportunity',
-      title: `${recallable.length} guests haven't returned in 6+ months`,
-      description: 'Send them a personalized offer to come back.',
-      actionLabel: 'View Guest CRM',
-      actionTarget: 'grow:crm',
+      id: "opp-empty-3d",
+      severity: "opportunity",
+      type: "opportunity",
+      title: t("insights.emptyBeds3d.title", { count: empty3d }),
+      description: t("insights.emptyBeds3d.description"),
+      actionLabel: t("insights.emptyBeds3d.actionLabel"),
+      actionTarget: "grow:pricing",
+      createdAt: new Date().toISOString(),
+      dismissed: false,
+    });
+  }
+
+  // 3. 6+ 月未回访
+  const recallable = guestProfiles.filter(
+    (g) => g.lastStayDate && daysSince(g.lastStayDate) > 180,
+  );
+  if (recallable.length >= 1) {
+    insights.push({
+      id: "opp-recall-6m",
+      severity: "opportunity",
+      type: "opportunity",
+      title: t("insights.recall6m.title", { count: recallable.length }),
+      description: t("insights.recall6m.description"),
+      actionLabel: t("insights.recall6m.actionLabel"),
+      actionTarget: "grow:crm",
+      relatedIds: recallable.map((g) => g.id),
       createdAt: new Date().toISOString(),
       dismissed: false,
     });
@@ -148,98 +213,74 @@ export function generateOpportunities(
   return insights;
 }
 
-/**
- * Generate risks: warnings about potential problems.
- */
+/* --------------------- 风险（2 类 — 仅与经营者决策相关） --------------------- *
+ * 旧版本曾生成 4 类风险，包含「紧急交接班」「待清洁床位」。
+ * 这两个是员工执行项，对经营者的"入住率 / 现金流"决策无意义，
+ * 且在交接班日志 / 床位看板 / 打扫模式 中都有独立视图——v2 移除。
+ * ---------------------------------------------------------------- */
 export function generateRisks(
   rooms: Room[],
-  shiftNotes: ShiftNote[]
+  _guestProfiles: GuestProfile[],
+  arrivals: Guest[],
+  _groupBookings: GroupBooking[],
+  t: TranslateFn,
 ): CopilotInsight[] {
   const insights: CopilotInsight[] = [];
-  const today = new Date();
 
-  // Overbooking risk
-  const availability = calculateAvailability(rooms, today, 7);
-  for (const day of availability) {
-    if (day.occupiedBeds > day.totalBeds) {
-      insights.push({
-        id: `ci_${crypto.randomUUID()}`,
-        type: 'risk',
-        severity: 'risk',
-        title: `Overbooking on ${format(parseISO(day.date), 'EEE, MMM d')}`,
-        description: `${day.occupiedBeds} guests but only ${day.totalBeds} beds available.`,
-        actionLabel: 'View Bed Board',
-        actionTarget: 'bedboard',
-        createdAt: new Date().toISOString(),
-        dismissed: false,
-      });
-    }
-  }
-
-  // Unconfirmed reservations
-  const unconfirmedReservations: { guestName: string; bedName: string; roomName: string }[] = [];
-  for (const room of rooms) {
-    for (const bed of room.beds) {
-      if (bed.reservations) {
-        for (const res of bed.reservations) {
-          if (res.paymentStatus === 'unpaid') {
-            unconfirmedReservations.push({
-              guestName: res.name,
-              bedName: bed.name,
-              roomName: room.name || room.number,
-            });
-          }
-        }
-      }
-    }
-  }
-
-  if (unconfirmedReservations.length > 0) {
+  // 1. 超售
+  const totalBeds = rooms.reduce((s, r) => s + r.beds.length, 0);
+  const tomorrow = new Date(TODAY);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  const tomorrowStr = tomorrow.toISOString().slice(0, 10);
+  const tomorrowArrivals = arrivals.filter((g) => {
+    const ci = g.checkInDate?.slice(0, 10);
+    const co = g.checkOutDate?.slice(0, 10);
+    return ci && co && ci <= tomorrowStr && co > tomorrowStr;
+  }).length;
+  if (tomorrowArrivals > totalBeds) {
     insights.push({
-      id: `ci_${crypto.randomUUID()}`,
-      type: 'risk',
-      severity: 'warning',
-      title: `${unconfirmedReservations.length} unconfirmed reservation${unconfirmedReservations.length > 1 ? 's' : ''}`,
-      description: unconfirmedReservations.map(r => `${r.guestName} (${r.roomName} ${r.bedName})`).join(', '),
-      actionLabel: 'View Reservations',
-      actionTarget: 'reservations',
+      id: "risk-overbook",
+      severity: "risk",
+      type: "risk",
+      title: t("insights.overbooking.title", { date: tomorrowStr }),
+      description: t("insights.overbooking.description", {
+        occupied: tomorrowArrivals,
+        total: totalBeds,
+      }),
+      actionLabel: t("insights.overbooking.actionLabel"),
+      actionTarget: "bedboard",
       createdAt: new Date().toISOString(),
       dismissed: false,
     });
   }
 
-  // Urgent shift notes
-  const urgentNotes = shiftNotes.filter(n => !n.isResolved && n.priority === 'urgent');
-  if (urgentNotes.length > 0) {
+  // 2. 未确认预订 — 用未结算 (unpaid) 的 arrival 作为代理
+  const unconfirmed = arrivals.filter((g) => g.paymentStatus === "unpaid");
+  if (unconfirmed.length >= 1) {
+    const sep = t("insights.listSeparator");
+    const details = unconfirmed
+      .slice(0, 2)
+      .map((g) => g.name)
+      .join(sep);
     insights.push({
-      id: `ci_${crypto.randomUUID()}`,
-      type: 'risk',
-      severity: 'risk',
-      title: `${urgentNotes.length} urgent shift note${urgentNotes.length > 1 ? 's' : ''}`,
-      description: urgentNotes.slice(0, 2).map(n => n.content).join(' | '),
-      actionLabel: 'View Shift Log',
-      actionTarget: 'shiftlog',
-      createdAt: new Date().toISOString(),
-      dismissed: false,
-    });
-  }
-
-  // Many beds in cleaning
-  const cleaningBeds = rooms.reduce((sum, r) => sum + r.beds.filter(b => b.status === 'cleaning').length, 0);
-  const totalBeds = rooms.reduce((sum, r) => sum + r.beds.length, 0);
-  if (cleaningBeds > 3 || (totalBeds > 0 && cleaningBeds / totalBeds > 0.3)) {
-    insights.push({
-      id: `ci_${crypto.randomUUID()}`,
-      type: 'risk',
-      severity: 'warning',
-      title: `${cleaningBeds} beds waiting to be cleaned`,
-      description: 'High number of beds in cleaning status may delay check-ins.',
-      actionLabel: 'View Bed Board',
-      actionTarget: 'bedboard',
+      id: "risk-unconfirmed",
+      severity: "risk",
+      type: "action",
+      title: t("insights.unconfirmed.title", { count: unconfirmed.length }),
+      description: t("insights.unconfirmed.description", { details }),
+      actionLabel: t("insights.unconfirmed.actionLabel"),
+      actionTarget: "reservations",
       createdAt: new Date().toISOString(),
       dismissed: false,
     });
   }
 
   return insights;
+}
+
+/* --------------------- helper --------------------- */
+function daysSince(dateStr: string): number {
+  const d = new Date(dateStr);
+  const diff = TODAY.getTime() - d.getTime();
+  return Math.floor(diff / (1000 * 60 * 60 * 24));
 }

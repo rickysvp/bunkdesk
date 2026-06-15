@@ -4,8 +4,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Identity
 
-- **Product name**: BunkDesk (branded as "Bunkly" in the sidebar)
-- **Package name**: `bunkly` (in package.json)
+- **Product name**: BunkDesk (displayed in the sidebar and on the landing page)
+- **Package name**: `bunkdesk` (in package.json)
 - **Purpose**: Visual bed management system for small independent hostels (hostel PMS)
 - **Deployed on**: Google AI Studio (app ID: `08315f93-cd37-4728-9367-a4a80c6a32b1`)
 - **Runtime**: Browser-only SPA — no backend server, all state in localStorage

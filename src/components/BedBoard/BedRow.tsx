@@ -138,7 +138,13 @@ export function BedRow({
         <div className="absolute inset-0 flex">
           {dates.map((date, idx) => {
             const booking = getBookingForDate(bookings, date);
-            const isEmptySlot = !booking && bed.status !== 'cleaning';
+            // An empty date slot is simply one that has no booking on it.
+            // `bed.status` (e.g. 'cleaning') is a bed-level state, not a
+            // per-date state — using it to gate date clicks would block
+            // future-dated quick-bookings on any bed that's currently
+            // marked as dirty, which is a regression. Cleaning status is
+            // surfaced via the sparkle button on the left label.
+            const isEmptySlot = !booking;
             return (
               <div
                 key={idx}
