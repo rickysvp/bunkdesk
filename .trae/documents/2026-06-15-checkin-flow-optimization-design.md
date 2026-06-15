@@ -2,7 +2,8 @@
 
 **Date**: 2026-06-15
 **Status**: Approved (brainstorming)
-**Target**: 中小青旅（SMB hostels），Excel 时代的运营者
+**Target**: 欧美独立青旅（SMB hostels），Excel 时代的运营者（Bali/Barcelona/Lisbon 路线）
+**Product Boundary**: 前台运营工具 — **不做支付**，仅记录已收/未收状态；实际收钱由前台线下处理
 **Top Scenario**: 预约客人到店（OTA / direct 预约，到店办理入住）
 
 ---
@@ -33,6 +34,8 @@
 - ❌ 5 卡片完全删除（用户选了内嵌折叠）
 - ❌ 客人未到店信号 / iBeacon（用户没选）
 - ❌ 跨设备实时同步（保持单设备 localStorage 模型）
+- ❌ **支付处理**（不接 Stripe / Alipay / WeChat Pay / PayPal 等任何支付 API，仅记录已收/未收状态）
+- ❌ 多支付方式选择按钮（现金/卡/支付宝/微信等实际收款由前台线下处理）
 
 ---
 
@@ -185,14 +188,17 @@ export function sortByPriority(
 
 #### ② 收钱
 ```tsx
-<div>应收: $85 · 已付: $0</div>
-<div className="grid grid-cols-3 gap-2">
-  <Button onClick={() => settlePayment(guestId)}>收现金</Button>
-  <Button onClick={() => settlePayment(guestId)}>收卡</Button>
-  <Button onClick={() => settlePayment(guestId)}>收支付宝</Button>
+<div>
+  应收: $85 · 已付: $0
+  <span className="text-xs text-zinc-500 block">
+    实际收钱在前台线下处理（现金/刷卡/银行转账/OTA 预付等）
+  </span>
 </div>
+<Button onClick={() => settlePayment(guestId)}>
+  {t('checkin.markAsPaid')}  // 唯一按钮，统一切到 paid
+</Button>
 ```
-> 注：3 个按钮都调同一 `settlePayment`，UI 层区分"方式"用于记账（M2 增强）。
+> **不做支付处理**。本按钮仅把 `paymentStatus` 置为 `'paid'`，作为"我已收到钱"的记账确认。客人实际付钱方式（现金/卡/银行转账/PayPal/OTA 预付等）由前台线下处理，不接任何支付 API。
 
 #### ③ 选床
 ```tsx
@@ -329,15 +335,19 @@ checkin: {
   notesPlaceholder: '例：素食 / 靠窗 / 接机',
   scanConfirm: '确认录入',
   skipNotes: '跳过',
-  collectCash: '收现金',
-  collectCard: '收卡',
-  collectAlipay: '收支付宝',
-  collectWechat: '收微信',
+  markAsPaid: 'Mark as paid',                  // 收钱只有 1 个按钮，统一切到 paid 状态
+  paidAmountHint: 'Received offline (cash / card / bank transfer)',  // 提示：实际收钱在系统外
   priorityRule: '排序规则：时间临近 30% + 未办件数 20% + 📌 置顶 ×∞',
   missingBed: '⚠️ 缺少床位',
   noAvailableBeds: '无可用床位',
 }
 ```
+
+> **重要 — 产品边界**：
+> - BunkDesk **不做支付处理**，仅记录"已收/未收"状态
+> - 客人实际付款方式（现金/刷卡/银行转账/PayPal/OTA 预付等）由前台线下处理
+> - ② 收钱 item 只有一个按钮：`Mark as paid`，点了就把 `paymentStatus` 置为 `'paid'`
+> - 目标市场：欧美独立青旅（Bali/Barcelona/Lisbon 路线），货币 `$` / `€`，不接任何支付 API
 
 ---
 
