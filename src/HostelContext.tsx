@@ -18,7 +18,7 @@ function loadState<T>(key: string, fallback: T): T {
 //  - Make schema migrations explicit (bump STORAGE_VERSION and add a migrator)
 //  - Keep reads/writes atomic from the app's perspective
 const STORAGE_KEY = 'bunkdesk_state_v1';
-const STORAGE_VERSION = 1;
+const STORAGE_VERSION = 2;  // 1 → 2（加 assignedBedId 反向映射）
 type HostelPersisted = {
   rooms: Room[];
   arrivals: Guest[];
@@ -32,6 +32,25 @@ type HostelPersisted = {
   guestLogs: GuestLogEntry[];
 };
 
+function migrateV1toV2(data: HostelPersisted): HostelPersisted {
+  // 反向映射：bed.guest 存在 → 写入 guest.assignedBedId
+  const guestIdToBedId = new Map<string, string>();
+  for (const room of data.rooms) {
+    for (const bed of room.beds) {
+      if (bed.guest) {
+        guestIdToBedId.set(bed.guest.id, bed.id);
+      }
+    }
+  }
+  const arrivals = data.arrivals.map(g => ({
+    ...g,
+    pinned: g.pinned ?? false,
+    assignedBedId: g.assignedBedId ?? guestIdToBedId.get(g.id),
+    notesSkipped: g.notesSkipped ?? false,
+  }));
+  return { ...data, arrivals };
+}
+
 function loadPersistedState(fallback: HostelPersisted): HostelPersisted {
   // Prefer the new versioned key; fall back to the legacy 9-key layout if
   // it exists so we don't drop data from older builds.
@@ -40,7 +59,7 @@ function loadPersistedState(fallback: HostelPersisted): HostelPersisted {
     if (raw) {
       const parsed = JSON.parse(raw);
       if (parsed && parsed.__v === STORAGE_VERSION && parsed.data) {
-        return { ...fallback, ...parsed.data };
+        return migrateV1toV2({ ...fallback, ...parsed.data });
       }
     }
   } catch {
