@@ -41,6 +41,9 @@ export function CheckInPanel({ setActiveTab }: { setActiveTab?: (tab: string) =>
 
   // Today Queue tab state
   const [todayQueueSelectedId, setTodayQueueSelectedId] = useState<string | null>(null);
+  const [expandedItem, setExpandedItem] = useState<'passport' | 'payment' | 'bed' | 'notes' | null>(null);
+  const [scanPassportValue, setScanPassportValue] = useState('');
+  const [scanDob, setScanDob] = useState('');
 
   // New guest state
   const tomorrow = new Date();
@@ -237,20 +240,43 @@ export function CheckInPanel({ setActiveTab }: { setActiveTab?: (tab: string) =>
               })
             )}
           </div>
-          {todayQueueSelected && (
-            <div className="bg-white border border-zinc-200 rounded-2xl p-4 shadow-sm space-y-3">
-              <div className="flex items-center justify-between">
-                <h3 className="font-semibold text-zinc-900">{todayQueueSelected.name}</h3>
-                <button onClick={() => setTodayQueueSelectedId(null)} className="text-xs text-zinc-500">✕</button>
+          {todayQueueSelected && (() => {
+            const g = todayQueueSelected;
+            const breakdown = computeIncompleteness(g);
+            const allDone = breakdown.count === 0;
+            return (
+              <div className="bg-white border border-zinc-200 rounded-2xl p-4 shadow-sm space-y-2">
+                {/* Header */}
+                <div className="flex items-center justify-between">
+                  <h3 className="font-semibold text-zinc-900">{g.name}</h3>
+                  <button onClick={() => setTodayQueueSelectedId(null)} className="text-xs text-zinc-500">✕</button>
+                </div>
+                <div className="text-xs text-zinc-500">
+                  {g.countryCode} · {g.checkInDate} · {g.nights}N
+                </div>
+
+                {/* 4 items */}
+                <ItemRow label={t('checkin.checklistPassport')} done={!breakdown.passport}
+                  onClick={() => setExpandedItem(expandedItem === 'passport' ? null : 'passport')}
+                  isExpanded={expandedItem === 'passport'}>
+                  {expandedItem === 'passport' && (
+                    <div className="space-y-2 mt-2">
+                      <Input placeholder="Passport / ID" value={scanPassportValue}
+                        onChange={e => setScanPassportValue(e.target.value)} className="h-8 text-xs" />
+                      <Input type="date" value={scanDob} onChange={e => setScanDob(e.target.value)} className="h-8 text-xs" />
+                      <Button size="sm" onClick={() => {
+                        scanPassport(g.id);
+                        updateArrival(g.id, { passportOrId: scanPassportValue, dob: scanDob });
+                        setScanPassportValue(''); setScanDob('');
+                        setExpandedItem(null);
+                      }}>{t('checkin.scanConfirm')}</Button>
+                    </div>
+                  )}
+                </ItemRow>
+                {/* ... 其他 3 项在后续 Task */}
               </div>
-              <div className="text-xs text-zinc-500">
-                {todayQueueSelected.countryCode} · {todayQueueSelected.checkInDate} · {todayQueueSelected.nights}N
-              </div>
-              <div className="text-xs text-blue-700 bg-blue-50 p-2 rounded">
-                {t('checkin.autoCompleteNote')}
-              </div>
-            </div>
-          )}
+            );
+          })()}
         </>
       )}
 
@@ -627,6 +653,27 @@ export function CheckInPanel({ setActiveTab }: { setActiveTab?: (tab: string) =>
       )}
 
       <ICalImport open={icalOpen} onClose={() => setIcalOpen(false)} onImport={(guests) => importArrivals(guests)} />
+    </div>
+  );
+}
+
+function ItemRow({ label, done, onClick, isExpanded, children }: {
+  label: string;
+  done: boolean;
+  onClick: () => void;
+  isExpanded: boolean;
+  children?: React.ReactNode;
+}) {
+  return (
+    <div className={cn("border rounded-xl p-3 transition-colors",
+      isExpanded ? "border-blue-500 bg-blue-50/30" : "border-zinc-200 bg-white")}>
+      <button onClick={onClick} className="w-full flex items-center justify-between text-left">
+        <span className={cn("text-xs font-medium", done ? "text-zinc-400 line-through" : "text-zinc-900")}>
+          {done ? '✅ ' : '🔲 '}{label}
+        </span>
+        <span className="text-[10px] text-zinc-500">{done ? '✓' : '点击展开'}</span>
+      </button>
+      {isExpanded && children}
     </div>
   );
 }
