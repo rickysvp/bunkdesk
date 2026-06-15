@@ -111,87 +111,99 @@ git commit -m "feat(types): add 3 enums + 6 optional fields to Guest"
 ## Task 2: Add i18n keys (en + zh)
 
 **Files:**
-- Modify: `src/locales/en.json` (find `checkin:` block, likely under `translations.checkin`)
-- Modify: `src/locales/zh.json` (same path)
+- Modify: `src/i18nContext.tsx` (the `translations.en` and `translations.zh` objects, inside the `checkin:` block — NOT `src/locales/*.json` which does not exist in this project)
 
-- [ ] **Step 1: Read the existing `checkin` block in `src/locales/en.json`**
+> **Note (added 2026-06-15):** i18n lives in a single TypeScript file, not JSON. Also, the 3 "parent" categories `idType` / `arrivalTime` / `source` use nested object form (label + sub-keys) because TypeScript cannot have a key be both a string and a parent object. **Subsequent tasks must use `t('checkin.idType.label')` instead of `t('checkin.idType')`** for the parent label text. Sub-options like `t('checkin.idType.passport')` are unchanged.
 
-Use Grep to find the `checkin` block, e.g.:
+- [ ] **Step 1: Read the existing `checkin` block in `src/i18nContext.tsx`**
+
+Use Grep to find the `checkin` block:
 ```bash
-grep -n '"checkin":' src/locales/en.json
+grep -n "checkin:" src/i18nContext.tsx
 ```
 
-You should see a flat object of checkin.* keys, e.g. `"checkin.newWalkIn": "New walk-in"`. Note the indentation style (likely 2 or 4 spaces).
+You should see an object with checkin.* keys. Note the indentation style (likely 6 spaces, nested in `en:` and `zh:`).
 
-- [ ] **Step 2: Add 24 new keys to `src/locales/en.json` inside the `checkin` object**
+- [ ] **Step 2: Add 24 new keys to BOTH `translations.en.checkin` and `translations.zh.checkin`**
 
-Find a stable marker inside `checkin` (e.g. the existing `"checkin.policeRegistration"` key) and insert these keys alphabetically (or grouped, but pick one rule and stay consistent). Use the same indentation as the surrounding keys:
+Find a stable marker (e.g. the existing `checkin.policeRegistration` key) and insert these 24 keys. Use the same indentation as surrounding keys. **CRITICAL: the 3 parent categories use nested-object form with `.label`:**
 
-```json
-"checkin.firstName": "First name",
-"checkin.lastName": "Last name",
-"checkin.phone": "Phone",
-"checkin.email": "Email",
-"checkin.idType": "ID document type",
-"checkin.idType.passport": "Passport",
-"checkin.idType.idCard": "ID Card",
-"checkin.idType.driverLicense": "Driver License",
-"checkin.arrivalTime": "Arrival time",
-"checkin.arrivalTime.morning": "Morning (8–12)",
-"checkin.arrivalTime.afternoon": "Afternoon (12–18)",
-"checkin.arrivalTime.evening": "Evening (18–22)",
-"checkin.arrivalTime.late": "Late (22+)",
-"checkin.referral": "Referral / How heard",
-"checkin.source": "Booking source",
-"checkin.source.walkIn": "Walk-in",
-"checkin.source.phone": "Phone",
-"checkin.source.email": "Email",
-"checkin.source.referral": "Referral",
-"checkin.source.other": "Other",
-"checkin.editInfo": "Edit info",
-"checkin.notProvided": "Not provided",
-"checkin.contactSection": "Contact",
-"checkin.idSection": "ID"
+```ts
+// English
+idType: {
+  label: "ID document type",
+  passport: "Passport",
+  idCard: "ID Card",
+  driverLicense: "Driver License",
+},
+arrivalTime: {
+  label: "Arrival time",
+  morning: "Morning (8–12)",
+  afternoon: "Afternoon (12–18)",
+  evening: "Evening (18–22)",
+  late: "Late (22+)",
+},
+source: {
+  label: "Booking source",
+  walkIn: "Walk-in",
+  phone: "Phone",
+  email: "Email",
+  referral: "Referral",
+  other: "Other",
+},
+// And flat keys:
+firstName: "First name",
+lastName: "Last name",
+phone: "Phone",
+email: "Email",
+referral: "Referral / How heard",
+editInfo: "Edit info",
+notProvided: "Not provided",
+contactSection: "Contact",
+idSection: "ID",
 ```
 
-- [ ] **Step 3: Add the same 24 keys to `src/locales/zh.json` with Chinese values**
-
-Insert at the same location with Chinese translations:
-```json
-"checkin.firstName": "名",
-"checkin.lastName": "姓",
-"checkin.phone": "电话",
-"checkin.email": "邮箱",
-"checkin.idType": "证件类型",
-"checkin.idType.passport": "护照",
-"checkin.idType.idCard": "身份证",
-"checkin.idType.driverLicense": "驾照",
-"checkin.arrivalTime": "预计抵店时段",
-"checkin.arrivalTime.morning": "上午 (8–12)",
-"checkin.arrivalTime.afternoon": "下午 (12–18)",
-"checkin.arrivalTime.evening": "傍晚 (18–22)",
-"checkin.arrivalTime.late": "深夜 (22 点后)",
-"checkin.referral": "推荐来源",
-"checkin.source": "预订来源",
-"checkin.source.walkIn": "现场到店",
-"checkin.source.phone": "电话预订",
-"checkin.source.email": "邮件预订",
-"checkin.source.referral": "推荐介绍",
-"checkin.source.other": "其它",
-"checkin.editInfo": "编辑资料",
-"checkin.notProvided": "未填写",
-"checkin.contactSection": "联系方式",
-"checkin.idSection": "证件"
+```ts
+// Chinese
+idType: {
+  label: "证件类型",
+  passport: "护照",
+  idCard: "身份证",
+  driverLicense: "驾照",
+},
+arrivalTime: {
+  label: "预计抵店时段",
+  morning: "上午 (8–12)",
+  afternoon: "下午 (12–18)",
+  evening: "傍晚 (18–22)",
+  late: "深夜 (22 点后)",
+},
+source: {
+  label: "预订来源",
+  walkIn: "现场到店",
+  phone: "电话预订",
+  email: "邮件预订",
+  referral: "推荐介绍",
+  other: "其它",
+},
+// And flat keys:
+firstName: "名",
+lastName: "姓",
+phone: "电话",
+email: "邮箱",
+referral: "推荐来源",
+editInfo: "编辑资料",
+notProvided: "未填写",
+contactSection: "联系方式",
+idSection: "证件",
 ```
 
-- [ ] **Step 4: Verify JSON files are valid + TypeScript compiles**
+- [ ] **Step 3: Verify TypeScript compiles (no JSON files to validate in this project)**
 
 ```bash
-node -e "JSON.parse(require('fs').readFileSync('src/locales/en.json'))" && \
-node -e "JSON.parse(require('fs').readFileSync('src/locales/zh.json'))" && \
-npx tsc --noEmit
+cd /Users/ricky/AICode/hostelite && npx tsc --noEmit
 ```
-Expected: no output from node, no errors from tsc.
+Expected: no errors.
 
 - [ ] **Step 5: Commit**
 
@@ -570,7 +582,7 @@ Find the existing form block (around line 222–293) and replace the entire `<fo
         <Input type="date" required className="h-10 bg-zinc-50 border-zinc-200" value={newGuestRef.checkOutDate} onChange={e => setNewGuestRef({...newGuestRef, checkOutDate: e.target.value})} />
       </div>
       <div className="space-y-1.5">
-        <Label className="text-[10px] font-semibold text-zinc-500 uppercase">{t('checkin.arrivalTime')}</Label>
+        <Label className="text-[10px] font-semibold text-zinc-500 uppercase">{t('checkin.arrivalTime.label')}</Label>
         <Select value={newGuestRef.arrivalTime} onValueChange={(val: string) => setNewGuestRef({...newGuestRef, arrivalTime: val as "morning" | "afternoon" | "evening" | "late"})}>
           <SelectTrigger className="h-10 bg-zinc-50 border-zinc-200"><SelectValue placeholder="—" /></SelectTrigger>
           <SelectContent>
@@ -589,7 +601,7 @@ Find the existing form block (around line 222–293) and replace the entire `<fo
     <div className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">ID &amp; Source</div>
     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
       <div className="space-y-1.5">
-        <Label className="text-[10px] font-semibold text-zinc-500 uppercase">{t('checkin.idType')}<span className="text-red-500">*</span></Label>
+        <Label className="text-[10px] font-semibold text-zinc-500 uppercase">{t('checkin.idType.label')}<span className="text-red-500">*</span></Label>
         <Select required value={newGuestRef.idType} onValueChange={(val: string) => setNewGuestRef({...newGuestRef, idType: val as "passport" | "idCard" | "driverLicense"})}>
           <SelectTrigger className="h-10 bg-zinc-50 border-zinc-200"><SelectValue /></SelectTrigger>
           <SelectContent>
@@ -609,7 +621,7 @@ Find the existing form block (around line 222–293) and replace the entire `<fo
     </div>
     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
       <div className="space-y-1.5">
-        <Label className="text-[10px] font-semibold text-zinc-500 uppercase">{t('checkin.source')}</Label>
+        <Label className="text-[10px] font-semibold text-zinc-500 uppercase">{t('checkin.source.label')}</Label>
         <Select value={newGuestRef.bookingSource} onValueChange={(val: string) => setNewGuestRef({...newGuestRef, bookingSource: val as "walk-in" | "phone" | "email" | "referral" | "other"})}>
           <SelectTrigger className="h-10 bg-zinc-50 border-zinc-200"><SelectValue /></SelectTrigger>
           <SelectContent>
@@ -755,14 +767,14 @@ Replace the entire `<div className="space-y-4">...</div>` (the selectedGuest bra
           <div className="grid grid-cols-2 gap-2 text-xs">
             <Field icon="📧" label={t('checkin.email')} value={selectedGuest.email} placeholder={t('checkin.notProvided')} />
             <Field icon="📞" label={t('checkin.phone')} value={selectedGuest.phone} placeholder={t('checkin.notProvided')} />
-            <Field icon="🕒" label={t('checkin.arrivalTime')} value={selectedGuest.arrivalTime ? t(`checkin.arrivalTime.${selectedGuest.arrivalTime}`) : undefined} placeholder={t('checkin.notProvided')} />
+            <Field icon="🕒" label={t('checkin.arrivalTime.label')} value={selectedGuest.arrivalTime ? t(`checkin.arrivalTime.${selectedGuest.arrivalTime}`) : undefined} placeholder={t('checkin.notProvided')} />
             <Field icon="🔗" label={t('checkin.referral')} value={selectedGuest.referral} placeholder={t('checkin.notProvided')} />
           </div>
         </div>
         <div className="pt-3 border-t border-zinc-100">
           <div className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider mb-2">{t('checkin.idSection')}</div>
           <div className="grid grid-cols-2 gap-2 text-xs">
-            <Field icon="🛂" label={t('checkin.idType')} value={selectedGuest.idType ? t(`checkin.idType.${selectedGuest.idType}`) : undefined} placeholder={t('checkin.notProvided')} />
+            <Field icon="🛂" label={t('checkin.idType.label')} value={selectedGuest.idType ? t(`checkin.idType.${selectedGuest.idType}`) : undefined} placeholder={t('checkin.notProvided')} />
             <Field icon="#" label={t('checkin.passportOrId')} value={selectedGuest.passportOrId} placeholder={t('checkin.notProvided')} />
             <Field icon="🎂" label={t('checkin.dob') || 'DOB'} value={selectedGuest.dob} placeholder={t('checkin.notProvided')} />
             <Field icon="👥" label={t('guest.gender') || 'Gender'} value={selectedGuest.gender ? t(`guest.${selectedGuest.gender}`) || selectedGuest.gender : undefined} placeholder={t('checkin.notProvided')} />
@@ -1022,7 +1034,7 @@ export function EditGuestInfoModal({ open, onClose, guest, onSave }: Props) {
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1.5">
-                  <Label className="text-[10px] font-semibold text-zinc-500 uppercase">{t('checkin.idType')}</Label>
+                  <Label className="text-[10px] font-semibold text-zinc-500 uppercase">{t('checkin.idType.label')}</Label>
                   <Select value={draft.idType ?? 'passport'} onValueChange={(val: string) => setDraft({...draft, idType: val as Guest['idType']})}>
                     <SelectTrigger className="h-9 bg-zinc-50 border-zinc-200"><SelectValue /></SelectTrigger>
                     <SelectContent>
@@ -1039,7 +1051,7 @@ export function EditGuestInfoModal({ open, onClose, guest, onSave }: Props) {
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1.5">
-                  <Label className="text-[10px] font-semibold text-zinc-500 uppercase">{t('checkin.arrivalTime')}</Label>
+                  <Label className="text-[10px] font-semibold text-zinc-500 uppercase">{t('checkin.arrivalTime.label')}</Label>
                   <Select value={draft.arrivalTime ?? ''} onValueChange={(val: string) => setDraft({...draft, arrivalTime: val as Guest['arrivalTime']})}>
                     <SelectTrigger className="h-9 bg-zinc-50 border-zinc-200"><SelectValue placeholder="—" /></SelectTrigger>
                     <SelectContent>
@@ -1051,7 +1063,7 @@ export function EditGuestInfoModal({ open, onClose, guest, onSave }: Props) {
                   </Select>
                 </div>
                 <div className="space-y-1.5">
-                  <Label className="text-[10px] font-semibold text-zinc-500 uppercase">{t('checkin.source')}</Label>
+                  <Label className="text-[10px] font-semibold text-zinc-500 uppercase">{t('checkin.source.label')}</Label>
                   <Select value={draft.bookingSource ?? 'walk-in'} onValueChange={(val: string) => setDraft({...draft, bookingSource: val as Guest['bookingSource']})}>
                     <SelectTrigger className="h-9 bg-zinc-50 border-zinc-200"><SelectValue /></SelectTrigger>
                     <SelectContent>
