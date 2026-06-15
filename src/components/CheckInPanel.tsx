@@ -14,6 +14,8 @@ import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '@/lib/utils';
 import { getSourceConfig, getPaymentStatusClass } from '../utils/guestDisplay';
 import { scoreBeds, getRoomSummaries, type BedScore } from '../utils/bedAllocator';
+import { sortByPriority } from '../utils/priorityEngine';
+import { computeIncompleteness } from '../utils/incompleteness';
 
 const COUNTRY_MAP: Record<string, string> = {
   US: 'USA', GBR: 'United Kingdom', AU: 'Australia',
@@ -24,7 +26,7 @@ const DEFAULT_PRICE = 85;
 type SubTab = 'todayQueue' | 'pending' | 'checked-in' | 'reserved';
 
 export function CheckInPanel({ setActiveTab }: { setActiveTab?: (tab: string) => void }) {
-  const { arrivals, rooms, assignArrival, autoAssignBed, settlePayment, scanPassport, addArrival, updateArrival, importArrivals, checkoutGuest } = useHostel();
+  const { arrivals, rooms, assignArrival, autoAssignBed, settlePayment, scanPassport, addArrival, updateArrival, importArrivals, checkoutGuest, pinGuest, unpinGuest, } = useHostel();
   const { t } = useTranslation();
   const [subTab, setSubTab] = useState<SubTab>('todayQueue');
   const [searchQuery, setSearchQuery] = useState('');
@@ -67,6 +69,14 @@ export function CheckInPanel({ setActiveTab }: { setActiveTab?: (tab: string) =>
 
   // Room summaries for Checked In tab
   const roomSummaries = useMemo(() => getRoomSummaries(rooms), [rooms]);
+
+  // ── 今日待办队列（最小版：仅 arrivals，按规则排序）──
+  // M2 TODO: 集成 rooms.flatMap(...).flatMap(b => b.reservations || [])，
+  //          把每个 reservation 转成 Guest 形态（paymentStatus/passportScanned/... 补齐）后合并到 unified
+  const todayQueueGuests = useMemo(() => {
+    const today = new Date().toISOString().slice(0, 10);
+    return sortByPriority(arrivals.filter(g => g.checkInDate <= today));
+  }, [arrivals]);
 
   // Gather checked-in guests
   const checkedInGuests = useMemo(() => rooms.flatMap(r =>
@@ -180,6 +190,46 @@ export function CheckInPanel({ setActiveTab }: { setActiveTab?: (tab: string) =>
             value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
         </div>
       </div>
+
+      {/* ── Today Queue Tab (smart priority queue, list-only) ── */}
+      {subTab === 'todayQueue' && (
+        <div className="flex-1 overflow-auto space-y-2 p-2">
+          <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 text-xs text-amber-800">
+            📌 {t('checkin.priorityRule')}
+          </div>
+          {todayQueueGuests.length === 0 ? (
+            <div className="py-12 text-center text-sm text-zinc-400">{t('checkin.noEventsFound') /* 借用无数据文案 */}</div>
+          ) : (
+            todayQueueGuests.map(guest => {
+              const breakdown = computeIncompleteness(guest);
+              return (
+                <div key={guest.id} className="bg-white border border-zinc-200 rounded-2xl p-3 shadow-sm">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="font-semibold text-sm text-zinc-900">
+                        {guest.pinned && '📌 '}{guest.name}
+                      </div>
+                      <div className="text-[10px] text-zinc-500">
+                        {guest.countryCode} · {guest.checkInDate} · {guest.nights}N
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className={cn("text-[10px] font-bold px-2 py-0.5 rounded",
+                        breakdown.count === 0 ? "bg-emerald-50 text-emerald-600" : "bg-amber-50 text-amber-600")}>
+                        {breakdown.count === 0 ? t('checkin.allSettled') : t('checkin.incompleteBadge', { count: breakdown.count })}
+                      </span>
+                      <button onClick={() => guest.pinned ? unpinGuest(guest.id) : pinGuest(guest.id)}
+                        className="p-1.5 hover:bg-zinc-100 rounded-lg text-xs">
+                        {guest.pinned ? t('checkin.unpin') : t('checkin.pinToTop')}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              );
+            })
+          )}
+        </div>
+      )}
 
       {/* ── Pending Tab ── */}
       {subTab === 'pending' && (
