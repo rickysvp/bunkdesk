@@ -96,6 +96,10 @@ interface HostelState {
   addArrival: (guest: Omit<Guest, "id">) => string;
   updateArrival: (guestId: string, updates: Partial<Pick<Guest, 'notes' | 'roomPreference' | 'source' | 'phone' | 'email' | 'totalAmount' | 'paidAmount' | 'gender' | 'dob' | 'passportOrId' | 'checkInDate' | 'checkOutDate' | 'nights'>>) => void;
   importArrivals: (guests: Omit<Guest, "id">[]) => void;
+  // Smart-queue actions (2026-06-15 spec §6.1)
+  pinGuest: (guestId: string) => void;
+  unpinGuest: (guestId: string) => void;
+  markNotesSkipped: (guestId: string) => void;
   addRoom: (room: Omit<Room, "id" | "beds">) => void;
   updateRoom: (roomId: string, name: string, number: string, pricePerNight?: number, bottomBunkPremium?: number) => void;
   deleteRoom: (roomId: string) => void;
@@ -376,6 +380,23 @@ export function HostelProvider({ children }: { children: ReactNode }) {
       logAction(guestId, 'check-in', `Checked in → ${room?.name} - ${bed?.name}`);
     }
   }, [arrivals, rooms, addAutoNote, logAction]);
+
+  // ── Smart-queue actions (2026-06-15 spec §6.1) ────────────────
+  // These only mutate the `arrivals` slice; they do NOT touch rooms
+  // because the guest is still pre-check-in. `setArrivals` is a stable
+  // React setter, so the empty dep array is safe.
+
+  const pinGuest = useCallback((guestId: string) => {
+    setArrivals((prev) => prev.map((g) => (g.id === guestId ? { ...g, pinned: true } : g)));
+  }, []);
+
+  const unpinGuest = useCallback((guestId: string) => {
+    setArrivals((prev) => prev.map((g) => (g.id === guestId ? { ...g, pinned: false } : g)));
+  }, []);
+
+  const markNotesSkipped = useCallback((guestId: string) => {
+    setArrivals((prev) => prev.map((g) => (g.id === guestId ? { ...g, notesSkipped: true } : g)));
+  }, []);
 
   const autoAssignBed = useCallback((guestId: string): BedScore | null => {
     const guest = arrivals.find((g) => g.id === guestId);
@@ -889,6 +910,7 @@ export function HostelProvider({ children }: { children: ReactNode }) {
     occupancyActions, applyOccupancyAction, dismissOccupancyAction,
     guestLogs, addGuestLog,
     addCharge, extendStay, addPartialPayment, addGuestNote, updateGuestField,
+    pinGuest, unpinGuest, markNotesSkipped,
   }), [
     rooms, arrivals, moveGuest, assignArrival, autoAssignBed, occupyBed, moveReservation, markBedClean, checkoutGuest, settlePayment, scanPassport,
     addArrival, updateArrival, importArrivals, addRoom, updateRoom, deleteRoom, addBedToRoom, updateBed, deleteBed,
@@ -901,6 +923,7 @@ export function HostelProvider({ children }: { children: ReactNode }) {
     occupancyActions, applyOccupancyAction, dismissOccupancyAction,
     guestLogs, addGuestLog,
     addCharge, extendStay, addPartialPayment, addGuestNote, updateGuestField,
+    pinGuest, unpinGuest, markNotesSkipped,
   ]);
 
   return (
