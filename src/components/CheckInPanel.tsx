@@ -21,12 +21,12 @@ const COUNTRY_MAP: Record<string, string> = {
 };
 const DEFAULT_PRICE = 85;
 
-type SubTab = 'pending' | 'checked-in' | 'reserved';
+type SubTab = 'todayQueue' | 'pending' | 'checked-in' | 'reserved';
 
 export function CheckInPanel({ setActiveTab }: { setActiveTab?: (tab: string) => void }) {
   const { arrivals, rooms, assignArrival, autoAssignBed, settlePayment, scanPassport, addArrival, updateArrival, importArrivals, checkoutGuest } = useHostel();
   const { t } = useTranslation();
-  const [subTab, setSubTab] = useState<SubTab>('pending');
+  const [subTab, setSubTab] = useState<SubTab>('todayQueue');
   const [searchQuery, setSearchQuery] = useState('');
 
   // Pending tab state
@@ -84,6 +84,12 @@ export function CheckInPanel({ setActiveTab }: { setActiveTab?: (tab: string) =>
 
   // Counts
   const pendingCount = arrivals.length;
+  const todayQueueCount = useMemo(() => {
+    const today = new Date().toISOString().slice(0, 10);
+    const fromArrivals = arrivals.filter(g => g.checkInDate <= today).length;
+    const fromReservations = rooms.flatMap(r => r.beds).flatMap(b => b.reservations || []).filter(res => res.checkInDate === today).length;
+    return fromArrivals + fromReservations;
+  }, [arrivals, rooms]);
   const checkedInCount = checkedInGuests.length;
   const reservedCount = reservedGuests.length;
 
@@ -153,6 +159,7 @@ export function CheckInPanel({ setActiveTab }: { setActiveTab?: (tab: string) =>
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4">
         <div className="flex gap-1 bg-zinc-100 rounded-xl p-1">
           {([
+            { id: 'todayQueue' as SubTab, label: '⚡ ' + (t('checkin.todayQueue') || "Today's Queue"), count: todayQueueCount, color: 'text-amber-600' },
             { id: 'pending' as SubTab, label: t('checkin.pending') || 'Pending', count: pendingCount, color: 'text-amber-600' },
             { id: 'checked-in' as SubTab, label: t('checkin.checkedIn') || 'Checked In', count: checkedInCount, color: 'text-emerald-600' },
             { id: 'reserved' as SubTab, label: t('checkin.reserved') || 'Reserved', count: reservedCount, color: 'text-blue-600' },
