@@ -237,10 +237,11 @@ export function CheckInPanel({ setActiveTab }: { setActiveTab?: (tab: string) =>
         </div>
       </div>
 
-      {/* ── Today Queue Tab (smart priority queue, list-only) ── */}
+      {/* ── Today Queue Tab (smart priority queue, 2-col on lg / 1-col on mobile) ── */}
       {subTab === 'todayQueue' && (
-        <>
-          <div className="flex-1 overflow-auto space-y-2 p-2">
+        <div className="flex-1 grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-3 p-2 overflow-hidden">
+          {/* 左：队列列表 */}
+          <div className="overflow-y-auto space-y-2">
             <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 text-xs text-amber-800">
               📌 {t('checkin.priorityRule')}
             </div>
@@ -277,137 +278,144 @@ export function CheckInPanel({ setActiveTab }: { setActiveTab?: (tab: string) =>
               })
             )}
           </div>
-          {todayQueueSelected && (() => {
-            const g = todayQueueSelected;
-            const breakdown = computeIncompleteness(g);
-            const allDone = breakdown.count === 0;
-            return (
-              <div className="bg-white border border-zinc-200 rounded-2xl p-4 shadow-sm space-y-2">
-                {/* Header */}
-                <div className="flex items-center justify-between">
-                  <h3 className="font-semibold text-zinc-900">{g.name}</h3>
-                  <button onClick={() => setTodayQueueSelectedId(null)} className="text-xs text-zinc-500">✕</button>
-                </div>
-                <div className="text-xs text-zinc-500">
-                  {g.countryCode} · {g.checkInDate} · {g.nights}N
-                </div>
-
-                {/* 4 items */}
-                <ItemRow label={t('checkin.checklistPassport')} done={!breakdown.passport}
-                  onClick={() => setExpandedItem(expandedItem === 'passport' ? null : 'passport')}
-                  isExpanded={expandedItem === 'passport'}>
-                  {expandedItem === 'passport' && (
-                    <div className="space-y-2 mt-2">
-                      <Input placeholder="Passport / ID" value={scanPassportValue}
-                        onChange={e => setScanPassportValue(e.target.value)} className="h-8 text-xs" />
-                      <Input type="date" value={scanDob} onChange={e => setScanDob(e.target.value)} className="h-8 text-xs" />
-                      <Button size="sm" onClick={() => {
-                        scanPassport(g.id);
-                        updateArrival(g.id, { passportOrId: scanPassportValue, dob: scanDob });
-                        setScanPassportValue(''); setScanDob('');
-                        setExpandedItem(null);
-                      }}>{t('checkin.scanConfirm')}</Button>
-                    </div>
-                  )}
-                </ItemRow>
-                <ItemRow label={t('checkin.checklistPayment')} done={!breakdown.payment}
-                  onClick={() => setExpandedItem(expandedItem === 'payment' ? null : 'payment')}
-                  isExpanded={expandedItem === 'payment'}>
-                  {expandedItem === 'payment' && (
-                    <div className="space-y-2 mt-2">
-                      <div className="text-xs text-zinc-700">
-                        {g.totalAmount != null ? `${g.totalAmount}` : '$0'} {t('checkin.payment')} · {g.paymentStatus}
-                      </div>
-                      <div className="text-[10px] text-zinc-500 italic">{t('checkin.paidAmountHint')}</div>
-                      <Button size="sm" onClick={() => {
-                        settlePayment(g.id);
-                        setExpandedItem(null);
-                      }}>{t('checkin.markAsPaid')}</Button>
-                    </div>
-                  )}
-                </ItemRow>
-                <ItemRow label={t('checkin.checklistBed')} done={!breakdown.bed}
-                  onClick={() => setExpandedItem(expandedItem === 'bed' ? null : 'bed')}
-                  isExpanded={expandedItem === 'bed'}>
-                  {expandedItem === 'bed' && (
-                    <div className="space-y-2 mt-2">
-                      {todayQueueScoredBeds.length === 0 ? (
-                        <div className="text-xs text-red-500">{t('checkin.noAvailableBeds')}</div>
-                      ) : (
-                        <div className="grid grid-cols-2 gap-2">
-                          {todayQueueScoredBeds.map((score, idx) => (
-                            <button key={score.bedId}
-                              onClick={() => {
-                                assignArrival(g.id, score.bedId);
-                                updateArrival(g.id, { assignedBedId: score.bedId });
-                                setExpandedItem(null);
-                              }}
-                              className={cn("p-2 rounded-lg border text-left text-xs",
-                                idx === 0 ? "border-emerald-400 bg-emerald-50" : "border-zinc-200 bg-white")}>
-                              {idx === 0 && <span className="text-[9px] bg-emerald-500 text-white px-1 rounded">★ Best</span>}
-                              <div className="font-semibold">{score.roomType}</div>
-                              <div className="text-[10px] text-zinc-500">{score.bedName} · R{score.roomNumber}</div>
-                            </button>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </ItemRow>
-                <ItemRow label={t('checkin.checklistNotes')} done={!breakdown.notes}
-                  onClick={() => setExpandedItem(expandedItem === 'notes' ? null : 'notes')}
-                  isExpanded={expandedItem === 'notes'}>
-                  {expandedItem === 'notes' && (
-                    <div className="space-y-2 mt-2">
-                      <Input placeholder={t('checkin.notesPlaceholder')} value={notesValue}
-                        onChange={e => setNotesValue(e.target.value)} className="h-8 text-xs" />
-                      <div className="flex gap-2">
-                        <Button size="sm" onClick={() => {
-                          updateArrival(g.id, { notes: notesValue });
-                          setNotesValue('');
-                          setExpandedItem(null);
-                        }}>保存</Button>
-                        <Button size="sm" variant="ghost" onClick={() => {
-                          markNotesSkipped(g.id);
-                          setNotesValue('');
-                          setExpandedItem(null);
-                        }}>{t('checkin.skipNotes')}</Button>
-                      </div>
-                    </div>
-                  )}
-                </ItemRow>
-                <details className="border-t border-zinc-200 pt-3 mt-3">
-                  <summary className="cursor-pointer text-xs text-zinc-500 hover:text-zinc-700">
-                    📋 {t('checkin.fullDetails')}
-                  </summary>
-                  <div className="mt-3 space-y-2 opacity-70 pointer-events-none">
-                    {/* 5 卡片只读摘要：直接复用已有字段渲染 */}
-                    <div className="p-2 bg-zinc-50 rounded text-xs">
-                      <div><b>{g.name}</b> · {g.country}</div>
-                      <div className="text-[10px] text-zinc-500">{g.nights}N · {g.paymentStatus}</div>
-                    </div>
-                    <div className="p-2 bg-zinc-50 rounded text-xs">
-                      <div className="text-[10px] font-semibold uppercase text-zinc-500">{t('checkin.verification')}</div>
-                      <div>{g.passportScanned ? '✅ ' + t('checkin.verified') : '⬜ ' + t('checkin.scanPassport')}</div>
-                    </div>
-                    <div className="p-2 bg-zinc-50 rounded text-xs">
-                      <div className="text-[10px] font-semibold uppercase text-zinc-500">{t('checkin.payment')}</div>
-                      <div>{g.paymentStatus}</div>
-                    </div>
-                    <div className="p-2 bg-zinc-50 rounded text-xs">
-                      <div className="text-[10px] font-semibold uppercase text-zinc-500">{t('checkin.notes')}</div>
-                      <div>{g.notes || '—'}</div>
-                    </div>
-                    <div className="p-2 bg-zinc-50 rounded text-xs">
-                      <div className="text-[10px] font-semibold uppercase text-zinc-500">{t('checkin.assignBed')}</div>
-                      <div>{g.assignedBedId || '—'}</div>
-                    </div>
+          {/* 右：详情面板（移动端在第二行，桌面端在右侧 400px 固定宽） */}
+          <div className="overflow-y-auto">
+            {todayQueueSelected ? (() => {
+              const g = todayQueueSelected;
+              const breakdown = computeIncompleteness(g);
+              const allDone = breakdown.count === 0;
+              return (
+                <div className="bg-white border border-zinc-200 rounded-2xl p-4 shadow-sm space-y-2">
+                  {/* Header */}
+                  <div className="flex items-center justify-between">
+                    <h3 className="font-semibold text-zinc-900">{g.name}</h3>
+                    <button onClick={() => setTodayQueueSelectedId(null)} className="text-xs text-zinc-500">✕</button>
                   </div>
-                </details>
+                  <div className="text-xs text-zinc-500">
+                    {g.countryCode} · {g.checkInDate} · {g.nights}N
+                  </div>
+
+                  {/* 4 items */}
+                  <ItemRow label={t('checkin.checklistPassport')} done={!breakdown.passport}
+                    onClick={() => setExpandedItem(expandedItem === 'passport' ? null : 'passport')}
+                    isExpanded={expandedItem === 'passport'}>
+                    {expandedItem === 'passport' && (
+                      <div className="space-y-2 mt-2">
+                        <Input placeholder="Passport / ID" value={scanPassportValue}
+                          onChange={e => setScanPassportValue(e.target.value)} className="h-8 text-xs" />
+                        <Input type="date" value={scanDob} onChange={e => setScanDob(e.target.value)} className="h-8 text-xs" />
+                        <Button size="sm" onClick={() => {
+                          scanPassport(g.id);
+                          updateArrival(g.id, { passportOrId: scanPassportValue, dob: scanDob });
+                          setScanPassportValue(''); setScanDob('');
+                          setExpandedItem(null);
+                        }}>{t('checkin.scanConfirm')}</Button>
+                      </div>
+                    )}
+                  </ItemRow>
+                  <ItemRow label={t('checkin.checklistPayment')} done={!breakdown.payment}
+                    onClick={() => setExpandedItem(expandedItem === 'payment' ? null : 'payment')}
+                    isExpanded={expandedItem === 'payment'}>
+                    {expandedItem === 'payment' && (
+                      <div className="space-y-2 mt-2">
+                        <div className="text-xs text-zinc-700">
+                          {g.totalAmount != null ? `${g.totalAmount}` : '$0'} {t('checkin.payment')} · {g.paymentStatus}
+                        </div>
+                        <div className="text-[10px] text-zinc-500 italic">{t('checkin.paidAmountHint')}</div>
+                        <Button size="sm" onClick={() => {
+                          settlePayment(g.id);
+                          setExpandedItem(null);
+                        }}>{t('checkin.markAsPaid')}</Button>
+                      </div>
+                    )}
+                  </ItemRow>
+                  <ItemRow label={t('checkin.checklistBed')} done={!breakdown.bed}
+                    onClick={() => setExpandedItem(expandedItem === 'bed' ? null : 'bed')}
+                    isExpanded={expandedItem === 'bed'}>
+                    {expandedItem === 'bed' && (
+                      <div className="space-y-2 mt-2">
+                        {todayQueueScoredBeds.length === 0 ? (
+                          <div className="text-xs text-red-500">{t('checkin.noAvailableBeds')}</div>
+                        ) : (
+                          <div className="grid grid-cols-2 gap-2">
+                            {todayQueueScoredBeds.map((score, idx) => (
+                              <button key={score.bedId}
+                                onClick={() => {
+                                  assignArrival(g.id, score.bedId);
+                                  updateArrival(g.id, { assignedBedId: score.bedId });
+                                  setExpandedItem(null);
+                                }}
+                                className={cn("p-2 rounded-lg border text-left text-xs",
+                                  idx === 0 ? "border-emerald-400 bg-emerald-50" : "border-zinc-200 bg-white")}>
+                                {idx === 0 && <span className="text-[9px] bg-emerald-500 text-white px-1 rounded">★ Best</span>}
+                                <div className="font-semibold">{score.roomType}</div>
+                                <div className="text-[10px] text-zinc-500">{score.bedName} · R{score.roomNumber}</div>
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </ItemRow>
+                  <ItemRow label={t('checkin.checklistNotes')} done={!breakdown.notes}
+                    onClick={() => setExpandedItem(expandedItem === 'notes' ? null : 'notes')}
+                    isExpanded={expandedItem === 'notes'}>
+                    {expandedItem === 'notes' && (
+                      <div className="space-y-2 mt-2">
+                        <Input placeholder={t('checkin.notesPlaceholder')} value={notesValue}
+                          onChange={e => setNotesValue(e.target.value)} className="h-8 text-xs" />
+                        <div className="flex gap-2">
+                          <Button size="sm" onClick={() => {
+                            updateArrival(g.id, { notes: notesValue });
+                            setNotesValue('');
+                            setExpandedItem(null);
+                          }}>保存</Button>
+                          <Button size="sm" variant="ghost" onClick={() => {
+                            markNotesSkipped(g.id);
+                            setNotesValue('');
+                            setExpandedItem(null);
+                          }}>{t('checkin.skipNotes')}</Button>
+                        </div>
+                      </div>
+                    )}
+                  </ItemRow>
+                  <details className="border-t border-zinc-200 pt-3 mt-3">
+                    <summary className="cursor-pointer text-xs text-zinc-500 hover:text-zinc-700">
+                      📋 {t('checkin.fullDetails')}
+                    </summary>
+                    <div className="mt-3 space-y-2 opacity-70 pointer-events-none">
+                      {/* 5 卡片只读摘要：直接复用已有字段渲染 */}
+                      <div className="p-2 bg-zinc-50 rounded text-xs">
+                        <div><b>{g.name}</b> · {g.country}</div>
+                        <div className="text-[10px] text-zinc-500">{g.nights}N · {g.paymentStatus}</div>
+                      </div>
+                      <div className="p-2 bg-zinc-50 rounded text-xs">
+                        <div className="text-[10px] font-semibold uppercase text-zinc-500">{t('checkin.verification')}</div>
+                        <div>{g.passportScanned ? '✅ ' + t('checkin.verified') : '⬜ ' + t('checkin.scanPassport')}</div>
+                      </div>
+                      <div className="p-2 bg-zinc-50 rounded text-xs">
+                        <div className="text-[10px] font-semibold uppercase text-zinc-500">{t('checkin.payment')}</div>
+                        <div>{g.paymentStatus}</div>
+                      </div>
+                      <div className="p-2 bg-zinc-50 rounded text-xs">
+                        <div className="text-[10px] font-semibold uppercase text-zinc-500">{t('checkin.notes')}</div>
+                        <div>{g.notes || '—'}</div>
+                      </div>
+                      <div className="p-2 bg-zinc-50 rounded text-xs">
+                        <div className="text-[10px] font-semibold uppercase text-zinc-500">{t('checkin.assignBed')}</div>
+                        <div>{g.assignedBedId || '—'}</div>
+                      </div>
+                    </div>
+                  </details>
+                </div>
+              );
+            })() : (
+              <div className="h-full min-h-[200px] border-2 border-dashed border-zinc-200 rounded-2xl flex items-center justify-center text-zinc-400 bg-zinc-50/50 text-sm">
+                {t('checkin.selectGuestToBegin')}
               </div>
-            );
-          })()}
-        </>
+            )}
+          </div>
+        </div>
       )}
 
       {/* ── Pending Tab ── */}
