@@ -41,9 +41,14 @@ export function CheckInPanel({ setActiveTab }: { setActiveTab?: (tab: string) =>
   const tomorrow = new Date();
   tomorrow.setDate(tomorrow.getDate() + 1);
   const [newGuestRef, setNewGuestRef] = useState({
-    name: '', countryCode: '', gender: 'male' as "male" | "female" | "other",
+    firstName: '', lastName: '',
+    countryCode: '', gender: 'male' as "male" | "female" | "other",
     checkInDate: format(new Date(), 'yyyy-MM-dd'), checkOutDate: format(tomorrow, 'yyyy-MM-dd'),
-    passportOrId: '', dob: '', policeConsent: false, notes: ''
+    phone: '', email: '',
+    idType: 'passport' as "passport" | "idCard" | "driverLicense",
+    passportOrId: '', arrivalTime: '' as "" | "morning" | "afternoon" | "evening" | "late",
+    referral: '', bookingSource: 'walk-in' as "walk-in" | "phone" | "email" | "referral" | "other",
+    dob: '', policeConsent: false, notes: '',
   });
 
   const selectedGuest = arrivals.find(g => g.id === selectedGuestId);
@@ -100,22 +105,40 @@ export function CheckInPanel({ setActiveTab }: { setActiveTab?: (tab: string) =>
 
   const handleCreateArrival = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newGuestRef.name || !newGuestRef.countryCode || !newGuestRef.checkInDate || !newGuestRef.checkOutDate || !newGuestRef.policeConsent) return;
+    if (!newGuestRef.firstName || !newGuestRef.lastName || !newGuestRef.countryCode || !newGuestRef.checkInDate || !newGuestRef.checkOutDate || !newGuestRef.policeConsent) return;
     const countryName = COUNTRY_MAP[newGuestRef.countryCode.toUpperCase()] || newGuestRef.countryCode.toUpperCase();
     const checkIn = parseISO(newGuestRef.checkInDate);
     const checkOut = parseISO(newGuestRef.checkOutDate);
     const calculatedNights = Math.max(1, differenceInDays(checkOut, checkIn));
     addArrival({
-      name: newGuestRef.name, country: countryName, countryCode: newGuestRef.countryCode.toUpperCase(),
-      gender: newGuestRef.gender, checkInDate: newGuestRef.checkInDate, checkOutDate: newGuestRef.checkOutDate,
-      nights: calculatedNights, paymentStatus: 'unpaid' as const, totalAmount: calculatedNights * DEFAULT_PRICE,
-      passportScanned: true, passportOrId: newGuestRef.passportOrId, dob: newGuestRef.dob,
-      policeConsent: newGuestRef.policeConsent, notes: newGuestRef.notes, source: 'walk-in' as const,
+      name: [newGuestRef.firstName, newGuestRef.lastName].filter(Boolean).join(' '),
+      firstName: newGuestRef.firstName,
+      lastName: newGuestRef.lastName,
+      country: countryName, countryCode: newGuestRef.countryCode.toUpperCase(),
+      gender: newGuestRef.gender,
+      checkInDate: newGuestRef.checkInDate, checkOutDate: newGuestRef.checkOutDate,
+      nights: calculatedNights,
+      paymentStatus: 'unpaid' as const, totalAmount: calculatedNights * DEFAULT_PRICE,
+      phone: newGuestRef.phone, email: newGuestRef.email,
+      passportScanned: true, passportOrId: newGuestRef.passportOrId,
+      idType: newGuestRef.idType,
+      arrivalTime: newGuestRef.arrivalTime || undefined,
+      referral: newGuestRef.referral || undefined,
+      bookingSource: newGuestRef.bookingSource,
+      dob: newGuestRef.dob, policeConsent: newGuestRef.policeConsent,
+      notes: newGuestRef.notes,
+      source: 'walk-in' as const,
     });
     setSelectedGuestId(null);
     setNewGuestRef({
-      name: '', countryCode: '', checkInDate: format(new Date(), 'yyyy-MM-dd'),
-      checkOutDate: format(tomorrow, 'yyyy-MM-dd'), passportOrId: '', dob: '', policeConsent: false, notes: ''
+      firstName: '', lastName: '',
+      countryCode: '', gender: 'male' as "male" | "female" | "other",
+      checkInDate: format(new Date(), 'yyyy-MM-dd'), checkOutDate: format(tomorrow, 'yyyy-MM-dd'),
+      phone: '', email: '',
+      idType: 'passport' as "passport" | "idCard" | "driverLicense",
+      passportOrId: '', arrivalTime: '' as "" | "morning" | "afternoon" | "evening" | "late",
+      referral: '', bookingSource: 'walk-in' as "walk-in" | "phone" | "email" | "referral" | "other",
+      dob: '', policeConsent: false, notes: '',
     });
   };
 
@@ -223,70 +246,140 @@ export function CheckInPanel({ setActiveTab }: { setActiveTab?: (tab: string) =>
                 <h2 className="text-lg font-semibold text-zinc-900 tracking-tight mb-4 flex items-center gap-2">
                   <UserIcon className="w-5 h-5 text-zinc-400" />{t('checkin.walkInRegistration') || t('checkin.newWalkIn')}
                 </h2>
-                <form onSubmit={handleCreateArrival} className="space-y-3">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                    <div className="space-y-1.5">
-                      <Label className="text-[10px] font-semibold text-zinc-500 uppercase">{t('checkin.name')}</Label>
-                      <div className="relative"><UserIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-400" />
-                        <Input required className="pl-8 h-10 bg-zinc-50 border-zinc-200" placeholder="John Doe" value={newGuestRef.name} onChange={e => setNewGuestRef({...newGuestRef, name: e.target.value})} />
+                <form onSubmit={handleCreateArrival} className="space-y-4">
+                  {/* ── Section 1: Personal Info ── */}
+                  <div className="space-y-3">
+                    <div className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">Personal Info</div>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                      <div className="space-y-1.5">
+                        <Label className="text-[10px] font-semibold text-zinc-500 uppercase">{t('checkin.firstName')}<span className="text-red-500">*</span></Label>
+                        <Input required value={newGuestRef.firstName} onChange={e => setNewGuestRef({...newGuestRef, firstName: e.target.value})} className="h-10 bg-zinc-50 border-zinc-200" />
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label className="text-[10px] font-semibold text-zinc-500 uppercase">{t('checkin.lastName')}<span className="text-red-500">*</span></Label>
+                        <Input required value={newGuestRef.lastName} onChange={e => setNewGuestRef({...newGuestRef, lastName: e.target.value})} className="h-10 bg-zinc-50 border-zinc-200" />
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label className="text-[10px] font-semibold text-zinc-500 uppercase">{t('checkin.country')}<span className="text-red-500">*</span></Label>
+                        <div className="relative">
+                          <Globe className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-400" />
+                          <Input required maxLength={3} className="pl-8 h-10 bg-zinc-50 border-zinc-200 uppercase" placeholder="US" value={newGuestRef.countryCode} onChange={e => setNewGuestRef({...newGuestRef, countryCode: e.target.value.toUpperCase()})} />
+                        </div>
                       </div>
                     </div>
-                    <div className="space-y-1.5">
-                      <Label className="text-[10px] font-semibold text-zinc-500 uppercase">{t('checkin.country')}</Label>
-                      <div className="relative"><Globe className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-400" />
-                        <Input required maxLength={3} className="pl-8 h-10 bg-zinc-50 border-zinc-200 uppercase" placeholder="US" value={newGuestRef.countryCode} onChange={e => setNewGuestRef({...newGuestRef, countryCode: e.target.value.toUpperCase()})} />
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                      <div className="space-y-1.5">
+                        <Label className="text-[10px] font-semibold text-zinc-500 uppercase">{t('checkin.phone')}<span className="text-red-500">*</span></Label>
+                        <Input required type="tel" value={newGuestRef.phone} onChange={e => setNewGuestRef({...newGuestRef, phone: e.target.value})} placeholder="+1-555-0100" className="h-10 bg-zinc-50 border-zinc-200" />
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label className="text-[10px] font-semibold text-zinc-500 uppercase">{t('checkin.email')}<span className="text-red-500">*</span></Label>
+                        <Input required type="email" value={newGuestRef.email} onChange={e => setNewGuestRef({...newGuestRef, email: e.target.value})} placeholder="john@mail.com" className="h-10 bg-zinc-50 border-zinc-200" />
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label className="text-[10px] font-semibold text-zinc-500 uppercase">{t('guest.gender') || 'Gender'}<span className="text-red-500">*</span></Label>
+                        <Select required value={newGuestRef.gender} onValueChange={(val: string) => setNewGuestRef({...newGuestRef, gender: val as "male" | "female" | "other"})}>
+                          <SelectTrigger className="h-10 bg-zinc-50 border-zinc-200"><SelectValue /></SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="male">{t('guest.male') || 'Male'}</SelectItem>
+                            <SelectItem value="female">{t('guest.female') || 'Female'}</SelectItem>
+                            <SelectItem value="other">{t('guest.other') || 'Other'}</SelectItem>
+                          </SelectContent>
+                        </Select>
                       </div>
                     </div>
-                    <div className="space-y-1.5">
-                      <Label className="text-[10px] font-semibold text-zinc-500 uppercase">{t('guest.gender') || "Gender"}</Label>
-                      <Select value={newGuestRef.gender} onValueChange={(val: string) => setNewGuestRef({...newGuestRef, gender: val as "male" | "female" | "other"})}>
-                        <SelectTrigger className="h-10 bg-zinc-50 border-zinc-200"><SelectValue /></SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="male">{t('guest.male') || "Male"}</SelectItem>
-                          <SelectItem value="female">{t('guest.female') || "Female"}</SelectItem>
-                          <SelectItem value="other">{t('guest.other') || "Other"}</SelectItem>
-                        </SelectContent>
-                      </Select>
+                    <div className="space-y-1.5 sm:w-1/3">
+                      <Label className="text-[10px] font-semibold text-zinc-500 uppercase">{t('checkin.dob') || 'DOB'}</Label>
+                      <Input type="date" value={newGuestRef.dob} onChange={e => setNewGuestRef({...newGuestRef, dob: e.target.value})} className="h-10 bg-zinc-50 border-zinc-200" />
                     </div>
                   </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div className="space-y-1.5">
-                      <Label className="text-[10px] font-semibold text-zinc-500 uppercase">{t('checkin.checkInDate')}</Label>
-                      <div className="relative"><CalendarIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-400" />
-                        <Input type="date" required className="pl-8 h-10 bg-zinc-50 border-zinc-200" value={newGuestRef.checkInDate} onChange={e => setNewGuestRef({...newGuestRef, checkInDate: e.target.value})} />
+
+                  {/* ── Section 2: Stay ── */}
+                  <div className="space-y-3 pt-3 border-t border-zinc-100">
+                    <div className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">Stay</div>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                      <div className="space-y-1.5">
+                        <Label className="text-[10px] font-semibold text-zinc-500 uppercase">{t('checkin.checkInDate')}<span className="text-red-500">*</span></Label>
+                        <Input type="date" required className="h-10 bg-zinc-50 border-zinc-200" value={newGuestRef.checkInDate} onChange={e => setNewGuestRef({...newGuestRef, checkInDate: e.target.value})} />
                       </div>
-                    </div>
-                    <div className="space-y-1.5">
-                      <Label className="text-[10px] font-semibold text-zinc-500 uppercase">{t('checkin.checkOutDate')}</Label>
-                      <div className="relative"><CalendarIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-400" />
-                        <Input type="date" required className="pl-8 h-10 bg-zinc-50 border-zinc-200" value={newGuestRef.checkOutDate} onChange={e => setNewGuestRef({...newGuestRef, checkOutDate: e.target.value})} />
+                      <div className="space-y-1.5">
+                        <Label className="text-[10px] font-semibold text-zinc-500 uppercase">{t('checkin.checkOutDate')}<span className="text-red-500">*</span></Label>
+                        <Input type="date" required className="h-10 bg-zinc-50 border-zinc-200" value={newGuestRef.checkOutDate} onChange={e => setNewGuestRef({...newGuestRef, checkOutDate: e.target.value})} />
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label className="text-[10px] font-semibold text-zinc-500 uppercase">{t('checkin.arrivalTime.label')}</Label>
+                        <Select value={newGuestRef.arrivalTime} onValueChange={(val: string) => setNewGuestRef({...newGuestRef, arrivalTime: val as "morning" | "afternoon" | "evening" | "late"})}>
+                          <SelectTrigger className="h-10 bg-zinc-50 border-zinc-200"><SelectValue placeholder="—" /></SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="morning">{t('checkin.arrivalTime.morning')}</SelectItem>
+                            <SelectItem value="afternoon">{t('checkin.arrivalTime.afternoon')}</SelectItem>
+                            <SelectItem value="evening">{t('checkin.arrivalTime.evening')}</SelectItem>
+                            <SelectItem value="late">{t('checkin.arrivalTime.late')}</SelectItem>
+                          </SelectContent>
+                        </Select>
                       </div>
                     </div>
                   </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div className="space-y-1.5">
-                      <Label className="text-[10px] font-semibold text-zinc-500 uppercase">{t('checkin.passportOrId')}</Label>
-                      <div className="relative"><IdCard className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-400" />
-                        <Input required className="pl-8 h-10 bg-zinc-50 border-zinc-200" value={newGuestRef.passportOrId} onChange={e => setNewGuestRef({...newGuestRef, passportOrId: e.target.value})} />
+
+                  {/* ── Section 3: ID & Source ── */}
+                  <div className="space-y-3 pt-3 border-t border-zinc-100">
+                    <div className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">ID &amp; Source</div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div className="space-y-1.5">
+                        <Label className="text-[10px] font-semibold text-zinc-500 uppercase">{t('checkin.idType.label')}<span className="text-red-500">*</span></Label>
+                        <Select required value={newGuestRef.idType} onValueChange={(val: string) => setNewGuestRef({...newGuestRef, idType: val as "passport" | "idCard" | "driverLicense"})}>
+                          <SelectTrigger className="h-10 bg-zinc-50 border-zinc-200"><SelectValue /></SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="passport">{t('checkin.idType.passport')}</SelectItem>
+                            <SelectItem value="idCard">{t('checkin.idType.idCard')}</SelectItem>
+                            <SelectItem value="driverLicense">{t('checkin.idType.driverLicense')}</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label className="text-[10px] font-semibold text-zinc-500 uppercase">{t('checkin.passportOrId')}<span className="text-red-500">*</span></Label>
+                        <div className="relative">
+                          <IdCard className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-400" />
+                          <Input required className="pl-8 h-10 bg-zinc-50 border-zinc-200" value={newGuestRef.passportOrId} onChange={e => setNewGuestRef({...newGuestRef, passportOrId: e.target.value})} />
+                        </div>
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div className="space-y-1.5">
+                        <Label className="text-[10px] font-semibold text-zinc-500 uppercase">{t('checkin.source.label')}</Label>
+                        <Select value={newGuestRef.bookingSource} onValueChange={(val: string) => setNewGuestRef({...newGuestRef, bookingSource: val as "walk-in" | "phone" | "email" | "referral" | "other"})}>
+                          <SelectTrigger className="h-10 bg-zinc-50 border-zinc-200"><SelectValue /></SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="walk-in">{t('checkin.source.walkIn')}</SelectItem>
+                            <SelectItem value="phone">{t('checkin.source.phone')}</SelectItem>
+                            <SelectItem value="email">{t('checkin.source.email')}</SelectItem>
+                            <SelectItem value="referral">{t('checkin.source.referral')}</SelectItem>
+                            <SelectItem value="other">{t('checkin.source.other')}</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label className="text-[10px] font-semibold text-zinc-500 uppercase">{t('checkin.referral')}</Label>
+                        <Input className="h-10 bg-zinc-50 border-zinc-200" placeholder="Hostelworld / Friend / Google…" value={newGuestRef.referral} onChange={e => setNewGuestRef({...newGuestRef, referral: e.target.value})} />
                       </div>
                     </div>
                     <div className="space-y-1.5">
-                      <Label className="text-[10px] font-semibold text-zinc-500 uppercase">{t('checkin.dob')}</Label>
-                      <div className="relative"><CalendarIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-400" />
-                        <Input type="date" required className="pl-8 h-10 bg-zinc-50 border-zinc-200" value={newGuestRef.dob} onChange={e => setNewGuestRef({...newGuestRef, dob: e.target.value})} />
-                      </div>
+                      <Label className="text-[10px] font-semibold text-zinc-500 uppercase flex items-center gap-1.5"><FileText className="w-3 h-3" />{t('checkin.notes')}</Label>
+                      <Input className="h-10 bg-zinc-50 border-zinc-200" placeholder="E.g., Prefers bottom bunk" value={newGuestRef.notes} onChange={e => setNewGuestRef({...newGuestRef, notes: e.target.value})} />
                     </div>
                   </div>
-                  <div className="space-y-1.5">
-                    <Label className="text-[10px] font-semibold text-zinc-500 uppercase flex items-center gap-1.5"><FileText className="w-3 h-3" />{t('checkin.notes')}</Label>
-                    <Input className="h-10 bg-zinc-50 border-zinc-200" placeholder="E.g., Prefers bottom bunk" value={newGuestRef.notes} onChange={e => setNewGuestRef({...newGuestRef, notes: e.target.value})} />
-                  </div>
+
+                  {/* ── Police Consent (sticky) ── */}
                   <div className="bg-zinc-50 p-3 rounded-xl border border-zinc-200">
                     <label className="flex items-start gap-2.5 cursor-pointer">
                       <input type="checkbox" required checked={newGuestRef.policeConsent} onChange={e => setNewGuestRef({...newGuestRef, policeConsent: e.target.checked})} className="mt-0.5 w-4 h-4 rounded border-zinc-300 text-zinc-900 focus:ring-zinc-900" />
-                      <div><span className="text-xs font-semibold text-zinc-900">{t('checkin.policeRegistration')}</span><span className="text-[10px] text-zinc-500 block mt-0.5">{t('checkin.policeRegistrationDesc')}</span></div>
+                      <div>
+                        <span className="text-xs font-semibold text-zinc-900">{t('checkin.policeRegistration')}<span className="text-red-500">*</span></span>
+                        <span className="text-[10px] text-zinc-500 block mt-0.5">{t('checkin.policeRegistrationDesc')}</span>
+                      </div>
                     </label>
                   </div>
+
                   <div className="pt-3 border-t border-zinc-100 flex justify-end">
                     <Button type="submit" size="lg" className="h-11 px-6 text-sm shadow-sm w-full sm:w-auto">{t('checkin.createArrival')}</Button>
                   </div>
