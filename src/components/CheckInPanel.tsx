@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useTranslation } from '../i18nContext';
 import { differenceInDays, parseISO, format } from 'date-fns';
 import { ICalImport } from './ICalImport';
+import { EditGuestInfoModal } from './EditGuestInfoModal';
 import { Guest, Bed, Room } from '../types';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '@/lib/utils';
@@ -23,6 +24,21 @@ const DEFAULT_PRICE = 85;
 
 type SubTab = 'pending' | 'checked-in' | 'reserved';
 
+function Field({ icon, label, value, placeholder }: { icon: string; label: string; value?: string; placeholder: string }) {
+  const hasValue = !!value && value.length > 0;
+  return (
+    <div className="flex items-start gap-1.5 min-w-0">
+      <span className="shrink-0 opacity-60">{icon}</span>
+      <div className="min-w-0 flex-1">
+        <div className="text-[9px] font-semibold text-zinc-400 uppercase tracking-wider">{label}</div>
+        <div className={cn("truncate", hasValue ? "text-zinc-900 font-medium" : "text-zinc-400 italic")}>
+          {hasValue ? value : placeholder}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function CheckInPanel({ setActiveTab }: { setActiveTab?: (tab: string) => void }) {
   const { arrivals, rooms, assignArrival, autoAssignBed, settlePayment, scanPassport, addArrival, updateArrival, importArrivals, checkoutGuest } = useHostel();
   const { t } = useTranslation();
@@ -36,6 +52,7 @@ export function CheckInPanel({ setActiveTab }: { setActiveTab?: (tab: string) =>
   const [checkInSuccess, setCheckInSuccess] = useState<string | null>(null);
   const [editNotes, setEditNotes] = useState('');
   const [editRoomPref, setEditRoomPref] = useState('');
+  const [editInfoOpen, setEditInfoOpen] = useState(false);
 
   // New guest state
   const tomorrow = new Date();
@@ -386,25 +403,62 @@ export function CheckInPanel({ setActiveTab }: { setActiveTab?: (tab: string) =>
                 </form>
               </div>
             ) : selectedGuest ? (
-              <div className="space-y-4">
-                {/* Guest Header */}
-                <div className="bg-white p-4 rounded-2xl border border-zinc-200 shadow-sm flex items-end justify-between">
-                  <div>
-                    <h2 className="text-xl font-semibold text-zinc-900">{selectedGuest.name}</h2>
-                    <p className="text-xs text-zinc-500 mt-0.5">
-                      <span className="font-medium text-zinc-700">{selectedGuest.country}</span>
-                      {' · '}{selectedGuest.nights} {t('dashboard.nights')}
-                      {' · '}{t('checkin.checkout')} {selectedGuest.checkOutDate}
-                    </p>
+              <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
+                {/* ── Left 60%: Info Card ── */}
+                <div className="lg:col-span-3 space-y-4">
+                  <div className="bg-white p-4 rounded-2xl border border-zinc-200 shadow-sm">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0">
+                        <h2 className="text-xl font-semibold text-zinc-900 truncate">
+                          {[selectedGuest.firstName, selectedGuest.lastName].filter(Boolean).join(' ') || selectedGuest.name}
+                        </h2>
+                        <p className="text-xs text-zinc-500 mt-0.5">
+                          <span className="font-medium text-zinc-700">{selectedGuest.country}</span>
+                          {' · '}{selectedGuest.gender ? t(`guest.${selectedGuest.gender}`) || selectedGuest.gender : t('checkin.notProvided')}
+                          {' · '}{selectedGuest.nights} {t('dashboard.nights')}
+                          {' · '}{t('checkin.checkout')} {selectedGuest.checkOutDate}
+                        </p>
+                      </div>
+                      <Button variant="outline" size="sm" className="h-7 text-xs shrink-0" onClick={() => setEditInfoOpen(true)}>
+                        ✎ {t('checkin.editInfo')}
+                      </Button>
+                    </div>
+                    {selectedGuest.paymentStatus === 'unpaid' && (
+                      <div className="mt-3 inline-flex items-center gap-1.5 bg-amber-50 text-amber-700 px-2 py-1 rounded-md text-[10px] font-semibold">
+                        ⚠ {t('checkin.paymentDue')} ${selectedGuest.totalAmount ?? (selectedGuest.nights * DEFAULT_PRICE)}
+                      </div>
+                    )}
+                    {selectedGuest.paymentStatus === 'paid' && (
+                      <div className="mt-3 inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-700 px-2 py-1 rounded-md text-[10px] font-semibold">
+                        ✓ {t('checkin.paid')}
+                      </div>
+                    )}
                   </div>
-                  {selectedGuest.paymentStatus === 'unpaid' ? (
-                    <div className="text-right"><span className="block text-[10px] font-semibold text-red-600 uppercase">{t('checkin.paymentDue')}</span><span className="text-lg font-bold text-zinc-900">${DEFAULT_PRICE}</span></div>
-                  ) : (
-                    <div className="text-right"><span className="block text-[10px] font-semibold text-emerald-600 uppercase">{t('checkin.paid')}</span></div>
-                  )}
+
+                  <div className="bg-white p-4 rounded-2xl border border-zinc-200 shadow-sm space-y-3">
+                    <div>
+                      <div className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider mb-2">{t('checkin.contactSection')}</div>
+                      <div className="grid grid-cols-2 gap-2 text-xs">
+                        <Field icon="📧" label={t('checkin.email')} value={selectedGuest.email} placeholder={t('checkin.notProvided')} />
+                        <Field icon="📞" label={t('checkin.phone')} value={selectedGuest.phone} placeholder={t('checkin.notProvided')} />
+                        <Field icon="🕒" label={t('checkin.arrivalTime.label')} value={selectedGuest.arrivalTime ? t(`checkin.arrivalTime.${selectedGuest.arrivalTime}`) : undefined} placeholder={t('checkin.notProvided')} />
+                        <Field icon="🔗" label={t('checkin.referral')} value={selectedGuest.referral} placeholder={t('checkin.notProvided')} />
+                      </div>
+                    </div>
+                    <div className="pt-3 border-t border-zinc-100">
+                      <div className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider mb-2">{t('checkin.idSection')}</div>
+                      <div className="grid grid-cols-2 gap-2 text-xs">
+                        <Field icon="🛂" label={t('checkin.idType.label')} value={selectedGuest.idType ? t(`checkin.idType.${selectedGuest.idType}`) : undefined} placeholder={t('checkin.notProvided')} />
+                        <Field icon="#" label={t('checkin.passportOrId')} value={selectedGuest.passportOrId} placeholder={t('checkin.notProvided')} />
+                        <Field icon="🎂" label={t('checkin.dob') || 'DOB'} value={selectedGuest.dob} placeholder={t('checkin.notProvided')} />
+                        <Field icon="👥" label={t('guest.gender') || 'Gender'} value={selectedGuest.gender ? t(`guest.${selectedGuest.gender}`) || selectedGuest.gender : undefined} placeholder={t('checkin.notProvided')} />
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                {/* Verification + Payment */}
-                <div className="grid grid-cols-2 gap-3">
+
+                {/* ── Right 40%: Actions Stack ── */}
+                <div className="lg:col-span-2 space-y-3">
                   <Card className="p-3 border-zinc-200 bg-white shadow-none">
                     <Label className="text-[10px] text-zinc-500 uppercase font-semibold">{t('checkin.verification')}</Label>
                     <div className="flex items-center gap-2 mt-2">
@@ -416,6 +470,7 @@ export function CheckInPanel({ setActiveTab }: { setActiveTab?: (tab: string) =>
                       ) : <span className="text-xs font-medium text-emerald-600">{t('checkin.verified')}</span>}
                     </div>
                   </Card>
+
                   <Card className="p-3 border-zinc-200 bg-white shadow-none">
                     <Label className="text-[10px] text-zinc-500 uppercase font-semibold">{t('checkin.payment')}</Label>
                     <div className="flex items-center gap-2 mt-2">
@@ -423,78 +478,76 @@ export function CheckInPanel({ setActiveTab }: { setActiveTab?: (tab: string) =>
                         <CheckCircle2 className="h-4 w-4" />
                       </div>
                       {selectedGuest.paymentStatus === 'unpaid' ? (
-                        <Button size="sm" variant="destructive" className="h-7 text-xs" onClick={() => settlePayment(selectedGuest.id)}>{t('checkin.collect')} ${DEFAULT_PRICE}</Button>
+                        <Button size="sm" variant="destructive" className="h-7 text-xs" onClick={() => settlePayment(selectedGuest.id)}>{t('checkin.collect')} ${selectedGuest.totalAmount ?? (selectedGuest.nights * DEFAULT_PRICE)}</Button>
                       ) : <span className="text-xs font-medium text-emerald-600">{t('checkin.allSettled')}</span>}
                     </div>
                   </Card>
-                </div>
-                {/* Notes */}
-                <Card className="p-3 border-zinc-200 bg-white shadow-none">
-                  <div className="grid grid-cols-2 gap-3">
+
+                  <Card className="p-3 border-zinc-200 bg-white shadow-none">
                     <div className="space-y-1">
                       <Label className="text-[10px] text-zinc-500">{t('checkin.notes')}</Label>
-                      <Input className="h-8 bg-zinc-50 border-zinc-200 text-xs" placeholder="Notes..." value={editNotes}
+                      <Input className="h-8 bg-zinc-50 border-zinc-200 text-xs" placeholder="..." value={editNotes}
                         onChange={e => { setEditNotes(e.target.value); if (selectedGuest) updateArrival(selectedGuest.id, { notes: e.target.value }); }} />
                     </div>
-                    <div className="space-y-1">
-                      <Label className="text-[10px] text-zinc-500">{t('checkin.roomPreference')}</Label>
-                      <Input className="h-8 bg-zinc-50 border-zinc-200 text-xs" placeholder="Room pref..." value={editRoomPref}
-                        onChange={e => { setEditRoomPref(e.target.value); if (selectedGuest) updateArrival(selectedGuest.id, { roomPreference: e.target.value }); }} />
+                  </Card>
+
+                  <Card className="p-4 border-zinc-200 shadow-none">
+                    <Label className="text-xs text-zinc-900 font-semibold mb-2 flex items-center gap-1.5"><BedDouble className="h-3.5 w-3.5" />{t('checkin.assignBed')}</Label>
+                    <Button size="lg" className="w-full h-11 text-sm mb-3 bg-blue-600 hover:bg-blue-700 text-white shadow-md"
+                      onClick={() => {
+                        const result = autoAssignBed(selectedGuest.id);
+                        if (result) {
+                          setCheckInSuccess(selectedGuest.name);
+                          setSelectedGuestId(null);
+                          setSelectedBedId(null);
+                        }
+                      }}>
+                      <svg className="w-4 h-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+                      {t('checkin.autoAssign') || 'Auto Assign & Check-in'}
+                    </Button>
+                    <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto">
+                      {scoredBeds.map((score, idx) => {
+                        const isTop = idx === 0;
+                        return (
+                          <button key={score.bedId} onClick={() => setSelectedBedId(score.bedId)}
+                            className={cn("p-3 rounded-xl border text-left transition-all cursor-pointer min-h-[70px] relative",
+                              selectedBedId === score.bedId ? 'border-zinc-900 bg-zinc-900 text-white shadow-md' :
+                              isTop ? 'border-emerald-400 bg-emerald-50/70 hover:border-emerald-500 shadow-sm' :
+                              'border-zinc-200 bg-white hover:border-zinc-400')}>
+                            {isTop && <span className="absolute -top-2 left-2 text-[10px] font-bold bg-emerald-500 text-white px-1.5 py-0.5 rounded">★ Best</span>}
+                            <span className="font-semibold text-xs">
+                              {score.roomType === 'dorm-mixed' ? t('bedboard.mixedDorm') : score.roomType === 'dorm-female' ? t('bedboard.femaleDorm') : t('bedboard.private')}
+                            </span>
+                            <span className={cn("text-[10px] mt-0.5 block", selectedBedId === score.bedId ? 'text-zinc-300' : 'text-zinc-500')}>
+                              {score.bedName} · R{score.roomNumber} · ${score.pricePerNight}
+                            </span>
+                            <div className="flex items-center gap-0.5 mt-1">
+                              {score.fillExisting && <span className="text-[9px] bg-zinc-100 dark:bg-zinc-800 px-1 py-0.5 rounded text-zinc-600">Fill</span>}
+                              {score.genderMatch && <span className="text-[9px] bg-blue-50 px-1 py-0.5 rounded text-blue-600">Match</span>}
+                            </div>
+                          </button>
+                        );
+                      })}
+                      {scoredBeds.length === 0 && (
+                        <div className="col-span-full py-4 text-center text-xs text-red-500">{t('checkin.noAvailableBeds') || 'No suitable beds available'}</div>
+                      )}
                     </div>
-                  </div>
-                </Card>
-                {/* Bed Assignment */}
-                <Card className="p-4 border-zinc-200 shadow-none">
-                  <Label className="text-xs text-zinc-900 font-semibold mb-2 flex items-center gap-1.5"><BedDouble className="h-3.5 w-3.5" />{t('checkin.assignBed')}</Label>
-                  {/* Auto Assign Button */}
-                  <Button size="lg" className="w-full h-11 text-sm mb-3 bg-blue-600 hover:bg-blue-700 text-white shadow-md"
-                    onClick={() => {
-                      const result = autoAssignBed(selectedGuest.id);
-                      if (result) {
-                        setCheckInSuccess(selectedGuest.name);
-                        setSelectedGuestId(null);
-                        setSelectedBedId(null);
-                      }
-                    }}>
-                    <svg className="w-4 h-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
-                    {t('checkin.autoAssign') || 'Auto Assign & Check-in'}
-                  </Button>
-                  {/* Scored Bed List */}
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-48 overflow-y-auto">
-                    {scoredBeds.map((score, idx) => {
-                      const isTop = idx === 0;
-                      return (
-                        <button key={score.bedId} onClick={() => setSelectedBedId(score.bedId)}
-                          className={cn("p-3 rounded-xl border text-left transition-all cursor-pointer min-h-[70px] relative",
-                            selectedBedId === score.bedId ? 'border-zinc-900 bg-zinc-900 text-white shadow-md' :
-                            isTop ? 'border-emerald-400 bg-emerald-50/70 hover:border-emerald-500 shadow-sm' :
-                            'border-zinc-200 bg-white hover:border-zinc-400')}>
-                          {isTop && <span className="absolute -top-2 left-2 text-[10px] font-bold bg-emerald-500 text-white px-1.5 py-0.5 rounded">★ Best</span>}
-                          <span className="font-semibold text-xs">
-                            {score.roomType === 'dorm-mixed' ? t('bedboard.mixedDorm') : score.roomType === 'dorm-female' ? t('bedboard.femaleDorm') : t('bedboard.private')}
-                          </span>
-                          <span className={cn("text-[10px] mt-0.5 block", selectedBedId === score.bedId ? 'text-zinc-300' : 'text-zinc-500')}>
-                            {score.bedName} · R{score.roomNumber} · ${score.pricePerNight}
-                          </span>
-                          <div className="flex items-center gap-0.5 mt-1">
-                            {score.fillExisting && <span className="text-[9px] bg-zinc-100 dark:bg-zinc-800 px-1 py-0.5 rounded text-zinc-600">Fill</span>}
-                            {score.genderMatch && <span className="text-[9px] bg-blue-50 px-1 py-0.5 rounded text-blue-600">Match</span>}
-                          </div>
-                        </button>
-                      );
-                    })}
-                    {scoredBeds.length === 0 && (
-                      <div className="col-span-full py-4 text-center text-xs text-red-500">{t('checkin.noAvailableBeds') || 'No suitable beds available'}</div>
+                    {(selectedGuest.paymentStatus === 'unpaid' || selectedGuest.paymentStatus === 'partial') && (
+                      <p className="text-[10px] font-medium text-amber-600 mt-2">⚠️ {t('checkin.unpaidWarning')}</p>
                     )}
-                  </div>
-                  {(selectedGuest.paymentStatus === 'unpaid' || selectedGuest.paymentStatus === 'partial') && (
-                    <p className="text-[10px] font-medium text-amber-600 mt-2">⚠️ {t('checkin.unpaidWarning')}</p>
-                  )}
-                  <div className="mt-3 pt-3 border-t border-zinc-100 flex justify-end gap-2">
-                    <Button size="lg" disabled={!selectedBedId || !selectedGuest.passportScanned} onClick={handleCheckIn}
-                      className="w-full sm:w-auto h-11 px-6 text-sm shadow-lg">{t('checkin.completeCheckIn')}</Button>
-                  </div>
-                </Card>
+                    <div className="mt-3 pt-3 border-t border-zinc-100 flex justify-end gap-2">
+                      <Button size="lg" disabled={!selectedBedId || !selectedGuest.passportScanned} onClick={handleCheckIn}
+                        className="w-full sm:w-auto h-11 px-6 text-sm shadow-lg">{t('checkin.completeCheckIn')}</Button>
+                    </div>
+                  </Card>
+                </div>
+
+                <EditGuestInfoModal
+                  open={editInfoOpen}
+                  onClose={() => setEditInfoOpen(false)}
+                  guest={selectedGuest}
+                  onSave={(updates) => updateArrival(selectedGuest.id, updates)}
+                />
               </div>
             ) : (
               <div className="h-full border-2 border-dashed border-zinc-200 rounded-2xl flex items-center justify-center text-zinc-400 bg-zinc-50/50 text-sm">
