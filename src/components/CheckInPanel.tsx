@@ -26,7 +26,7 @@ const DEFAULT_PRICE = 85;
 type SubTab = 'todayQueue' | 'pending' | 'checked-in' | 'reserved';
 
 export function CheckInPanel({ setActiveTab }: { setActiveTab?: (tab: string) => void }) {
-  const { arrivals, rooms, assignArrival, autoAssignBed, settlePayment, scanPassport, addArrival, updateArrival, importArrivals, checkoutGuest, pinGuest, unpinGuest, } = useHostel();
+  const { arrivals, rooms, assignArrival, autoAssignBed, settlePayment, scanPassport, addArrival, updateArrival, importArrivals, checkoutGuest, pinGuest, unpinGuest, markNotesSkipped, } = useHostel();
   const { t } = useTranslation();
   const [subTab, setSubTab] = useState<SubTab>('todayQueue');
   const [searchQuery, setSearchQuery] = useState('');
@@ -44,6 +44,7 @@ export function CheckInPanel({ setActiveTab }: { setActiveTab?: (tab: string) =>
   const [expandedItem, setExpandedItem] = useState<'passport' | 'payment' | 'bed' | 'notes' | null>(null);
   const [scanPassportValue, setScanPassportValue] = useState('');
   const [scanDob, setScanDob] = useState('');
+  const [notesValue, setNotesValue] = useState('');
 
   // New guest state
   const tomorrow = new Date();
@@ -273,7 +274,44 @@ export function CheckInPanel({ setActiveTab }: { setActiveTab?: (tab: string) =>
                     </div>
                   )}
                 </ItemRow>
-                {/* ... 其他 3 项在后续 Task */}
+                <ItemRow label={t('checkin.checklistPayment')} done={!breakdown.payment}
+                  onClick={() => setExpandedItem(expandedItem === 'payment' ? null : 'payment')}
+                  isExpanded={expandedItem === 'payment'}>
+                  {expandedItem === 'payment' && (
+                    <div className="space-y-2 mt-2">
+                      <div className="text-xs text-zinc-700">
+                        {g.totalAmount != null ? `${g.totalAmount}` : '$0'} {t('checkin.payment')} · {g.paymentStatus}
+                      </div>
+                      <div className="text-[10px] text-zinc-500 italic">{t('checkin.paidAmountHint')}</div>
+                      <Button size="sm" onClick={() => {
+                        settlePayment(g.id);
+                        setExpandedItem(null);
+                      }}>{t('checkin.markAsPaid')}</Button>
+                    </div>
+                  )}
+                </ItemRow>
+                <ItemRow label={t('checkin.checklistNotes')} done={!breakdown.notes}
+                  onClick={() => setExpandedItem(expandedItem === 'notes' ? null : 'notes')}
+                  isExpanded={expandedItem === 'notes'}>
+                  {expandedItem === 'notes' && (
+                    <div className="space-y-2 mt-2">
+                      <Input placeholder={t('checkin.notesPlaceholder')} value={notesValue}
+                        onChange={e => setNotesValue(e.target.value)} className="h-8 text-xs" />
+                      <div className="flex gap-2">
+                        <Button size="sm" onClick={() => {
+                          updateArrival(g.id, { notes: notesValue });
+                          setNotesValue('');
+                          setExpandedItem(null);
+                        }}>保存</Button>
+                        <Button size="sm" variant="ghost" onClick={() => {
+                          markNotesSkipped(g.id);
+                          setNotesValue('');
+                          setExpandedItem(null);
+                        }}>{t('checkin.skipNotes')}</Button>
+                      </div>
+                    </div>
+                  )}
+                </ItemRow>
               </div>
             );
           })()}
