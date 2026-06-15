@@ -346,6 +346,34 @@ export function CheckInPanel({ setActiveTab }: { setActiveTab?: (tab: string) =>
                     </div>
                   )}
                 </ItemRow>
+                <details className="border-t border-zinc-200 pt-3 mt-3">
+                  <summary className="cursor-pointer text-xs text-zinc-500 hover:text-zinc-700">
+                    📋 {t('checkin.fullDetails')}
+                  </summary>
+                  <div className="mt-3 space-y-2 opacity-70 pointer-events-none">
+                    {/* 5 卡片只读摘要：直接复用已有字段渲染 */}
+                    <div className="p-2 bg-zinc-50 rounded text-xs">
+                      <div><b>{g.name}</b> · {g.country}</div>
+                      <div className="text-[10px] text-zinc-500">{g.nights}N · {g.paymentStatus}</div>
+                    </div>
+                    <div className="p-2 bg-zinc-50 rounded text-xs">
+                      <div className="text-[10px] font-semibold uppercase text-zinc-500">{t('checkin.verification')}</div>
+                      <div>{g.passportScanned ? '✅ ' + t('checkin.verified') : '⬜ ' + t('checkin.scanPassport')}</div>
+                    </div>
+                    <div className="p-2 bg-zinc-50 rounded text-xs">
+                      <div className="text-[10px] font-semibold uppercase text-zinc-500">{t('checkin.payment')}</div>
+                      <div>{g.paymentStatus}</div>
+                    </div>
+                    <div className="p-2 bg-zinc-50 rounded text-xs">
+                      <div className="text-[10px] font-semibold uppercase text-zinc-500">{t('checkin.notes')}</div>
+                      <div>{g.notes || '—'}</div>
+                    </div>
+                    <div className="p-2 bg-zinc-50 rounded text-xs">
+                      <div className="text-[10px] font-semibold uppercase text-zinc-500">{t('checkin.assignBed')}</div>
+                      <div>{g.assignedBedId || '—'}</div>
+                    </div>
+                  </div>
+                </details>
               </div>
             );
           })()}
