@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect, useRef } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useHostel } from '../HostelContext';
 import { Users, Info, IdCard, CheckCircle2, ChevronRight, BedDouble, Plus, Calendar as CalendarIcon, User as UserIcon, Globe, FileText, Link as LinkIcon, ArrowRight, Search, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -14,8 +14,6 @@ import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '@/lib/utils';
 import { getSourceConfig, getPaymentStatusClass } from '../utils/guestDisplay';
 import { scoreBeds, getRoomSummaries, type BedScore } from '../utils/bedAllocator';
-import { sortByPriority } from '../utils/priorityEngine';
-import { computeIncompleteness } from '../utils/incompleteness';
 
 const COUNTRY_MAP: Record<string, string> = {
   US: 'USA', GBR: 'United Kingdom', AU: 'Australia',
@@ -23,12 +21,12 @@ const COUNTRY_MAP: Record<string, string> = {
 };
 const DEFAULT_PRICE = 85;
 
-type SubTab = 'todayQueue' | 'pending' | 'checked-in' | 'reserved';
+type SubTab = 'pending' | 'checked-in' | 'reserved';
 
 export function CheckInPanel({ setActiveTab }: { setActiveTab?: (tab: string) => void }) {
-  const { arrivals, rooms, assignArrival, autoAssignBed, settlePayment, scanPassport, addArrival, updateArrival, importArrivals, checkoutGuest, pinGuest, unpinGuest, markNotesSkipped, } = useHostel();
+  const { arrivals, rooms, assignArrival, autoAssignBed, settlePayment, scanPassport, addArrival, updateArrival, importArrivals, checkoutGuest } = useHostel();
   const { t } = useTranslation();
-  const [subTab, setSubTab] = useState<SubTab>('todayQueue');
+  const [subTab, setSubTab] = useState<SubTab>('pending');
   const [searchQuery, setSearchQuery] = useState('');
 
   // Pending tab state
@@ -38,16 +36,6 @@ export function CheckInPanel({ setActiveTab }: { setActiveTab?: (tab: string) =>
   const [checkInSuccess, setCheckInSuccess] = useState<string | null>(null);
   const [editNotes, setEditNotes] = useState('');
   const [editRoomPref, setEditRoomPref] = useState('');
-
-  // Today Queue tab state
-  const [todayQueueSelectedId, setTodayQueueSelectedId] = useState<string | null>(null);
-  const [expandedItem, setExpandedItem] = useState<'passport' | 'payment' | 'bed' | 'notes' | null>(null);
-  const [scanPassportValue, setScanPassportValue] = useState('');
-  const [scanDob, setScanDob] = useState('');
-  const [notesValue, setNotesValue] = useState('');
-  // ── Task 13: 全勾自动完成 + 成功 banner ──
-  const [checkInSuccessName, setCheckInSuccessName] = useState<string | null>(null);
-  const hasAutoCompletedRef = useRef<string | null>(null);
 
   // New guest state
   const tomorrow = new Date();
@@ -80,35 +68,6 @@ export function CheckInPanel({ setActiveTab }: { setActiveTab?: (tab: string) =>
   // Room summaries for Checked In tab
   const roomSummaries = useMemo(() => getRoomSummaries(rooms), [rooms]);
 
-  // ── 今日待办队列（最小版：仅 arrivals，按规则排序）──
-  // M2 TODO: 集成 rooms.flatMap(...).flatMap(b => b.reservations || [])，
-  //          把每个 reservation 转成 Guest 形态（paymentStatus/passportScanned/... 补齐）后合并到 unified
-  const todayQueueGuests = useMemo(() => {
-    const today = new Date().toISOString().slice(0, 10);
-    return sortByPriority(arrivals.filter(g => g.checkInDate <= today));
-  }, [arrivals]);
-
-  // ── 今日待办：选中的客人（详情面板数据源）──
-  const todayQueueSelected = todayQueueGuests.find(g => g.id === todayQueueSelectedId);
-
-  // ── Task 13: 今日待办 4 项全勾 → 自动完成 + 顶部 banner ──
-  useEffect(() => {
-    if (!todayQueueSelected) return;
-    const g = todayQueueSelected;
-    const breakdown = computeIncompleteness(g);
-    if (breakdown.count === 0 && hasAutoCompletedRef.current !== g.id && g.assignedBedId) {
-      hasAutoCompletedRef.current = g.id;
-      setCheckInSuccessName(g.name);
-      setTimeout(() => setCheckInSuccessName(null), 5000);
-    }
-  }, [todayQueueSelected]);
-
-  // ── 今日待办：选中客人的推荐床位（复用 scoreBeds，截取前 6 个）──
-  const todayQueueScoredBeds = useMemo(() => {
-    if (!todayQueueSelected) return [];
-    return scoreBeds(todayQueueSelected, rooms).slice(0, 6);
-  }, [todayQueueSelected, rooms]);
-
   // Gather checked-in guests
   const checkedInGuests = useMemo(() => rooms.flatMap(r =>
     r.beds.filter(b => b.guest).map(b => ({
@@ -125,12 +84,6 @@ export function CheckInPanel({ setActiveTab }: { setActiveTab?: (tab: string) =>
 
   // Counts
   const pendingCount = arrivals.length;
-  const todayQueueCount = useMemo(() => {
-    const today = new Date().toISOString().slice(0, 10);
-    const fromArrivals = arrivals.filter(g => g.checkInDate <= today).length;
-    const fromReservations = rooms.flatMap(r => r.beds).flatMap(b => b.reservations || []).filter(res => res.checkInDate === today).length;
-    return fromArrivals + fromReservations;
-  }, [arrivals, rooms]);
   const checkedInCount = checkedInGuests.length;
   const reservedCount = reservedGuests.length;
 
@@ -177,7 +130,7 @@ export function CheckInPanel({ setActiveTab }: { setActiveTab?: (tab: string) =>
 
   return (
     <div className="flex flex-col h-full pb-20 md:pb-0">
-      {/* Check-in Success Banner (legacy pending-tab flow) */}
+      {/* Check-in Success Banner */}
       <AnimatePresence>
         {checkInSuccess && (
           <motion.div
@@ -196,26 +149,10 @@ export function CheckInPanel({ setActiveTab }: { setActiveTab?: (tab: string) =>
         )}
       </AnimatePresence>
 
-      {/* ── Task 13: 今日待办全勾自动完成 → 顶部绿色 banner（5s 自动消失）── */}
-      <AnimatePresence>
-        {checkInSuccessName && (
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            className="fixed top-4 left-1/2 -translate-x-1/2 z-50 bg-emerald-600 text-white px-5 py-3 rounded-xl shadow-lg flex items-center gap-3"
-          >
-            <CheckCircle2 className="h-5 w-5" />
-            <span className="text-sm font-medium">{checkInSuccessName} {t('checkin.checkedInSuccess')}</span>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
       {/* Sub Tab Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4">
         <div className="flex gap-1 bg-zinc-100 rounded-xl p-1">
           {([
-            { id: 'todayQueue' as SubTab, label: '⚡ ' + (t('checkin.todayQueue') || "Today's Queue"), count: todayQueueCount, color: 'text-amber-600' },
             { id: 'pending' as SubTab, label: t('checkin.pending') || 'Pending', count: pendingCount, color: 'text-amber-600' },
             { id: 'checked-in' as SubTab, label: t('checkin.checkedIn') || 'Checked In', count: checkedInCount, color: 'text-emerald-600' },
             { id: 'reserved' as SubTab, label: t('checkin.reserved') || 'Reserved', count: reservedCount, color: 'text-blue-600' },
@@ -236,187 +173,6 @@ export function CheckInPanel({ setActiveTab }: { setActiveTab?: (tab: string) =>
             value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
         </div>
       </div>
-
-      {/* ── Today Queue Tab (smart priority queue, 2-col on lg / 1-col on mobile) ── */}
-      {subTab === 'todayQueue' && (
-        <div className="flex-1 grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-3 p-2 overflow-hidden">
-          {/* 左：队列列表 */}
-          <div className="overflow-y-auto space-y-2">
-            <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 text-xs text-amber-800">
-              📌 {t('checkin.priorityRule')}
-            </div>
-            {todayQueueGuests.length === 0 ? (
-              <div className="py-12 text-center text-sm text-zinc-400">{t('checkin.noEventsFound') /* 借用无数据文案 */}</div>
-            ) : (
-              todayQueueGuests.map(guest => {
-                const breakdown = computeIncompleteness(guest);
-                return (
-                  <div key={guest.id} onClick={() => setTodayQueueSelectedId(guest.id)}
-                    className="bg-white border border-zinc-200 rounded-2xl p-3 shadow-sm cursor-pointer hover:border-zinc-400">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <div className="font-semibold text-sm text-zinc-900">
-                          {guest.pinned && '📌 '}{guest.name}
-                        </div>
-                        <div className="text-[10px] text-zinc-500">
-                          {guest.countryCode} · {guest.checkInDate} · {guest.nights}N
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <span className={cn("text-[10px] font-bold px-2 py-0.5 rounded",
-                          breakdown.count === 0 ? "bg-emerald-50 text-emerald-600" : "bg-amber-50 text-amber-600")}>
-                          {breakdown.count === 0 ? t('checkin.allSettled') : t('checkin.incompleteBadge', { count: breakdown.count })}
-                        </span>
-                        <button onClick={() => guest.pinned ? unpinGuest(guest.id) : pinGuest(guest.id)}
-                          className="p-1.5 hover:bg-zinc-100 rounded-lg text-xs">
-                          {guest.pinned ? t('checkin.unpin') : t('checkin.pinToTop')}
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })
-            )}
-          </div>
-          {/* 右：详情面板（移动端在第二行，桌面端在右侧 400px 固定宽） */}
-          <div className="overflow-y-auto">
-            {todayQueueSelected ? (() => {
-              const g = todayQueueSelected;
-              const breakdown = computeIncompleteness(g);
-              const allDone = breakdown.count === 0;
-              return (
-                <div className="bg-white border border-zinc-200 rounded-2xl p-4 shadow-sm space-y-2">
-                  {/* Header */}
-                  <div className="flex items-center justify-between">
-                    <h3 className="font-semibold text-zinc-900">{g.name}</h3>
-                    <button onClick={() => setTodayQueueSelectedId(null)} className="text-xs text-zinc-500">✕</button>
-                  </div>
-                  <div className="text-xs text-zinc-500">
-                    {g.countryCode} · {g.checkInDate} · {g.nights}N
-                  </div>
-
-                  {/* 4 items */}
-                  <ItemRow label={t('checkin.checklistPassport')} done={!breakdown.passport}
-                    onClick={() => setExpandedItem(expandedItem === 'passport' ? null : 'passport')}
-                    isExpanded={expandedItem === 'passport'}>
-                    {expandedItem === 'passport' && (
-                      <div className="space-y-2 mt-2">
-                        <Input placeholder="Passport / ID" value={scanPassportValue}
-                          onChange={e => setScanPassportValue(e.target.value)} className="h-8 text-xs" />
-                        <Input type="date" value={scanDob} onChange={e => setScanDob(e.target.value)} className="h-8 text-xs" />
-                        <Button size="sm" onClick={() => {
-                          scanPassport(g.id);
-                          updateArrival(g.id, { passportOrId: scanPassportValue, dob: scanDob });
-                          setScanPassportValue(''); setScanDob('');
-                          setExpandedItem(null);
-                        }}>{t('checkin.scanConfirm')}</Button>
-                      </div>
-                    )}
-                  </ItemRow>
-                  <ItemRow label={t('checkin.checklistPayment')} done={!breakdown.payment}
-                    onClick={() => setExpandedItem(expandedItem === 'payment' ? null : 'payment')}
-                    isExpanded={expandedItem === 'payment'}>
-                    {expandedItem === 'payment' && (
-                      <div className="space-y-2 mt-2">
-                        <div className="text-xs text-zinc-700">
-                          {g.totalAmount != null ? `${g.totalAmount}` : '$0'} {t('checkin.payment')} · {g.paymentStatus}
-                        </div>
-                        <div className="text-[10px] text-zinc-500 italic">{t('checkin.paidAmountHint')}</div>
-                        <Button size="sm" onClick={() => {
-                          settlePayment(g.id);
-                          setExpandedItem(null);
-                        }}>{t('checkin.markAsPaid')}</Button>
-                      </div>
-                    )}
-                  </ItemRow>
-                  <ItemRow label={t('checkin.checklistBed')} done={!breakdown.bed}
-                    onClick={() => setExpandedItem(expandedItem === 'bed' ? null : 'bed')}
-                    isExpanded={expandedItem === 'bed'}>
-                    {expandedItem === 'bed' && (
-                      <div className="space-y-2 mt-2">
-                        {todayQueueScoredBeds.length === 0 ? (
-                          <div className="text-xs text-red-500">{t('checkin.noAvailableBeds')}</div>
-                        ) : (
-                          <div className="grid grid-cols-2 gap-2">
-                            {todayQueueScoredBeds.map((score, idx) => (
-                              <button key={score.bedId}
-                                onClick={() => {
-                                  assignArrival(g.id, score.bedId);
-                                  updateArrival(g.id, { assignedBedId: score.bedId });
-                                  setExpandedItem(null);
-                                }}
-                                className={cn("p-2 rounded-lg border text-left text-xs",
-                                  idx === 0 ? "border-emerald-400 bg-emerald-50" : "border-zinc-200 bg-white")}>
-                                {idx === 0 && <span className="text-[9px] bg-emerald-500 text-white px-1 rounded">★ Best</span>}
-                                <div className="font-semibold">{score.roomType}</div>
-                                <div className="text-[10px] text-zinc-500">{score.bedName} · R{score.roomNumber}</div>
-                              </button>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </ItemRow>
-                  <ItemRow label={t('checkin.checklistNotes')} done={!breakdown.notes}
-                    onClick={() => setExpandedItem(expandedItem === 'notes' ? null : 'notes')}
-                    isExpanded={expandedItem === 'notes'}>
-                    {expandedItem === 'notes' && (
-                      <div className="space-y-2 mt-2">
-                        <Input placeholder={t('checkin.notesPlaceholder')} value={notesValue}
-                          onChange={e => setNotesValue(e.target.value)} className="h-8 text-xs" />
-                        <div className="flex gap-2">
-                          <Button size="sm" onClick={() => {
-                            updateArrival(g.id, { notes: notesValue });
-                            setNotesValue('');
-                            setExpandedItem(null);
-                          }}>保存</Button>
-                          <Button size="sm" variant="ghost" onClick={() => {
-                            markNotesSkipped(g.id);
-                            setNotesValue('');
-                            setExpandedItem(null);
-                          }}>{t('checkin.skipNotes')}</Button>
-                        </div>
-                      </div>
-                    )}
-                  </ItemRow>
-                  <details className="border-t border-zinc-200 pt-3 mt-3">
-                    <summary className="cursor-pointer text-xs text-zinc-500 hover:text-zinc-700">
-                      📋 {t('checkin.fullDetails')}
-                    </summary>
-                    <div className="mt-3 space-y-2 opacity-70 pointer-events-none">
-                      {/* 5 卡片只读摘要：直接复用已有字段渲染 */}
-                      <div className="p-2 bg-zinc-50 rounded text-xs">
-                        <div><b>{g.name}</b> · {g.country}</div>
-                        <div className="text-[10px] text-zinc-500">{g.nights}N · {g.paymentStatus}</div>
-                      </div>
-                      <div className="p-2 bg-zinc-50 rounded text-xs">
-                        <div className="text-[10px] font-semibold uppercase text-zinc-500">{t('checkin.verification')}</div>
-                        <div>{g.passportScanned ? '✅ ' + t('checkin.verified') : '⬜ ' + t('checkin.scanPassport')}</div>
-                      </div>
-                      <div className="p-2 bg-zinc-50 rounded text-xs">
-                        <div className="text-[10px] font-semibold uppercase text-zinc-500">{t('checkin.payment')}</div>
-                        <div>{g.paymentStatus}</div>
-                      </div>
-                      <div className="p-2 bg-zinc-50 rounded text-xs">
-                        <div className="text-[10px] font-semibold uppercase text-zinc-500">{t('checkin.notes')}</div>
-                        <div>{g.notes || '—'}</div>
-                      </div>
-                      <div className="p-2 bg-zinc-50 rounded text-xs">
-                        <div className="text-[10px] font-semibold uppercase text-zinc-500">{t('checkin.assignBed')}</div>
-                        <div>{g.assignedBedId || '—'}</div>
-                      </div>
-                    </div>
-                  </details>
-                </div>
-              );
-            })() : (
-              <div className="h-full min-h-[200px] border-2 border-dashed border-zinc-200 rounded-2xl flex items-center justify-center text-zinc-400 bg-zinc-50/50 text-sm">
-                {t('checkin.selectGuestToBegin')}
-              </div>
-            )}
-          </div>
-        </div>
-      )}
 
       {/* ── Pending Tab ── */}
       {subTab === 'pending' && (
@@ -791,27 +547,6 @@ export function CheckInPanel({ setActiveTab }: { setActiveTab?: (tab: string) =>
       )}
 
       <ICalImport open={icalOpen} onClose={() => setIcalOpen(false)} onImport={(guests) => importArrivals(guests)} />
-    </div>
-  );
-}
-
-function ItemRow({ label, done, onClick, isExpanded, children }: {
-  label: string;
-  done: boolean;
-  onClick: () => void;
-  isExpanded: boolean;
-  children?: React.ReactNode;
-}) {
-  return (
-    <div className={cn("border rounded-xl p-3 transition-colors",
-      isExpanded ? "border-blue-500 bg-blue-50/30" : "border-zinc-200 bg-white")}>
-      <button onClick={onClick} className="w-full flex items-center justify-between text-left">
-        <span className={cn("text-xs font-medium", done ? "text-zinc-400 line-through" : "text-zinc-900")}>
-          {done ? '✅ ' : '🔲 '}{label}
-        </span>
-        <span className="text-[10px] text-zinc-500">{done ? '✓' : '点击展开'}</span>
-      </button>
-      {isExpanded && children}
     </div>
   );
 }

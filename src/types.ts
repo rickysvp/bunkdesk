@@ -28,10 +28,6 @@ export interface Guest {
   policeConsent?: boolean;
   source: GuestSource;
   roomPreference?: string;
-  // ── 新增字段（2026-06-15 spec §6.1）──
-  pinned?: boolean;          // 人工置顶
-  assignedBedId?: string;    // 显式记录已分配床位
-  notesSkipped?: boolean;    // 备注被显式跳过
 }
 
 export interface Bed {
