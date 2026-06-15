@@ -39,6 +39,9 @@ export function CheckInPanel({ setActiveTab }: { setActiveTab?: (tab: string) =>
   const [editNotes, setEditNotes] = useState('');
   const [editRoomPref, setEditRoomPref] = useState('');
 
+  // Today Queue tab state
+  const [todayQueueSelectedId, setTodayQueueSelectedId] = useState<string | null>(null);
+
   // New guest state
   const tomorrow = new Date();
   tomorrow.setDate(tomorrow.getDate() + 1);
@@ -77,6 +80,9 @@ export function CheckInPanel({ setActiveTab }: { setActiveTab?: (tab: string) =>
     const today = new Date().toISOString().slice(0, 10);
     return sortByPriority(arrivals.filter(g => g.checkInDate <= today));
   }, [arrivals]);
+
+  // ── 今日待办：选中的客人（详情面板数据源）──
+  const todayQueueSelected = todayQueueGuests.find(g => g.id === todayQueueSelectedId);
 
   // Gather checked-in guests
   const checkedInGuests = useMemo(() => rooms.flatMap(r =>
@@ -193,42 +199,59 @@ export function CheckInPanel({ setActiveTab }: { setActiveTab?: (tab: string) =>
 
       {/* ── Today Queue Tab (smart priority queue, list-only) ── */}
       {subTab === 'todayQueue' && (
-        <div className="flex-1 overflow-auto space-y-2 p-2">
-          <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 text-xs text-amber-800">
-            📌 {t('checkin.priorityRule')}
-          </div>
-          {todayQueueGuests.length === 0 ? (
-            <div className="py-12 text-center text-sm text-zinc-400">{t('checkin.noEventsFound') /* 借用无数据文案 */}</div>
-          ) : (
-            todayQueueGuests.map(guest => {
-              const breakdown = computeIncompleteness(guest);
-              return (
-                <div key={guest.id} className="bg-white border border-zinc-200 rounded-2xl p-3 shadow-sm">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <div className="font-semibold text-sm text-zinc-900">
-                        {guest.pinned && '📌 '}{guest.name}
+        <>
+          <div className="flex-1 overflow-auto space-y-2 p-2">
+            <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 text-xs text-amber-800">
+              📌 {t('checkin.priorityRule')}
+            </div>
+            {todayQueueGuests.length === 0 ? (
+              <div className="py-12 text-center text-sm text-zinc-400">{t('checkin.noEventsFound') /* 借用无数据文案 */}</div>
+            ) : (
+              todayQueueGuests.map(guest => {
+                const breakdown = computeIncompleteness(guest);
+                return (
+                  <div key={guest.id} onClick={() => setTodayQueueSelectedId(guest.id)}
+                    className="bg-white border border-zinc-200 rounded-2xl p-3 shadow-sm cursor-pointer hover:border-zinc-400">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <div className="font-semibold text-sm text-zinc-900">
+                          {guest.pinned && '📌 '}{guest.name}
+                        </div>
+                        <div className="text-[10px] text-zinc-500">
+                          {guest.countryCode} · {guest.checkInDate} · {guest.nights}N
+                        </div>
                       </div>
-                      <div className="text-[10px] text-zinc-500">
-                        {guest.countryCode} · {guest.checkInDate} · {guest.nights}N
+                      <div className="flex items-center gap-2">
+                        <span className={cn("text-[10px] font-bold px-2 py-0.5 rounded",
+                          breakdown.count === 0 ? "bg-emerald-50 text-emerald-600" : "bg-amber-50 text-amber-600")}>
+                          {breakdown.count === 0 ? t('checkin.allSettled') : t('checkin.incompleteBadge', { count: breakdown.count })}
+                        </span>
+                        <button onClick={() => guest.pinned ? unpinGuest(guest.id) : pinGuest(guest.id)}
+                          className="p-1.5 hover:bg-zinc-100 rounded-lg text-xs">
+                          {guest.pinned ? t('checkin.unpin') : t('checkin.pinToTop')}
+                        </button>
                       </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className={cn("text-[10px] font-bold px-2 py-0.5 rounded",
-                        breakdown.count === 0 ? "bg-emerald-50 text-emerald-600" : "bg-amber-50 text-amber-600")}>
-                        {breakdown.count === 0 ? t('checkin.allSettled') : t('checkin.incompleteBadge', { count: breakdown.count })}
-                      </span>
-                      <button onClick={() => guest.pinned ? unpinGuest(guest.id) : pinGuest(guest.id)}
-                        className="p-1.5 hover:bg-zinc-100 rounded-lg text-xs">
-                        {guest.pinned ? t('checkin.unpin') : t('checkin.pinToTop')}
-                      </button>
                     </div>
                   </div>
-                </div>
-              );
-            })
+                );
+              })
+            )}
+          </div>
+          {todayQueueSelected && (
+            <div className="bg-white border border-zinc-200 rounded-2xl p-4 shadow-sm space-y-3">
+              <div className="flex items-center justify-between">
+                <h3 className="font-semibold text-zinc-900">{todayQueueSelected.name}</h3>
+                <button onClick={() => setTodayQueueSelectedId(null)} className="text-xs text-zinc-500">✕</button>
+              </div>
+              <div className="text-xs text-zinc-500">
+                {todayQueueSelected.countryCode} · {todayQueueSelected.checkInDate} · {todayQueueSelected.nights}N
+              </div>
+              <div className="text-xs text-blue-700 bg-blue-50 p-2 rounded">
+                {t('checkin.autoCompleteNote')}
+              </div>
+            </div>
           )}
-        </div>
+        </>
       )}
 
       {/* ── Pending Tab ── */}
