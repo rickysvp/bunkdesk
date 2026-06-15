@@ -52,13 +52,38 @@ export function parseICal(text: string): ParsedEvent[] {
   return events;
 }
 
+export function parseSummaryToName(summary: string): { firstName: string; lastName: string; name: string } {
+  const s = summary.trim();
+  if (!s) return { firstName: '', lastName: '', name: '' };
+
+  // 1. "Last, First" format (Western name order)
+  if (s.includes(',')) {
+    const [lastPart, firstPart] = s.split(',').map(x => x.trim());
+    const last = lastPart || '';
+    const first = firstPart || '';
+    return { firstName: first, lastName: last, name: [first, last].filter(Boolean).join(' ') };
+  }
+
+  // 2. "First Last" format (default)
+  const parts = s.split(/\s+/);
+  if (parts.length === 1) {
+    return { firstName: parts[0], lastName: '', name: parts[0] };
+  }
+  const firstName = parts[0];
+  const lastName = parts.slice(1).join(' ');
+  return { firstName, lastName, name: [firstName, lastName].filter(Boolean).join(' ') };
+}
+
 export function mapEventToGuest(event: ParsedEvent): Omit<Guest, 'id'> {
   const checkIn = new Date(event.dtStart);
   const checkOut = new Date(event.dtEnd);
   const nights = Math.max(1, Math.round((checkOut.getTime() - checkIn.getTime()) / (1000 * 60 * 60 * 24)));
+  const parsedName = parseSummaryToName(event.summary);
 
   return {
-    name: event.summary,
+    name: parsedName.name,
+    firstName: parsedName.firstName,
+    lastName: parsedName.lastName,
     country: '',
     countryCode: '',
     checkInDate: event.dtStart,
