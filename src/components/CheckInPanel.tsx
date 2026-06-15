@@ -88,6 +88,12 @@ export function CheckInPanel({ setActiveTab }: { setActiveTab?: (tab: string) =>
   // ── 今日待办：选中的客人（详情面板数据源）──
   const todayQueueSelected = todayQueueGuests.find(g => g.id === todayQueueSelectedId);
 
+  // ── 今日待办：选中客人的推荐床位（复用 scoreBeds，截取前 6 个）──
+  const todayQueueScoredBeds = useMemo(() => {
+    if (!todayQueueSelected) return [];
+    return scoreBeds(todayQueueSelected, rooms).slice(0, 6);
+  }, [todayQueueSelected, rooms]);
+
   // Gather checked-in guests
   const checkedInGuests = useMemo(() => rooms.flatMap(r =>
     r.beds.filter(b => b.guest).map(b => ({
@@ -287,6 +293,34 @@ export function CheckInPanel({ setActiveTab }: { setActiveTab?: (tab: string) =>
                         settlePayment(g.id);
                         setExpandedItem(null);
                       }}>{t('checkin.markAsPaid')}</Button>
+                    </div>
+                  )}
+                </ItemRow>
+                <ItemRow label={t('checkin.checklistBed')} done={!breakdown.bed}
+                  onClick={() => setExpandedItem(expandedItem === 'bed' ? null : 'bed')}
+                  isExpanded={expandedItem === 'bed'}>
+                  {expandedItem === 'bed' && (
+                    <div className="space-y-2 mt-2">
+                      {todayQueueScoredBeds.length === 0 ? (
+                        <div className="text-xs text-red-500">{t('checkin.noAvailableBeds')}</div>
+                      ) : (
+                        <div className="grid grid-cols-2 gap-2">
+                          {todayQueueScoredBeds.map((score, idx) => (
+                            <button key={score.bedId}
+                              onClick={() => {
+                                assignArrival(g.id, score.bedId);
+                                updateArrival(g.id, { assignedBedId: score.bedId });
+                                setExpandedItem(null);
+                              }}
+                              className={cn("p-2 rounded-lg border text-left text-xs",
+                                idx === 0 ? "border-emerald-400 bg-emerald-50" : "border-zinc-200 bg-white")}>
+                              {idx === 0 && <span className="text-[9px] bg-emerald-500 text-white px-1 rounded">★ Best</span>}
+                              <div className="font-semibold">{score.roomType}</div>
+                              <div className="text-[10px] text-zinc-500">{score.bedName} · R{score.roomNumber}</div>
+                            </button>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   )}
                 </ItemRow>
