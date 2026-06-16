@@ -1,0 +1,120 @@
+<h2>详情卡布局：3 个方案</h2>
+<p class="subtitle">新字段（Email/Phone/ID Type/Arrival Time/Referral）要插到现有 4 张卡的哪里？</p>
+
+<div class="options">
+  <div class="option" data-choice="A" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content" style="width:100%">
+      <h3>线性扩展 - 新字段塞进现有卡</h3>
+      <p>Header 升级为「客户摘要卡」（含 Email/Phone/Arrival Time），Verification 卡增加 ID Type 显示，Notes 卡增加 Referral 字段。改动最小，结构不动。</p>
+      <div class="mockup" style="margin-top:8px">
+        <div class="mockup-header">Detail View - Linear Expansion</div>
+        <div class="mockup-body" style="background:#fafafa;padding:10px;font-size:10px;display:flex;flex-direction:column;gap:6px">
+          <div style="background:#fff;border:1px solid #d4d4d8;border-radius:6px;padding:8px">
+            <div style="font-weight:600;font-size:12px">John Smith <span style="color:#71717a;font-weight:400">· USA</span></div>
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;margin-top:6px;font-size:9px">
+              <div>📧 john@mail.com</div>
+              <div>📞 +1-555-0100</div>
+              <div>🕒 Arriving ~3pm</div>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+            <div style="background:#fff;border:1px solid #d4d4d8;border-radius:6px;padding:6px">
+              <div style="font-size:8px;color:#71717a;text-transform:uppercase">Verification</div>
+              <div style="font-size:9px;margin-top:2px">✓ Passport P1234567 scanned</div>
+            </div>
+            <div style="background:#fff;border:1px solid #d4d4d8;border-radius:6px;padding:6px">
+              <div style="font-size:8px;color:#71717a;text-transform:uppercase">Payment</div>
+              <div style="font-size:9px;margin-top:2px;color:#dc2626">⚠ Unpaid $255</div>
+            </div>
+          </div>
+          <div style="background:#fff;border:1px solid #d4d4d8;border-radius:6px;padding:6px">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px">
+              <div style="background:#fafafa;border:1px solid #d4d4d8;border-radius:3px;padding:3px">Notes</div>
+              <div style="background:#fafafa;border:1px solid #d4d4d8;border-radius:3px;padding:3px">Referral: Booking.com</div>
+            </div>
+          </div>
+          <div style="background:#fff;border:1px solid #d4d4d8;border-radius:6px;padding:6px">
+            <div style="background:#2563eb;color:#fff;padding:6px;border-radius:4px;text-align:center;font-size:10px">⚡ Auto Assign &amp; Check-in</div>
+          </div>
+        </div>
+      </div>
+      <p class="label" style="margin-top:6px;color:#71717a">PROS · 改动最小、与 Walk-in 风格统一<br>CONS · Header 变拥挤</p>
+    </div>
+  </div>
+
+  <div class="option" data-choice="B" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content" style="width:100%">
+      <h3>新增 Contact 卡 - 5 张卡结构</h3>
+      <p>在 Header 下面插入新的「Contact」卡（独占显示 Email/Phone/Arrival Time/Referral），Header 恢复简洁。Verification 独立并加 ID Type。</p>
+      <div class="mockup" style="margin-top:8px">
+        <div class="mockup-header">Detail View - 5 Cards with Contact</div>
+        <div class="mockup-body" style="background:#fafafa;padding:10px;font-size:10px;display:flex;flex-direction:column;gap:6px">
+          <div style="background:#fff;border:1px solid #d4d4d8;border-radius:6px;padding:8px">
+            <div style="font-weight:600;font-size:12px">John Smith</div>
+            <div style="color:#71717a;font-size:9px">USA · 3 nights · check-out 6/18</div>
+          </div>
+          <div style="background:#fff;border:1px solid #d4d4d8;border-radius:6px;padding:8px">
+            <div style="font-size:8px;color:#71717a;text-transform:uppercase;font-weight:600">📇 Contact</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-top:4px;font-size:9px">
+              <div>📧 john@mail.com</div>
+              <div>📞 +1-555-0100</div>
+              <div>🕒 Arriving ~3pm</div>
+              <div>🔗 Referral: Booking.com</div>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+            <div style="background:#fff;border:1px solid #d4d4d8;border-radius:6px;padding:6px">
+              <div style="font-size:8px;color:#71717a;text-transform:uppercase">Verification</div>
+              <div style="font-size:9px;margin-top:2px">✓ Passport P1234567</div>
+            </div>
+            <div style="background:#fff;border:1px solid #d4d4d8;border-radius:6px;padding:6px">
+              <div style="font-size:8px;color:#71717a;text-transform:uppercase">Payment</div>
+              <div style="font-size:9px;margin-top:2px;color:#dc2626">⚠ Unpaid $255</div>
+            </div>
+          </div>
+          <div style="background:#fff;border:1px solid #d4d4d8;border-radius:6px;padding:6px">
+            <div style="background:#fafafa;border:1px solid #d4d4d8;border-radius:3px;padding:3px;font-size:9px">Notes: Prefers bottom bunk</div>
+          </div>
+        </div>
+      </div>
+      <p class="label" style="margin-top:6px;color:#71717a">PROS · 信息分组清晰、Header 简洁<br>CONS · 多 1 张卡、整体变长</p>
+    </div>
+  </div>
+
+  <div class="option" data-choice="C" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content" style="width:100%">
+      <h3>两栏布局 - 信息 + 操作</h3>
+      <p>左 60% 显示客户信息（Header + Contact + ID 合并为一张信息卡），右 40% 显示操作（Verification/Payment/Notes/Bed Assignment 整合为操作面板）。</p>
+      <div class="mockup" style="margin-top:8px">
+        <div class="mockup-header">Detail View - Two Columns</div>
+        <div class="mockup-body" style="background:#fafafa;padding:10px;font-size:10px">
+          <div style="display:grid;grid-template-columns:3fr 2fr;gap:6px">
+            <div style="background:#fff;border:1px solid #d4d4d8;border-radius:6px;padding:8px">
+              <div style="font-weight:600;font-size:12px">John Smith</div>
+              <div style="color:#71717a;font-size:9px">USA · 3N · 6/15 → 6/18</div>
+              <hr style="margin:6px 0;border:0;border-top:1px solid #e4e4e7">
+              <div style="font-size:9px;display:grid;grid-template-columns:1fr 1fr;gap:3px">
+                <div>📧 john@mail.com</div>
+                <div>📞 +1-555-0100</div>
+                <div>🕒 ~3pm</div>
+                <div>🔗 Booking.com</div>
+                <div>🛂 Passport P1234567</div>
+                <div>📅 DOB 1990-05-12</div>
+              </div>
+            </div>
+            <div style="background:#fff;border:1px solid #d4d4d8;border-radius:6px;padding:8px;display:flex;flex-direction:column;gap:4px">
+              <div style="background:#f0fdf4;border:1px solid #86efac;border-radius:3px;padding:4px;font-size:9px">✓ Verified</div>
+              <div style="background:#fef2f2;border:1px solid #fca5a5;border-radius:3px;padding:4px;font-size:9px">⚠ Unpaid $255</div>
+              <div style="background:#fafafa;border:1px solid #d4d4d8;border-radius:3px;padding:4px;font-size:9px">Notes...</div>
+              <div style="background:#2563eb;color:#fff;padding:6px;border-radius:3px;text-align:center;font-size:9px;margin-top:auto">⚡ Auto-Assign</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <p class="label" style="margin-top:6px;color:#71717a">PROS · 信息操作分离清晰<br>CONS · 右栏窄、详情卡需更紧凑</p>
+    </div>
+  </div>
+</div>

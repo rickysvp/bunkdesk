@@ -1,11 +1,11 @@
-import type { Guest } from '../types';
+import type { Guest, BookingSource } from '../types';
 
 /**
- * One-time migration for guests stored in pre-v1.6.0 localStorage.
+ * One-time migration for guests stored in pre-v1.7.0 localStorage.
  *  - Splits `name` into `firstName` / `lastName` when both are absent
  *  - Defaults `idType` to 'passport' when absent
- *  - Leaves phone/email/arrivalTime/referral/bookingSource as undefined
- *    (UI will show 'Not provided' placeholder)
+ *  - Maps old bookingSource values (phone/email/referral/other) to new OTA values
+ *  - Removes obsolete dob, policeConsent, referral fields
  */
 export function migrateGuest(g: Guest): Guest {
   const result: Guest = { ...g };
@@ -26,6 +26,22 @@ export function migrateGuest(g: Guest): Guest {
   if (!result.name) {
     result.name = 'Unknown';
   }
+
+  // Map old bookingSource values to new OTA channels
+  const oldSourceMap: Record<string, BookingSource> = {
+    'phone': 'other-ota',
+    'email': 'other-ota',
+    'referral': 'other-ota',
+    'other': 'other-ota',
+  };
+  if (result.bookingSource && oldSourceMap[result.bookingSource]) {
+    result.bookingSource = oldSourceMap[result.bookingSource];
+  }
+
+  // Remove obsolete fields
+  delete (result as any).dob;
+  delete (result as any).policeConsent;
+  delete (result as any).referral;
 
   return result;
 }

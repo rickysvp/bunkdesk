@@ -16,9 +16,8 @@ export interface GuestInfoUpdates {
   idType?: Guest['idType'];
   passportOrId?: string;
   arrivalTime?: Guest['arrivalTime'];
-  referral?: string;
   bookingSource?: Guest['bookingSource'];
-  dob?: string;
+  bedPreference?: Guest['bedPreference'];
   gender?: Guest['gender'];
   notes?: string;
 }
@@ -44,9 +43,8 @@ export function EditGuestInfoModal({ open, onClose, guest, onSave }: Props) {
         idType: guest.idType,
         passportOrId: guest.passportOrId ?? '',
         arrivalTime: guest.arrivalTime,
-        referral: guest.referral ?? '',
         bookingSource: guest.bookingSource,
-        dob: guest.dob ?? '',
+        bedPreference: guest.bedPreference,
         gender: guest.gender,
         notes: guest.notes ?? '',
       });
@@ -63,9 +61,8 @@ export function EditGuestInfoModal({ open, onClose, guest, onSave }: Props) {
       idType: draft.idType,
       passportOrId: draft.passportOrId || undefined,
       arrivalTime: draft.arrivalTime,
-      referral: draft.referral || undefined,
       bookingSource: draft.bookingSource,
-      dob: draft.dob || undefined,
+      bedPreference: draft.bedPreference,
       gender: draft.gender,
       notes: draft.notes || undefined,
     });
@@ -148,25 +145,27 @@ export function EditGuestInfoModal({ open, onClose, guest, onSave }: Props) {
                     <SelectTrigger className="h-9 bg-zinc-50 border-zinc-200"><SelectValue /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="walk-in">{t('checkin.source.walkIn')}</SelectItem>
-                      <SelectItem value="phone">{t('checkin.source.phone')}</SelectItem>
-                      <SelectItem value="email">{t('checkin.source.email')}</SelectItem>
-                      <SelectItem value="referral">{t('checkin.source.referral')}</SelectItem>
-                      <SelectItem value="other">{t('checkin.source.other')}</SelectItem>
+                      <SelectItem value="hostelworld">Hostelworld</SelectItem>
+                      <SelectItem value="booking-com">Booking.com</SelectItem>
+                      <SelectItem value="airbnb">Airbnb</SelectItem>
+                      <SelectItem value="google">Google</SelectItem>
+                      <SelectItem value="other-ota">{t('checkin.source.otherOta')}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1.5">
-                  <Label className="text-[10px] font-semibold text-zinc-500 uppercase">{t('checkin.referral')}</Label>
-                  <Input value={draft.referral ?? ''} onChange={e => setDraft({...draft, referral: e.target.value})} className="h-9 bg-zinc-50 border-zinc-200" />
+                  <Label className="text-[10px] font-semibold text-zinc-500 uppercase">{t('checkin.bedPreference') || 'Bed Preference'}</Label>
+                  <Select value={draft.bedPreference ?? ''} onValueChange={(val: string) => setDraft({...draft, bedPreference: val as Guest['bedPreference']})}>
+                    <SelectTrigger className="h-9 bg-zinc-50 border-zinc-200"><SelectValue placeholder="—" /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="any">{t('checkin.noPreference') || 'No preference'}</SelectItem>
+                      <SelectItem value="bottom">{t('checkin.bottomBunk') || 'Bottom bunk'}</SelectItem>
+                      <SelectItem value="top">{t('checkin.topBunk') || 'Top bunk'}</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
-                <div className="space-y-1.5">
-                  <Label className="text-[10px] font-semibold text-zinc-500 uppercase">{t('checkin.dob') || 'DOB'}</Label>
-                  <Input type="date" value={draft.dob ?? ''} onChange={e => setDraft({...draft, dob: e.target.value})} className="h-9 bg-zinc-50 border-zinc-200" />
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1.5">
                   <Label className="text-[10px] font-semibold text-zinc-500 uppercase">{t('guest.gender') || 'Gender'}</Label>
                   <Select value={draft.gender ?? ''} onValueChange={(val: string) => setDraft({...draft, gender: val as Guest['gender']})}>

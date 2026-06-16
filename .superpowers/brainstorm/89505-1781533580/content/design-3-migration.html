@@ -1,0 +1,141 @@
+<h2>设计 3/3 · 迁移 + i18n + 种子数据</h2>
+<p class="subtitle">旧数据兼容、i18n 键值、demo 种子更新</p>
+
+<div class="section">
+<h3>① 旧数据迁移（localStorage 启动时）</h3>
+<div class="mockup">
+<div class="mockup-header">src/utils/guestMigration.ts · 新增</div>
+<div class="mockup-body" style="background:#fafafa;padding:12px;font-family:monospace;font-size:10px;line-height:1.5">
+<div style="color:#71717a">// 启动时调用，对每个 Guest 做一次性兼容</div>
+<div><span style="color:#a21caf">export function</span> <span style="color:#2563eb">migrateGuest</span>(g: Guest): Guest {</div>
+<div style="padding-left:12px">
+<div><span style="color:#a21caf">const</span> result = { ...g };</div>
+<div><span style="color:#71717a">// 1. 姓名拆分（仅当 firstName/lastName 缺失时）</span></div>
+<div><span style="color:#a21caf">if</span> (!g.firstName &amp;&amp; !g.lastName &amp;&amp; g.name) {</div>
+<div style="padding-left:12px">
+<div><span style="color:#a21caf">const</span> parts = g.name.trim().split(<span style="color:#16a34a">/\s+/</span>);</div>
+<div>result.firstName = parts[0] || <span style="color:#16a34a">''</span>;</div>
+<div>result.lastName = parts.slice(1).join(<span style="color:#16a34a">' '</span>) || <span style="color:#16a34a">''</span>;</div>
+</div>
+<div>}</div>
+<div><span style="color:#71717a">// 2. IDType 默认</span></div>
+<div><span style="color:#a21caf">if</span> (!g.idType) result.idType = <span style="color:#16a34a">'passport'</span>;</div>
+<div><span style="color:#71717a">// 3. 其它新字段保持 undefined（详情卡显示 "—"）</span></div>
+<div><span style="color:#a21caf">return</span> result;</div>
+</div>
+<div>}</div>
+</div>
+</div>
+
+<div class="pros-cons">
+<div class="pros">
+<h4>关键策略</h4>
+<ul>
+<li>启动时一次性遍历 + 写回 localStorage</li>
+<li>name 字段保留（向后兼容）</li>
+<li>idType 默认 passport</li>
+<li>邮箱/电话/arrivalTime/referral 为 undefined，详情卡显示"未填写"+提示</li>
+</ul>
+</div>
+<div class="cons">
+<h4>注意点</h4>
+<ul>
+<li>多字姓名（西班牙/中国）按首空格拆可能不完美，但 iCal 也同样限制</li>
+<li>版本号 v1.6.0 写入 localStorage 检测是否需要迁移</li>
+</ul>
+</div>
+</div>
+</div>
+
+<div class="section">
+<h3>② i18n 键值（en.json + zh.json）</h3>
+<div class="mockup">
+<div class="mockup-header">src/locales/*.json · 新增</div>
+<div class="mockup-body" style="background:#fafafa;padding:12px;font-family:monospace;font-size:10px;line-height:1.6">
+<div style="color:#71717a">// 新增 key（checkin 命名空间）</div>
+<div><span style="color:#a21caf">"checkin.firstName"</span>: <span style="color:#16a34a">"First name"</span> / <span style="color:#16a34a">"名"</span></div>
+<div><span style="color:#a21caf">"checkin.lastName"</span>: <span style="color:#16a34a">"Last name"</span> / <span style="color:#16a34a">"姓"</span></div>
+<div><span style="color:#a21caf">"checkin.phone"</span>: <span style="color:#16a34a">"Phone"</span> / <span style="color:#16a34a">"电话"</span></div>
+<div><span style="color:#a21caf">"checkin.email"</span>: <span style="color:#16a34a">"Email"</span> / <span style="color:#16a34a">"邮箱"</span></div>
+<div><span style="color:#a21caf">"checkin.idType"</span>: <span style="color:#16a34a">"ID document type"</span> / <span style="color:#16a34a">"证件类型"</span></div>
+<div><span style="color:#a21caf">"checkin.idType.passport"</span>: <span style="color:#16a34a">"Passport"</span> / <span style="color:#16a34a">"护照"</span></div>
+<div><span style="color:#a21caf">"checkin.idType.idCard"</span>: <span style="color:#16a34a">"ID Card"</span> / <span style="color:#16a34a">"身份证"</span></div>
+<div><span style="color:#a21caf">"checkin.idType.driverLicense"</span>: <span style="color:#16a34a">"Driver License"</span> / <span style="color:#16a34a">"驾照"</span></div>
+<div><span style="color:#a21caf">"checkin.arrivalTime"</span>: <span style="color:#16a34a">"Arrival time"</span> / <span style="color:#16a34a">"预计抵店时段"</span></div>
+<div><span style="color:#a21caf">"checkin.arrivalTime.morning"</span>: <span style="color:#16a34a">"Morning (8–12)"</span> / <span style="color:#16a34a">"上午 (8–12)"</span></div>
+<div><span style="color:#a21caf">"checkin.arrivalTime.afternoon"</span>: <span style="color:#16a34a">"Afternoon (12–18)"</span> / <span style="color:#16a34a">"下午 (12–18)"</span></div>
+<div><span style="color:#a21caf">"checkin.arrivalTime.evening"</span>: <span style="color:#16a34a">"Evening (18–22)"</span> / <span style="color:#16a34a">"傍晚 (18–22)"</span></div>
+<div><span style="color:#a21caf">"checkin.arrivalTime.late"</span>: <span style="color:#16a34a">"Late (22+)"</span> / <span style="color:#16a34a">"深夜 (22 点后)"</span></div>
+<div><span style="color:#a21caf">"checkin.referral"</span>: <span style="color:#16a34a">"Referral / How heard"</span> / <span style="color:#16a34a">"推荐来源"</span></div>
+<div><span style="color:#a21caf">"checkin.editInfo"</span>: <span style="color:#16a34a">"Edit info"</span> / <span style="color:#16a34a">"编辑资料"</span></div>
+<div><span style="color:#a21caf">"checkin.notProvided"</span>: <span style="color:#16a34a">"Not provided"</span> / <span style="color:#16a34a">"未填写"</span></div>
+<div><span style="color:#a21caf">"checkin.contactSection"</span>: <span style="color:#16a34a">"Contact"</span> / <span style="color:#16a34a">"联系方式"</span></div>
+<div><span style="color:#a21caf">"checkin.idSection"</span>: <span style="color:#16a34a">"ID"</span> / <span style="color:#16a34a">"证件"</span></div>
+</div>
+</div>
+</div>
+
+<div class="section">
+<h3>③ Demo 种子数据更新（src/data/seed.ts 或 类似）</h3>
+<div class="mockup">
+<div class="mockup-header">Demo Data · 补全 Email/Phone/ArrivalTime</div>
+<div class="mockup-body" style="background:#fafafa;padding:12px;font-family:monospace;font-size:10px;line-height:1.5">
+<div style="color:#71717a">// 给 5-8 个 demo 客人补全新字段，方便首次体验看到完整信息</div>
+<div>{</div>
+<div style="padding-left:12px">
+<div>name: <span style="color:#16a34a">"Sophie Müller"</span>, firstName: <span style="color:#16a34a">"Sophie"</span>, lastName: <span style="color:#16a34a">"Müller"</span>,</div>
+<div>email: <span style="color:#16a34a">"sophie@mail.de"</span>, phone: <span style="color:#16a34a">"+49-30-12345678"</span>,</div>
+<div>idType: <span style="color:#16a34a">"passport"</span>, arrivalTime: <span style="color:#16a34a">"afternoon"</span>,</div>
+<div>referral: <span style="color:#16a34a">"Hostelworld"</span>, countryCode: <span style="color:#16a34a">"DEU"</span>,</div>
+<div>...</div>
+</div>
+<div>}</div>
+<div style="margin-top:8px;color:#71717a">// 至少 1 个 demo 故意留空 referral/arrivalTime，演示"未填写"占位</div>
+</div>
+</div>
+</div>
+
+<div class="section">
+<h3>④ iCal 导入智能解析（src/components/ICalImport.tsx）</h3>
+<div class="mockup">
+<div class="mockup-header">SUMMARY 解析逻辑</div>
+<div class="mockup-body" style="background:#fafafa;padding:12px;font-family:monospace;font-size:10px;line-height:1.5">
+<div><span style="color:#a21caf">function</span> <span style="color:#2563eb">parseSummaryToName</span>(summary: string): {first: string, last: string} {</div>
+<div style="padding-left:12px">
+<div><span style="color:#a21caf">const</span> s = summary.trim();</div>
+<div><span style="color:#71717a">// 1. "Last, First" 格式</span></div>
+<div><span style="color:#a21caf">if</span> (s.includes(<span style="color:#16a34a">','</span>)) {</div>
+<div style="padding-left:12px">
+<div><span style="color:#a21caf">const</span> [last, first] = s.split(<span style="color:#16a34a">','</span>).map(x =&gt; x.trim());</div>
+<div><span style="color:#a21caf">return</span> { first, last };</div>
+</div>
+<div>}</div>
+<div><span style="color:#71717a">// 2. "First Last" 格式（按首空格拆）</span></div>
+<div><span style="color:#a21caf">const</span> parts = s.split(<span style="color:#16a34a">/\s+/</span>);</div>
+<div><span style="color:#a21caf">if</span> (parts.length === 1) <span style="color:#a21caf">return</span> { first: parts[0], last: <span style="color:#16a34a">''</span> };</div>
+<div><span style="color:#a21caf">return</span> { first: parts[0], last: parts.slice(1).join(<span style="color:#16a34a">' '</span>) };</div>
+</div>
+<div>}</div>
+</div>
+</div>
+</div>
+
+<div class="section">
+<h3>⑤ 文件改动清单</h3>
+<div class="mockup">
+<div class="mockup-header">Files Modified</div>
+<div class="mockup-body" style="background:#fafafa;padding:12px;font-size:11px;line-height:1.7">
+<div>📄 <b>src/types.ts</b> — Guest 接口扩展 + 2 枚举</div>
+<div>📄 <b>src/utils/guestMigration.ts</b> — 新增迁移函数</div>
+<div>📄 <b>src/HostelContext.tsx</b> — 启动时调用迁移 + addArrival 支持新字段</div>
+<div>📄 <b>src/components/CheckInPanel.tsx</b> — Walk-in 表单 + 详情卡重构</div>
+<div>📄 <b>src/components/ICalImport.tsx</b> — 智能解析 SUMMARY</div>
+<div>📄 <b>src/locales/en.json + zh.json</b> — 新增 ~18 个 i18n key</div>
+<div>📄 <b>src/data/seed.ts</b> — demo 数据补全</div>
+<div>📄 <b>src/version.ts</b> — v1.4.0 → <b>v1.6.0</b></div>
+</div>
+</div>
+</div>
+
+<p class="label" style="margin-top:16px;color:#71717a">SECTION 3 OF 3 · 迁移 + i18n + 种子 · 请确认 ✅ / 调整</p>
+</div>

@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BunkDesk — 当前 vs 优化对比</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, 'SF Pro Display', 'Helvetica Neue', sans-serif; background: #0f0f1a; color: #e5e7eb; padding: 24px; }
+  h1 { font-size: 18px; font-weight: 700; color: #fff; margin-bottom: 4px; }
+  .subtitle { font-size: 12px; color: #9ca3af; margin-bottom: 20px; }
+  .compare { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .panel { background: #1a1a2e; border-radius: 16px; overflow: hidden; }
+  .panel-label { padding: 10px 16px; font-size: 11px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; }
+  .panel-label.before { background: #7f1d1d; color: #fca5a5; }
+  .panel-label.after { background: #065f46; color: #6ee7b7; }
+  .panel-body { padding: 16px; background: #f8f9fc; color: #1f2937; }
+
+  /* Shared card/field styles */
+  .card { background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 14px; }
+  .card + .card { margin-top: 10px; }
+  .section-title { font-size: 9px; font-weight: 800; color: #9ca3af; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 8px; }
+
+  /* BEFORE styles (current) */
+  .before-panel .field { display: flex; align-items: flex-start; gap: 6px; padding: 4px 0; }
+  .before-panel .field-icon { font-size: 10px; opacity: .6; }
+  .before-panel .field-label { font-size: 9px; font-weight: 600; color: #9ca3af; text-transform: uppercase; letter-spacing: .3px; }
+  .before-panel .field-value { font-size: 12px; font-weight: 500; color: #1f2937; }
+  .before-panel .field-value.empty { color: #d1d5db; font-style: italic; }
+  .before-panel .field-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; }
+
+  /* AFTER styles (optimized) */
+  .after-panel .card { border: 1px solid #e5e7eb; border-radius: 14px; padding: 16px; box-shadow: 0 1px 3px rgba(0,0,0,.04); }
+  .after-panel .section-header { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+  .after-panel .section-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .after-panel .section-title-new { font-size: 10px; font-weight: 800; letter-spacing: .8px; text-transform: uppercase; }
+  .after-panel .field-row { display: flex; align-items: center; gap: 10px; padding: 7px 0; border-bottom: 1px solid #f3f4f6; }
+  .after-panel .field-row:last-child { border-bottom: none; }
+  .after-panel .f-icon { width: 28px; height: 28px; border-radius: 7px; display: flex; align-items: center; justify-content: center; font-size: 13px; flex-shrink: 0; }
+  .after-panel .f-label { font-size: 9px; font-weight: 700; color: #9ca3af; text-transform: uppercase; letter-spacing: .4px; }
+  .after-panel .f-value { font-size: 13px; font-weight: 600; color: #111827; }
+  .after-panel .f-value.empty { color: #d1d5db; font-style: italic; font-weight: 400; }
+
+  /* Source dropdown */
+  .source-select { display: inline-flex; align-items: center; gap: 5px; background: #f3f4f6; border: 1px solid #d1d5db; border-radius: 6px; padding: 3px 10px; font-size: 12px; font-weight: 600; color: #374151; cursor: pointer; }
+  .source-select .arrow { font-size: 9px; color: #9ca3af; }
+
+  /* Bed cards */
+  .bed-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+  .bed-card { border: 1.5px solid #e5e7eb; border-radius: 10px; padding: 10px; position: relative; }
+  .bed-card.best { border-color: #10b981; background: #ecfdf5; }
+  .bed-card .best-badge { position: absolute; top: -7px; left: 8px; background: #10b981; color: #fff; font-size: 8px; font-weight: 800; padding: 1px 7px; border-radius: 4px; }
+  .bed-card .room { font-size: 11px; font-weight: 700; color: #1f2937; }
+  .bed-card .info { font-size: 9px; color: #6b7280; margin-top: 1px; }
+  .bed-card .tags { display: flex; gap: 3px; margin-top: 4px; flex-wrap: wrap; }
+  .tag { font-size: 8px; font-weight: 700; padding: 1px 5px; border-radius: 3px; }
+  .tag-gender { background: #dbeafe; color: #1e40af; }
+  .tag-pref { background: #ede9fe; color: #6d28d9; }
+  .tag-fill { background: #f3f4f6; color: #4b5563; }
+  .tag-frag { background: #fef3c7; color: #92400e; }
+
+  /* Status items */
+  .status-row { display: flex; align-items: center; justify-content: space-between; padding: 6px 0; }
+  .status-row + .status-row { border-top: 1px solid #f3f4f6; }
+  .status-icon { width: 22px; height: 22px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 11px; }
+  .status-text { font-size: 11px; font-weight: 600; }
+
+  /* Buttons */
+  .btn { padding: 7px 16px; border-radius: 8px; font-size: 11px; font-weight: 700; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; }
+  .btn-blue { background: #3b82f6; color: #fff; }
+  .btn-green { background: #10b981; color: #fff; }
+  .btn-red { background: #ef4444; color: #fff; }
+  .btn-outline { background: #fff; color: #374151; border: 1px solid #d1d5db; }
+
+  /* Badge */
+  .badge { display: inline-flex; align-items: center; gap: 3px; padding: 2px 8px; border-radius: 12px; font-size: 10px; font-weight: 700; }
+  .badge-amber { background: #fef3c7; color: #92400e; }
+  .badge-green { background: #d1fae5; color: #065f46; }
+  .badge-blue { background: #dbeafe; color: #1e40af; }
+  .badge-rose { background: #ffe4e6; color: #9f1239; }
+
+  .callout { background: #1e293b; border: 1px solid #334155; border-radius: 10px; padding: 14px; margin-top: 20px; }
+  .callout h3 { font-size: 13px; font-weight: 700; color: #60a5fa; margin-bottom: 8px; }
+  .callout ul { padding-left: 16px; font-size: 12px; line-height: 1.8; color: #cbd5e1; }
+  .callout li span { color: #fbbf24; font-weight: 600; }
+</style>
+</head>
+<body>
+
+<h1>当前 vs 优化 — 逐项对比</h1>
+<p class="subtitle">保持双栏结构，针对性修复 4 个问题</p>
+
+<div class="compare">
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- BEFORE (Current) -->
+<!-- ═══════════════════════════════════════════════════ -->
+<div class="panel">
+  <div class="panel-label before">✕ 当前版本</div>
+  <div class="panel-body before-panel" style="font-size:12px">
+
+    <!-- Left: Info -->
+    <div style="display:grid;grid-template-columns:3fr 2fr;gap:10px">
+      <div>
+        <div class="card">
+          <div style="font-size:16px;font-weight:600;color:#1f2937">Sophie Müller</div>
+          <div style="font-size:10px;color:#71717a;margin-top:2px">Germany · Female · 3N · out 6/18</div>
+          <div style="margin-top:6px"><span class="badge badge-amber">⚠ Unpaid $255</span></div>
+        </div>
+        <div class="card">
+          <div class="section-title">CONTACT</div>
+          <div class="field-grid">
+            <div class="field"><span class="field-icon">📧</span><div><div class="field-label">Email</div><div class="field-value">sophie@mail.de</div></div></div>
+            <div class="field"><span class="field-icon">📞</span><div><div class="field-label">Phone</div><div class="field-value">+49-30-1234</div></div></div>
+            <div class="field"><span class="field-icon">🕒</span><div><div class="field-label">Arrival</div><div class="field-value">Afternoon</div></div></div>
+            <div class="field"><span class="field-icon">🔗</span><div><div class="field-label">Referral</div><div class="field-value">Hostelworld</div></div></div>
+          </div>
+          <div style="border-top:1px solid #f3f4f6;margin-top:6px;padding-top:6px">
+            <div class="section-title">ID</div>
+            <div class="field-grid">
+              <div class="field"><span class="field-icon">🛂</span><div><div class="field-label">ID Type</div><div class="field-value">Passport</div></div></div>
+              <div class="field"><span class="field-icon">#</span><div><div class="field-label">ID Number</div><div class="field-value">C01X00T47</div></div></div>
+              <div class="field"><span class="field-icon">🎂</span><div><div class="field-label">DOB</div><div class="field-value">1995-03-14</div></div></div>
+              <div class="field"><span class="field-icon">👥</span><div><div class="field-label">Gender</div><div class="field-value">Female</div></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Actions -->
+      <div>
+        <div class="card" style="padding:10px">
+          <div class="section-title">VERIFICATION</div>
+          <div style="font-size:10px;color:#10b981">✓ Passport scanned</div>
+        </div>
+        <div class="card" style="padding:10px">
+          <div class="section-title">PAYMENT</div>
+          <div style="font-size:10px;color:#dc2626">⚠ Unpaid $255</div>
+          <button class="btn btn-red" style="font-size:9px;padding:3px 8px;margin-top:4px">Collect $255</button>
+        </div>
+        <div class="card" style="padding:10px">
+          <div class="section-title">NOTES</div>
+          <div style="background:#fafafa;border:1px solid #e5e7eb;border-radius:4px;padding:3px;font-size:10px">Prefers bottom bunk</div>
+        </div>
+        <div class="card" style="padding:10px">
+          <div class="section-title">BED ASSIGNMENT</div>
+          <button class="btn btn-blue" style="width:100%;justify-content:center;font-size:10px;padding:6px;margin-bottom:6px">⚡ Auto-Assign</button>
+          <div class="bed-grid">
+            <div class="bed-card best"><div class="best-badge">★</div><div class="room">Mixed Dorm</div><div class="info">Bed 7 · R2 · $80</div><div class="tags"><span class="tag tag-fill">Fill</span><span class="tag tag-gender">Match</span></div></div>
+            <div class="bed-card"><div class="room">Female Dorm</div><div class="info">Bed 3 · R5 · $85</div><div class="tags"><span class="tag tag-fill">Fill</span></div></div>
+          </div>
+          <button class="btn btn-green" style="width:100%;justify-content:center;font-size:10px;padding:6px;margin-top:6px">✓ Complete</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- AFTER (Optimized) -->
+<!-- ═══════════════════════════════════════════════════ -->
+<div class="panel">
+  <div class="panel-label after">✓ 优化版本</div>
+  <div class="panel-body after-panel" style="font-size:12px">
+
+    <div style="display:grid;grid-template-columns:3fr 2fr;gap:10px">
+      <!-- Left: Info -->
+      <div>
+        <!-- Header -->
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start">
+            <div>
+              <div style="font-size:18px;font-weight:800;color:#111827">Sophie Müller</div>
+              <div style="display:flex;gap:4px;margin-top:5px;flex-wrap:wrap">
+                <span class="badge badge-blue">🇩🇪 DEU</span>
+                <span class="badge badge-rose">♀ Female</span>
+                <span style="font-size:10px;color:#9ca3af;align-self:center;margin-left:4px">3 nights · checkout 6/18</span>
+              </div>
+            </div>
+            <button class="btn btn-outline" style="font-size:10px;padding:4px 10px">✎ Edit</button>
+          </div>
+          <div style="margin-top:8px;display:flex;gap:5px">
+            <span class="badge badge-amber">⚠ Unpaid $255</span>
+            <span class="badge badge-blue">🕒 Afternoon</span>
+          </div>
+        </div>
+
+        <!-- Contact -->
+        <div class="card">
+          <div class="section-header">
+            <div class="section-dot" style="background:#3b82f6"></div>
+            <div class="section-title-new" style="color:#3b82f6">Contact</div>
+          </div>
+          <div class="field-row">
+            <div class="f-icon" style="background:#eff6ff">📧</div>
+            <div style="flex:1"><div class="f-label">Email</div><div class="f-value">sophie@mail.de</div></div>
+          </div>
+          <div class="field-row">
+            <div class="f-icon" style="background:#eff6ff">📞</div>
+            <div style="flex:1"><div class="f-label">Phone</div><div class="f-value">+49-30-12345678</div></div>
+          </div>
+          <div class="field-row">
+            <div class="f-icon" style="background:#eff6ff">🔗</div>
+            <div style="flex:1"><div class="f-label">Referral</div><div class="f-value">Hostelworld</div></div>
+          </div>
+          <div class="field-row">
+            <div class="f-icon" style="background:#eff6ff">📋</div>
+            <div style="flex:1"><div class="f-label">Source</div>
+              <div class="source-select">Walk-in <span class="arrow">▾</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ID -->
+        <div class="card">
+          <div class="section-header">
+            <div class="section-dot" style="background:#8b5cf6"></div>
+            <div class="section-title-new" style="color:#8b5cf6">ID Document</div>
+          </div>
+          <div class="field-row">
+            <div class="f-icon" style="background:#f5f3ff">🛂</div>
+            <div style="flex:1"><div class="f-label">Type + Number</div><div class="f-value">Passport · C01X00T47</div></div>
+            <span class="badge badge-green" style="font-size:9px">✓ Scanned</span>
+          </div>
+          <div class="field-row">
+            <div class="f-icon" style="background:#f5f3ff">🎂</div>
+            <div style="flex:1"><div class="f-label">Date of Birth</div><div class="f-value">1995-03-14</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Actions -->
+      <div>
+        <!-- Compressed status bar -->
+        <div class="card" style="padding:12px">
+          <div class="status-row">
+            <div style="display:flex;align-items:center;gap:6px">
+              <div class="status-icon" style="background:#d1fae5;color:#065f46">✓</div>
+              <span class="status-text" style="color:#065f46">Verified</span>
+            </div>
+          </div>
+          <div class="status-row">
+            <div style="display:flex;align-items:center;gap:6px">
+              <div class="status-icon" style="background:#fee2e2;color:#dc2626">⚠</div>
+              <span class="status-text" style="color:#dc2626">$255 unpaid</span>
+            </div>
+            <button class="btn btn-red" style="font-size:9px;padding:3px 8px">Collect</button>
+          </div>
+          <div class="status-row">
+            <div style="display:flex;align-items:center;gap:6px">
+              <div class="status-icon" style="background:#fef3c7;color:#92400e">📝</div>
+              <span style="font-size:10px;color:#92400e">Prefers bottom bunk</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bed Assignment (larger) -->
+        <div class="card" style="border-color:#10b981;border-width:1.5px">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px">
+            <span style="font-size:14px">🛏️</span>
+            <span style="font-size:11px;font-weight:800;color:#10b981;text-transform:uppercase;letter-spacing:.5px">Bed Assignment</span>
+          </div>
+          <div style="font-size:10px;color:#6b7280;margin-bottom:8px">
+            For <span style="font-weight:700;color:#e11d48">♀ Female</span> · prefers <span style="font-weight:700;color:#6366f1">Mixed dorm</span>
+          </div>
+          <button class="btn btn-blue" style="width:100%;justify-content:center;margin-bottom:8px">⚡ Auto-Assign Best Bed</button>
+          <div style="display:flex;flex-direction:column;gap:6px">
+            <div class="bed-card best">
+              <div class="best-badge">★ BEST</div>
+              <div style="display:flex;justify-content:space-between;align-items:center">
+                <div><div class="room">Female Dorm</div><div class="info">Bed 3 · Room 5 · $85/night</div></div>
+                <div style="font-size:16px;font-weight:800;color:#10b981">92</div>
+              </div>
+              <div class="tags" style="margin-top:4px">
+                <span class="tag tag-gender">♀ Gender +30</span>
+                <span class="tag tag-fill">Fill +40</span>
+                <span class="tag tag-frag">Low frag +8</span>
+              </div>
+            </div>
+            <div class="bed-card">
+              <div style="display:flex;justify-content:space-between;align-items:center">
+                <div><div class="room">Mixed Dorm</div><div class="info">Bed 7 · Room 2 · $80/night</div></div>
+                <div style="font-size:16px;font-weight:800;color:#6b7280">78</div>
+              </div>
+              <div class="tags" style="margin-top:4px">
+                <span class="tag tag-pref">✓ Preference +20</span>
+                <span class="tag tag-fill">Fill +40</span>
+                <span class="tag tag-gender">♀ Mixed ok +18</span>
+              </div>
+            </div>
+          </div>
+          <button class="btn btn-green" style="width:100%;justify-content:center;margin-top:8px">✓ Complete Check-in</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+</div>
+
+<!-- Change Summary -->
+<div class="callout">
+  <h3>优化改动清单（保持双栏结构不变）</h3>
+  <ul>
+    <li><span>左栏 Header</span>：姓名加大加粗(18px/800) + 国家/性别改为彩色 badge + 付款/抵店状态 badge 化</li>
+    <li><span>左栏 Contact</span>：2 列网格 → 单列 field-row（图标+标签+值），每行有彩色图标背景 + 分隔线</li>
+    <li><span>左栏 新增 Source</span>：内嵌下拉菜单（Walk-in ▾），不用弹窗</li>
+    <li><span>左栏 ID</span>：ID Type + Number 合并一行 + 扫描状态 badge 内嵌</li>
+    <li><span>分区标题</span>：灰色小字 → 彩色圆点 + 彩色标题（蓝=Contact / 紫=ID）</li>
+    <li><span>右栏 Verification/Payment/Notes</span>：3 张卡压缩为 1 张状态条，节省空间给 Bed</li>
+    <li><span>右栏 Bed Assignment</span>：加大 + 显示推荐依据（性别/偏好/填充/碎片化）+ 分数</li>
+    <li><span>床位推荐逻辑</span>：scoreBeds 已有 gender + preference 加权，只需在 UI 展示 reasons</li>
+  </ul>
+</div>
+
+</body>
+</html>

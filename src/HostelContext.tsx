@@ -85,7 +85,7 @@ interface HostelState {
   settlePayment: (guestId: string) => void;
   scanPassport: (guestId: string) => void;
   addArrival: (guest: Omit<Guest, "id">) => string;
-  updateArrival: (guestId: string, updates: Partial<Pick<Guest, 'notes' | 'roomPreference' | 'source' | 'phone' | 'email' | 'totalAmount' | 'paidAmount' | 'gender' | 'dob' | 'passportOrId' | 'checkInDate' | 'checkOutDate' | 'nights' | 'firstName' | 'lastName' | 'idType' | 'arrivalTime' | 'referral' | 'bookingSource'>>) => void;
+  updateArrival: (guestId: string, updates: Partial<Pick<Guest, 'notes' | 'roomPreference' | 'source' | 'phone' | 'email' | 'totalAmount' | 'paidAmount' | 'gender' | 'passportOrId' | 'checkInDate' | 'checkOutDate' | 'nights' | 'firstName' | 'lastName' | 'idType' | 'arrivalTime' | 'bookingSource' | 'bedPreference'>>) => void;
   importArrivals: (guests: Omit<Guest, "id">[]) => void;
   addRoom: (room: Omit<Room, "id" | "beds">) => void;
   updateRoom: (roomId: string, name: string, number: string, pricePerNight?: number, bottomBunkPremium?: number) => void;
@@ -548,7 +548,7 @@ export function HostelProvider({ children }: { children: ReactNode }) {
     return newGuest.id;
   }, [logAction]);
 
-  const updateArrival = useCallback((guestId: string, updates: Partial<Pick<Guest, 'notes' | 'roomPreference' | 'source' | 'phone' | 'email' | 'totalAmount' | 'paidAmount' | 'gender' | 'dob' | 'passportOrId' | 'checkInDate' | 'checkOutDate' | 'nights'>>) => {
+  const updateArrival = useCallback((guestId: string, updates: Partial<Pick<Guest, 'notes' | 'roomPreference' | 'source' | 'phone' | 'email' | 'totalAmount' | 'paidAmount' | 'gender' | 'passportOrId' | 'checkInDate' | 'checkOutDate' | 'nights' | 'firstName' | 'lastName' | 'idType' | 'arrivalTime' | 'bookingSource' | 'bedPreference'>>) => {
     setArrivals((prev) => prev.map((g) => g.id === guestId ? { ...g, ...updates } : g));
     // Sync updates to rooms guest data AND reservations
     setRooms((prevRooms) =>
@@ -683,7 +683,7 @@ export function HostelProvider({ children }: { children: ReactNode }) {
 
   const updateGuestField = useCallback((
     guestId: string,
-    field: 'phone' | 'email' | 'passportOrId' | 'dob' | 'gender' | 'source' | 'roomPreference',
+    field: 'phone' | 'email' | 'passportOrId' | 'gender' | 'source' | 'roomPreference',
     value: string,
   ) => {
     setArrivals((prev) => prev.map((g) => g.id === guestId ? { ...g, [field]: value } : g));

@@ -11,7 +11,7 @@ export type IdDocumentType = "passport" | "idCard" | "driverLicense";
 
 export type ArrivalSlot = "morning" | "afternoon" | "evening" | "late";
 
-export type BookingSource = "walk-in" | "phone" | "email" | "referral" | "other";
+export type BookingSource = "walk-in" | "hostelworld" | "booking-com" | "airbnb" | "google" | "other-ota";
 
 export interface Guest {
   id: string;
@@ -30,16 +30,14 @@ export interface Guest {
   notes?: string;
   passportScanned: boolean;
   passportOrId?: string;
-  dob?: string;
-  policeConsent?: boolean;
   firstName?: string;
   lastName?: string;
   idType?: IdDocumentType;
   arrivalTime?: ArrivalSlot;
-  referral?: string;
   bookingSource?: BookingSource;
   source: GuestSource;
   roomPreference?: string;
+  bedPreference?: 'top' | 'bottom' | 'any';
 }
 
 export interface Bed {

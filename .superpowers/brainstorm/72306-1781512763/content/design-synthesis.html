@@ -1,0 +1,96 @@
+<h2>CheckInPanel 重构 · 设计合成图</h2>
+<p class="subtitle">基于你的 8 个决策：H2 架构 + 规则排序 + 4 项 checklist + 内嵌 5 卡片 + 全勾自动完成</p>
+
+<div class="split">
+  <div class="mockup">
+    <div class="mockup-header">⚡ 今日待办（默认首页 · 规则排序）</div>
+    <div class="mockup-body" style="font-size:11px;padding:10px">
+      <div style="display:flex;gap:4px;margin-bottom:10px;font-size:10px">
+        <div class="mock-button" style="background:#f59e0b;color:white">⚡ 今日待办 (4)</div>
+        <div class="mock-button" style="background:white">待入住 (3)</div>
+        <div class="mock-button" style="background:white">已入住 (12)</div>
+        <div class="mock-button" style="background:white">已预订 (8)</div>
+      </div>
+      <div style="background:#fffbeb;border:1px solid #fde68a;padding:8px;border-radius:8px;margin-bottom:8px">
+        <b>📌 排序规则：</b> 时间临近 30% + 未办件数 20% + 📌置顶 ×∞
+      </div>
+      <div style="background:white;border:1px solid #e4e4e7;padding:8px;border-radius:6px;margin-bottom:6px">
+        <div>🔥 ① <b>John Doe</b> <span style="color:#71717a">14:00 到</span> <span style="color:#dc2626">[缺 3]</span></div>
+        <div style="color:#71717a;font-size:10px;margin-top:2px">⏰ 30 min 内到 · 未录护照 · 未付款 · 未分床</div>
+      </div>
+      <div style="background:white;border:1px solid #e4e4e7;padding:8px;border-radius:6px;margin-bottom:6px">
+        <div>② <b>Maria</b> <span style="color:#71717a">16:00 到</span> <span style="color:#f59e0b">[缺 1]</span></div>
+        <div style="color:#71717a;font-size:10px;margin-top:2px">⏰ 2h · 仅缺分床</div>
+      </div>
+      <div style="background:white;border:1px solid #e4e4e7;padding:8px;border-radius:6px;margin-bottom:6px;border-color:#fef3c7">
+        <div>📌 <b>VIP 张三</b> <span style="color:#71717a">20:00 到</span> <span style="color:#10b981">[全齐]</span> <span style="font-size:9px">手动置顶</span></div>
+      </div>
+      <div style="background:white;border:1px solid #e4e4e7;padding:8px;border-radius:6px;opacity:0.6">
+        <div>④ Liam · 明天 09:00 · <span style="color:#10b981">[全齐]</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="mockup">
+    <div class="mockup-header">点 John Doe → 右侧展开 4 项 checklist</div>
+    <div class="mockup-body" style="font-size:10px;padding:8px">
+      <div style="background:#fafafa;padding:6px;border-radius:6px;margin-bottom:6px">
+        <b>John Doe</b> · USA · 14:00 到 · 3 晚 · <span style="color:#dc2626">$85 未付</span>
+      </div>
+
+      <div style="border:1px solid #e4e4e7;padding:6px;border-radius:6px;margin-bottom:4px">
+        <b>① 录护照</b> <span style="color:#71717a">[未办]</span>
+        <div style="margin-top:4px;padding:6px;background:#f4f4f5;border-radius:4px">
+          ▸ 护照号 [PA1234567 ] 出生 [1990-01-01] <button class="mock-button" style="font-size:9px">确认</button>
+        </div>
+      </div>
+
+      <div style="border:1px solid #e4e4e7;padding:6px;border-radius:6px;margin-bottom:4px">
+        <b>② 收钱</b> <span style="color:#71717a">[未付 $85]</span>
+      </div>
+
+      <div style="border:1px solid #10b981;background:#f0fdf4;padding:6px;border-radius:6px;margin-bottom:4px">
+        <b>③ 选床</b> <span style="color:#10b981">[✓ 已选 A1 · Female Dorm]</span>
+      </div>
+
+      <div style="border:1px solid #e4e4e7;padding:6px;border-radius:6px;margin-bottom:4px">
+        <b>④ 存备注</b> <span style="color:#71717a">[空]</span>
+      </div>
+
+      <div style="margin-top:8px;padding:6px;background:#dbeafe;border-radius:6px;color:#1e40af">
+        ⚡ 全部勾选后自动转为"已入住" · 无需点完成按钮
+      </div>
+
+      <div style="margin-top:8px;border-top:1px solid #e4e4e7;padding-top:6px">
+        <details><summary>📋 查看完整信息（折叠的 5 卡片）</summary>
+        <div style="padding:4px;color:#71717a">Header / 验证+付款双卡 / 备注+偏好 / 床位分配 / 完成按钮（只读）</div>
+        </details>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+<h3>设计要点</h3>
+<ul style="font-size:12px;line-height:1.7">
+  <li>✅ <b>无 AI</b>：所有"智能"是纯规则加权，零云端依赖</li>
+  <li>✅ <b>H2 架构</b>：⚡ 今日待办 在最前 + 原 3 tab 不动</li>
+  <li>✅ <b>规则评分</b>：时间临近 30% + 未办件数 20% + 人工置顶 ×∞</li>
+  <li>✅ <b>固定 4 项 checklist</b>：录护照 / 收钱 / 选床 / 存备注</li>
+  <li>✅ <b>原地展开</b>：item 点开后变内嵌表单，不弹窗</li>
+  <li>✅ <b>5 卡片内嵌折叠</b>：默认收起，展开可看 5 卡片只读</li>
+  <li>✅ <b>全勾自动完成</b>：4 项都打勾自动转"已入住"，无手动按钮</li>
+</ul>
+</div>
+
+<div class="section">
+<h3>需要新增 / 改动的代码</h3>
+<ul style="font-size:12px;line-height:1.7">
+  <li><b>types.ts</b>：<code>Guest</code> 加 <code>pinned?: boolean</code> 字段</li>
+  <li><b>utils/priorityEngine.ts</b>：新增，规则评分函数（纯函数 + 单测）</li>
+  <li><b>utils/incompleteness.ts</b>：新增，4 项 check 函数</li>
+  <li><b>HostelContext.tsx</b>：加 <code>pinGuest</code> / <code>unpinGuest</code> actions</li>
+  <li><b>CheckInPanel.tsx</b>：新增 ⚡ 今日待办 sub-tab + checklist 展开 + 内嵌 5 卡片</li>
+  <li><b>i18n</b>：<code>checkin.todayQueue</code> / <code>checkin.pin</code> / <code>checkin.unpin</code> / <code>checkin.fullDetails</code> 命名空间</li>
+</ul>
+</div>

@@ -27,14 +27,14 @@ function FieldRow({ icon, iconBg, label, value, placeholder, children }: {
 }) {
   const hasValue = !!value && value.length > 0;
   return (
-    <div className="flex items-center gap-2 py-1.5 border-b border-zinc-50 last:border-b-0">
-      <div className={cn("w-6 h-6 rounded-md flex items-center justify-center text-[11px] shrink-0", iconBg)}>
+    <div className="flex items-center gap-2 py-2 border-b border-zinc-50 last:border-b-0">
+      <div className={cn("w-7 h-7 rounded-md flex items-center justify-center text-xs shrink-0", iconBg)}>
         {icon}
       </div>
       <div className="min-w-0 flex-1">
-        <div className="text-[9px] font-bold text-zinc-400 uppercase tracking-wider">{label}</div>
+        <div className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider">{label}</div>
         {children ? children : (
-          <div className={cn("truncate text-xs", hasValue ? "text-zinc-900 font-semibold" : "text-zinc-300 italic font-normal")}>
+          <div className={cn("truncate text-sm", hasValue ? "text-zinc-900 font-semibold" : "text-zinc-300 italic font-normal")}>
             {hasValue ? value : placeholder}
           </div>
         )}
@@ -70,8 +70,9 @@ export function CheckInPanel({ setActiveTab }: { setActiveTab?: (tab: string) =>
     idType: 'passport' as "passport" | "idCard" | "driverLicense",
     passportOrId: '', arrivalTime: '' as "" | "morning" | "afternoon" | "evening" | "late",
     roomPreference: '' as '' | 'dorm-mixed' | 'dorm-female' | 'private',
-    referral: '', bookingSource: 'walk-in' as "walk-in" | "phone" | "email" | "referral" | "other",
-    dob: '', policeConsent: false, notes: '',
+    bedPreference: '' as '' | 'top' | 'bottom' | 'any',
+    bookingSource: 'walk-in' as "walk-in" | "hostelworld" | "booking-com" | "airbnb" | "google" | "other-ota",
+    notes: '',
   });
 
   const selectedGuest = arrivals.find(g => g.id === selectedGuestId);
@@ -128,7 +129,7 @@ export function CheckInPanel({ setActiveTab }: { setActiveTab?: (tab: string) =>
 
   const handleCreateArrival = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newGuestRef.firstName || !newGuestRef.lastName || !newGuestRef.countryCode || !newGuestRef.checkInDate || !newGuestRef.checkOutDate || !newGuestRef.policeConsent) return;
+    if (!newGuestRef.firstName || !newGuestRef.lastName || !newGuestRef.countryCode || !newGuestRef.checkInDate || !newGuestRef.checkOutDate) return;
     const countryName = COUNTRY_MAP[newGuestRef.countryCode.toUpperCase()] || newGuestRef.countryCode.toUpperCase();
     const checkIn = parseISO(newGuestRef.checkInDate);
     const checkOut = parseISO(newGuestRef.checkOutDate);
@@ -147,9 +148,8 @@ export function CheckInPanel({ setActiveTab }: { setActiveTab?: (tab: string) =>
       idType: newGuestRef.idType,
       arrivalTime: newGuestRef.arrivalTime || undefined,
       roomPreference: newGuestRef.roomPreference || undefined,
-      referral: newGuestRef.referral || undefined,
+      bedPreference: newGuestRef.bedPreference || undefined,
       bookingSource: newGuestRef.bookingSource,
-      dob: newGuestRef.dob, policeConsent: newGuestRef.policeConsent,
       notes: newGuestRef.notes,
       source: 'walk-in' as const,
     });
@@ -162,8 +162,9 @@ export function CheckInPanel({ setActiveTab }: { setActiveTab?: (tab: string) =>
       idType: 'passport' as "passport" | "idCard" | "driverLicense",
       passportOrId: '', arrivalTime: '' as "" | "morning" | "afternoon" | "evening" | "late",
       roomPreference: '' as '' | 'dorm-mixed' | 'dorm-female' | 'private',
-      referral: '', bookingSource: 'walk-in' as "walk-in" | "phone" | "email" | "referral" | "other",
-      dob: '', policeConsent: false, notes: '',
+      bedPreference: '' as '' | 'top' | 'bottom' | 'any',
+      bookingSource: 'walk-in' as "walk-in" | "hostelworld" | "booking-com" | "airbnb" | "google" | "other-ota",
+      notes: '',
     });
   };
 
@@ -313,10 +314,6 @@ export function CheckInPanel({ setActiveTab }: { setActiveTab?: (tab: string) =>
                         </Select>
                       </div>
                     </div>
-                    <div className="space-y-1.5 sm:w-1/3">
-                      <Label className="text-[10px] font-semibold text-zinc-500 uppercase">{t('checkin.dob') || 'DOB'}</Label>
-                      <Input type="date" value={newGuestRef.dob} onChange={e => setNewGuestRef({...newGuestRef, dob: e.target.value})} className="h-10 bg-zinc-50 border-zinc-200" />
-                    </div>
                   </div>
 
                   {/* ── Section 2: Stay ── */}
@@ -354,6 +351,17 @@ export function CheckInPanel({ setActiveTab }: { setActiveTab?: (tab: string) =>
                           </SelectContent>
                         </Select>
                       </div>
+                      <div className="space-y-1.5 sm:w-1/3">
+                        <Label className="text-[10px] font-semibold text-zinc-500 uppercase">{t('checkin.bedPreference') || 'Bed Preference'}</Label>
+                        <Select value={newGuestRef.bedPreference} onValueChange={(val: string) => setNewGuestRef({...newGuestRef, bedPreference: val as '' | 'top' | 'bottom' | 'any'})}>
+                          <SelectTrigger className="h-10 bg-zinc-50 border-zinc-200"><SelectValue placeholder="—" /></SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="any">{t('checkin.noPreference') || 'No preference'}</SelectItem>
+                            <SelectItem value="bottom">{t('checkin.bottomBunk') || 'Bottom bunk'}</SelectItem>
+                            <SelectItem value="top">{t('checkin.topBunk') || 'Top bunk'}</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
                     </div>
                   </div>
 
@@ -383,20 +391,17 @@ export function CheckInPanel({ setActiveTab }: { setActiveTab?: (tab: string) =>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <div className="space-y-1.5">
                         <Label className="text-[10px] font-semibold text-zinc-500 uppercase">{t('checkin.source.label')}</Label>
-                        <Select value={newGuestRef.bookingSource} onValueChange={(val: string) => setNewGuestRef({...newGuestRef, bookingSource: val as "walk-in" | "phone" | "email" | "referral" | "other"})}>
+                        <Select value={newGuestRef.bookingSource} onValueChange={(val: string) => setNewGuestRef({...newGuestRef, bookingSource: val as "walk-in" | "hostelworld" | "booking-com" | "airbnb" | "google" | "other-ota"})}>
                           <SelectTrigger className="h-10 bg-zinc-50 border-zinc-200"><SelectValue /></SelectTrigger>
                           <SelectContent>
                             <SelectItem value="walk-in">{t('checkin.source.walkIn')}</SelectItem>
-                            <SelectItem value="phone">{t('checkin.source.phone')}</SelectItem>
-                            <SelectItem value="email">{t('checkin.source.email')}</SelectItem>
-                            <SelectItem value="referral">{t('checkin.source.referral')}</SelectItem>
-                            <SelectItem value="other">{t('checkin.source.other')}</SelectItem>
+                            <SelectItem value="hostelworld">Hostelworld</SelectItem>
+                            <SelectItem value="booking-com">Booking.com</SelectItem>
+                            <SelectItem value="airbnb">Airbnb</SelectItem>
+                            <SelectItem value="google">Google</SelectItem>
+                            <SelectItem value="other-ota">{t('checkin.source.otherOta')}</SelectItem>
                           </SelectContent>
                         </Select>
-                      </div>
-                      <div className="space-y-1.5">
-                        <Label className="text-[10px] font-semibold text-zinc-500 uppercase">{t('checkin.referral')}</Label>
-                        <Input className="h-10 bg-zinc-50 border-zinc-200" placeholder="Hostelworld / Friend / Google…" value={newGuestRef.referral} onChange={e => setNewGuestRef({...newGuestRef, referral: e.target.value})} />
                       </div>
                     </div>
                     <div className="space-y-1.5">
@@ -405,40 +410,29 @@ export function CheckInPanel({ setActiveTab }: { setActiveTab?: (tab: string) =>
                     </div>
                   </div>
 
-                  {/* ── Police Consent (sticky) ── */}
-                  <div className="bg-zinc-50 p-3 rounded-xl border border-zinc-200">
-                    <label className="flex items-start gap-2.5 cursor-pointer">
-                      <input type="checkbox" required checked={newGuestRef.policeConsent} onChange={e => setNewGuestRef({...newGuestRef, policeConsent: e.target.checked})} className="mt-0.5 w-4 h-4 rounded border-zinc-300 text-zinc-900 focus:ring-zinc-900" />
-                      <div>
-                        <span className="text-xs font-semibold text-zinc-900">{t('checkin.policeRegistration')}<span className="text-red-500">*</span></span>
-                        <span className="text-[10px] text-zinc-500 block mt-0.5">{t('checkin.policeRegistrationDesc')}</span>
-                      </div>
-                    </label>
-                  </div>
-
                   <div className="pt-3 border-t border-zinc-100 flex justify-end">
                     <Button type="submit" size="lg" className="h-11 px-6 text-sm shadow-sm w-full sm:w-auto">{t('checkin.createArrival')}</Button>
                   </div>
                 </form>
               </div>
             ) : selectedGuest ? (
-              <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
+              <div className="grid grid-cols-1 lg:grid-cols-5 gap-5">
                 {/* ── Left 60%: Info Card ── */}
-                <div className="lg:col-span-3 space-y-3">
+                <div className="lg:col-span-3 space-y-4">
                   {/* Header Card */}
-                  <div className="bg-white p-4 rounded-2xl border border-zinc-200 shadow-sm">
+                  <div className="bg-white p-5 rounded-2xl border border-zinc-200 shadow-sm">
                     <div className="flex items-start justify-between gap-2">
                       <div className="min-w-0">
-                        <h2 className="text-[17px] font-extrabold text-zinc-900 truncate">
+                        <h2 className="text-xl font-extrabold text-zinc-900 truncate">
                           {[selectedGuest.firstName, selectedGuest.lastName].filter(Boolean).join(' ') || selectedGuest.name}
                         </h2>
                         <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
-                          <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-blue-50 text-blue-700 text-[10px] font-bold">
+                          <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-blue-50 text-blue-700 text-xs font-bold">
                             {selectedGuest.countryCode || selectedGuest.country}
                           </span>
                           {selectedGuest.gender && (
                             <span className={cn(
-                              "inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-bold",
+                              "inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-xs font-bold",
                               selectedGuest.gender === 'female' ? 'bg-pink-50 text-pink-700' :
                               selectedGuest.gender === 'male' ? 'bg-sky-50 text-sky-700' :
                               'bg-zinc-100 text-zinc-600'
@@ -446,7 +440,7 @@ export function CheckInPanel({ setActiveTab }: { setActiveTab?: (tab: string) =>
                               {selectedGuest.gender === 'female' ? '♀' : selectedGuest.gender === 'male' ? '♂' : '○'} {t(`guest.${selectedGuest.gender}`) || selectedGuest.gender}
                             </span>
                           )}
-                          <span className="text-[10px] text-zinc-400">{selectedGuest.nights} {t('dashboard.nights')} · {t('checkin.checkout')} {selectedGuest.checkOutDate}</span>
+                          <span className="text-xs text-zinc-400">{selectedGuest.nights} {t('dashboard.nights')} · {t('checkin.checkout')} {selectedGuest.checkOutDate}</span>
                         </div>
                       </div>
                       <Button variant="outline" size="sm" className="h-7 text-xs shrink-0" onClick={() => setEditInfoOpen(true)}>
@@ -455,17 +449,17 @@ export function CheckInPanel({ setActiveTab }: { setActiveTab?: (tab: string) =>
                     </div>
                     <div className="flex items-center gap-1.5 mt-2 flex-wrap">
                       {selectedGuest.paymentStatus === 'unpaid' && (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-50 text-amber-700 text-[10px] font-bold">
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-50 text-amber-700 text-xs font-bold">
                           ⚠ {t('checkin.paymentDue')} {formatCurrency(selectedGuest.totalAmount ?? (selectedGuest.nights * AVG_PRICE), language)}
                         </span>
                       )}
                       {selectedGuest.paymentStatus === 'paid' && (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 text-[10px] font-bold">
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 text-xs font-bold">
                           ✓ {t('checkin.paid')}
                         </span>
                       )}
                       {selectedGuest.arrivalTime && (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-blue-50 text-blue-700 text-[10px] font-bold">
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-blue-50 text-blue-700 text-xs font-bold">
                           🕒 {t(`checkin.arrivalTime.${selectedGuest.arrivalTime}`)}
                         </span>
                       )}
@@ -473,29 +467,29 @@ export function CheckInPanel({ setActiveTab }: { setActiveTab?: (tab: string) =>
                   </div>
 
                   {/* Contact + ID Card */}
-                  <div className="bg-white p-4 rounded-2xl border border-zinc-200 shadow-sm">
+                  <div className="bg-white p-5 rounded-2xl border border-zinc-200 shadow-sm">
                     {/* Contact Section */}
                     <div className="flex items-center gap-1.5 mb-2">
                       <div className="w-1.5 h-1.5 rounded-full bg-blue-500" />
-                      <div className="text-[9px] font-extrabold text-blue-500 uppercase tracking-wider">{t('checkin.contactSection')}</div>
+                      <div className="text-[11px] font-extrabold text-blue-500 uppercase tracking-wider">{t('checkin.contactSection')}</div>
                     </div>
-                    <div className="grid grid-cols-2 gap-x-3">
+                    <div className="grid grid-cols-2 gap-x-5">
                       <FieldRow icon="📧" iconBg="bg-blue-50" label={t('checkin.email')} value={selectedGuest.email} placeholder={t('checkin.notProvided')} />
                       <FieldRow icon="📞" iconBg="bg-blue-50" label={t('checkin.phone')} value={selectedGuest.phone} placeholder={t('checkin.notProvided')} />
                       <FieldRow icon="🕒" iconBg="bg-blue-50" label={t('checkin.arrivalTime.label')} value={selectedGuest.arrivalTime ? t(`checkin.arrivalTime.${selectedGuest.arrivalTime}`) : undefined} placeholder={t('checkin.notProvided')} />
-                      <FieldRow icon="🔗" iconBg="bg-blue-50" label={t('checkin.referral')} value={selectedGuest.referral} placeholder={t('checkin.notProvided')} />
                       <div className="col-span-2">
                         <FieldRow icon="📋" iconBg="bg-blue-50" label={t('checkin.source.label')} value="" placeholder="">
                           <Select value={selectedGuest.bookingSource ?? 'walk-in'} onValueChange={(val: string) => updateArrival(selectedGuest.id, { bookingSource: val as Guest['bookingSource'] })}>
-                            <SelectTrigger className="h-6 text-[11px] bg-zinc-100 border-zinc-200 w-28">
+                            <SelectTrigger className="h-7 text-xs bg-zinc-100 border-zinc-200 w-32">
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
                               <SelectItem value="walk-in">{t('checkin.source.walkIn')}</SelectItem>
-                              <SelectItem value="phone">{t('checkin.source.phone')}</SelectItem>
-                              <SelectItem value="email">{t('checkin.source.email')}</SelectItem>
-                              <SelectItem value="referral">{t('checkin.source.referral')}</SelectItem>
-                              <SelectItem value="other">{t('checkin.source.other')}</SelectItem>
+                              <SelectItem value="hostelworld">Hostelworld</SelectItem>
+                              <SelectItem value="booking-com">Booking.com</SelectItem>
+                              <SelectItem value="airbnb">Airbnb</SelectItem>
+                              <SelectItem value="google">Google</SelectItem>
+                              <SelectItem value="other-ota">{t('checkin.source.otherOta')}</SelectItem>
                             </SelectContent>
                           </Select>
                         </FieldRow>
@@ -506,9 +500,9 @@ export function CheckInPanel({ setActiveTab }: { setActiveTab?: (tab: string) =>
                     <div className="border-t border-zinc-100 mt-2 pt-2">
                       <div className="flex items-center gap-1.5 mb-2">
                         <div className="w-1.5 h-1.5 rounded-full bg-violet-500" />
-                        <div className="text-[9px] font-extrabold text-violet-500 uppercase tracking-wider">{t('checkin.idSection')}</div>
+                        <div className="text-[11px] font-extrabold text-violet-500 uppercase tracking-wider">{t('checkin.idSection')}</div>
                       </div>
-                      <div className="grid grid-cols-2 gap-x-3">
+                      <div className="grid grid-cols-2 gap-x-5">
                         <FieldRow icon="🛂" iconBg="bg-violet-50" label={t('checkin.idType.label')} value={selectedGuest.idType ? t(`checkin.idType.${selectedGuest.idType}`) : undefined} placeholder={t('checkin.notProvided')}>
                           {selectedGuest.passportScanned && (
                             <div className="flex items-center gap-1.5">
@@ -518,7 +512,6 @@ export function CheckInPanel({ setActiveTab }: { setActiveTab?: (tab: string) =>
                           )}
                         </FieldRow>
                         <FieldRow icon="#" iconBg="bg-violet-50" label={t('checkin.passportOrId')} value={selectedGuest.passportOrId} placeholder={t('checkin.notProvided')} />
-                        <FieldRow icon="🎂" iconBg="bg-violet-50" label={t('checkin.dob') || 'DOB'} value={selectedGuest.dob} placeholder={t('checkin.notProvided')} />
                         <FieldRow icon="👥" iconBg="bg-violet-50" label={t('guest.gender') || 'Gender'} value={selectedGuest.gender ? t(`guest.${selectedGuest.gender}`) || selectedGuest.gender : undefined} placeholder={t('checkin.notProvided')} />
                       </div>
                     </div>
@@ -526,17 +519,17 @@ export function CheckInPanel({ setActiveTab }: { setActiveTab?: (tab: string) =>
                 </div>
 
                 {/* ── Right 40%: Actions Stack ── */}
-                <div className="lg:col-span-2 space-y-3">
+                <div className="lg:col-span-2 space-y-4">
                   <Card className="p-3 border-zinc-200 bg-white shadow-none">
                     <div className="flex flex-col gap-0">
                       {/* Verification */}
-                      <div className="flex items-center justify-between py-1.5 border-b border-zinc-50">
+                      <div className="flex items-center justify-between py-2.5 border-b border-zinc-50">
                         <div className="flex items-center gap-2">
-                          <div className={cn("w-5 h-5 rounded-md flex items-center justify-center text-[10px]",
+                          <div className={cn("w-6 h-6 rounded-md flex items-center justify-center text-xs",
                             selectedGuest.passportScanned ? 'bg-emerald-50 text-emerald-600' : 'bg-zinc-100 text-zinc-400')}>
                             {selectedGuest.passportScanned ? '✓' : '○'}
                           </div>
-                          <span className={cn("text-[11px] font-semibold", selectedGuest.passportScanned ? 'text-emerald-600' : 'text-zinc-500')}>
+                          <span className={cn("text-sm font-semibold", selectedGuest.passportScanned ? 'text-emerald-600' : 'text-zinc-500')}>
                             {selectedGuest.passportScanned ? t('checkin.verified') : t('checkin.scanPassport')}
                           </span>
                         </div>
@@ -545,13 +538,13 @@ export function CheckInPanel({ setActiveTab }: { setActiveTab?: (tab: string) =>
                         )}
                       </div>
                       {/* Payment */}
-                      <div className="flex items-center justify-between py-1.5 border-b border-zinc-50">
+                      <div className="flex items-center justify-between py-2.5 border-b border-zinc-50">
                         <div className="flex items-center gap-2">
-                          <div className={cn("w-5 h-5 rounded-md flex items-center justify-center text-[10px]",
+                          <div className={cn("w-6 h-6 rounded-md flex items-center justify-center text-xs",
                             selectedGuest.paymentStatus === 'unpaid' ? 'bg-red-50 text-red-500' : 'bg-emerald-50 text-emerald-500')}>
                             {selectedGuest.paymentStatus === 'unpaid' ? '⚠' : '✓'}
                           </div>
-                          <span className={cn("text-[11px] font-semibold", selectedGuest.paymentStatus === 'unpaid' ? 'text-red-600' : 'text-emerald-600')}>
+                          <span className={cn("text-sm font-semibold", selectedGuest.paymentStatus === 'unpaid' ? 'text-red-600' : 'text-emerald-600')}>
                             {selectedGuest.paymentStatus === 'unpaid'
                               ? `${formatCurrency(selectedGuest.totalAmount ?? (selectedGuest.nights * AVG_PRICE), language)} ${t('checkin.unpaid')}`
                               : t('checkin.allSettled')}
@@ -562,26 +555,26 @@ export function CheckInPanel({ setActiveTab }: { setActiveTab?: (tab: string) =>
                         )}
                       </div>
                       {/* Notes */}
-                      <div className="flex items-center gap-2 py-1.5">
-                        <div className="w-5 h-5 rounded-md bg-amber-50 flex items-center justify-center text-[10px] text-amber-600">📝</div>
-                        <Input className="h-5 bg-zinc-50 border-zinc-200 text-[10px] flex-1" placeholder="..." value={editNotes}
+                      <div className="flex items-center gap-2 py-2.5">
+                        <div className="w-6 h-6 rounded-md bg-amber-50 flex items-center justify-center text-xs text-amber-600">📝</div>
+                        <Input className="h-7 bg-zinc-50 border-zinc-200 text-xs flex-1" placeholder="..." value={editNotes}
                           onChange={e => { setEditNotes(e.target.value); if (selectedGuest) updateArrival(selectedGuest.id, { notes: e.target.value }); }} />
                       </div>
                     </div>
                   </Card>
 
-                  <Card className="p-3 border-emerald-200 shadow-none">
-                    <Label className="text-[10px] text-emerald-600 font-extrabold uppercase tracking-wider mb-1 flex items-center gap-1.5">
+                  <Card className="p-4 border-emerald-200 shadow-none">
+                    <Label className="text-xs text-emerald-600 font-extrabold uppercase tracking-wider mb-1 flex items-center gap-1.5">
                       <BedDouble className="h-3.5 w-3.5" />{t('checkin.assignBed')}
                     </Label>
-                    <div className="text-[9px] text-zinc-500 mb-2">
+                    <div className="text-[11px] text-zinc-500 mb-2">
                       {t('checkin.recommendationFor') || 'For'}
                       <span className="font-bold text-pink-600">{selectedGuest.gender === 'female' ? ' ♀ Female' : selectedGuest.gender === 'male' ? ' ♂ Male' : ''}</span>
                       {selectedGuest.roomPreference && (
                         <> · <span className="font-bold text-indigo-600">{t('checkin.prefers') || 'prefers'} {selectedGuest.roomPreference}</span></>
                       )}
                     </div>
-                    <Button size="lg" className="w-full h-9 text-xs mb-2 bg-blue-600 hover:bg-blue-700 text-white shadow-md"
+                    <Button size="lg" className="w-full h-10 text-sm mb-2 bg-blue-600 hover:bg-blue-700 text-white shadow-md"
                       onClick={() => {
                         const result = autoAssignBed(selectedGuest.id);
                         if (result) {
@@ -593,7 +586,7 @@ export function CheckInPanel({ setActiveTab }: { setActiveTab?: (tab: string) =>
                       <svg className="w-3.5 h-3.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
                       {t('checkin.autoAssign') || 'Auto Assign & Check-in'}
                     </Button>
-                    <div className="grid grid-cols-2 gap-1.5 max-h-48 overflow-y-auto">
+                    <div className="grid grid-cols-2 gap-1.5 max-h-72 overflow-y-auto">
                       {scoredBeds.map((score, idx) => {
                         const isTop = idx === 0;
                         return (
@@ -602,18 +595,18 @@ export function CheckInPanel({ setActiveTab }: { setActiveTab?: (tab: string) =>
                               selectedBedId === score.bedId ? 'border-zinc-900 bg-zinc-900 text-white shadow-md' :
                               isTop ? 'border-emerald-400 bg-emerald-50/70 hover:border-emerald-500 shadow-sm' :
                               'border-zinc-200 bg-white hover:border-zinc-400')}>
-                            {isTop && <span className="absolute -top-1.5 left-2 text-[8px] font-extrabold bg-emerald-500 text-white px-1.5 py-0.5 rounded">★ BEST</span>}
-                            <span className="font-bold text-[11px]">
+                            {isTop && <span className="absolute -top-1.5 left-2 text-[10px] font-extrabold bg-emerald-500 text-white px-2 py-0.5 rounded">★ BEST</span>}
+                            <span className="font-bold text-sm">
                               {score.roomType === 'dorm-mixed' ? t('bedboard.mixedDorm') : score.roomType === 'dorm-female' ? t('bedboard.femaleDorm') : t('bedboard.private')}
                             </span>
-                            <span className={cn("text-[9px] mt-0.5 block", selectedBedId === score.bedId ? 'text-zinc-300' : 'text-zinc-500')}>
+                            <span className={cn("text-xs mt-0.5 block", selectedBedId === score.bedId ? 'text-zinc-300' : 'text-zinc-500')}>
                               {score.bedName} · R{score.roomNumber} · {formatCurrency(score.pricePerNight, language)}
                             </span>
                             <div className="flex items-center gap-0.5 mt-1 flex-wrap">
-                              {score.genderMatch && <span className="text-[8px] font-bold bg-blue-50 text-blue-700 px-1 py-0.5 rounded">♀ Gender</span>}
-                              {score.preferenceMatch && <span className="text-[8px] font-bold bg-violet-50 text-violet-700 px-1 py-0.5 rounded">✓ Pref</span>}
-                              {score.fillExisting && <span className="text-[8px] font-bold bg-zinc-100 text-zinc-600 px-1 py-0.5 rounded">Fill</span>}
-                              {score.fragmentationScore >= 7 && <span className="text-[8px] font-bold bg-amber-50 text-amber-700 px-1 py-0.5 rounded">Low frag</span>}
+                              {score.genderMatch && <span className="text-[10px] font-bold bg-blue-50 text-blue-700 px-1 py-0.5 rounded">♀ Gender</span>}
+                              {score.preferenceMatch && <span className="text-[10px] font-bold bg-violet-50 text-violet-700 px-1 py-0.5 rounded">✓ Pref</span>}
+                              {score.fillExisting && <span className="text-[10px] font-bold bg-zinc-100 text-zinc-600 px-1 py-0.5 rounded">Fill</span>}
+                              {score.fragmentationScore >= 7 && <span className="text-[10px] font-bold bg-amber-50 text-amber-700 px-1 py-0.5 rounded">Low frag</span>}
                             </div>
                           </button>
                         );
@@ -623,11 +616,11 @@ export function CheckInPanel({ setActiveTab }: { setActiveTab?: (tab: string) =>
                       )}
                     </div>
                     {(selectedGuest.paymentStatus === 'unpaid' || selectedGuest.paymentStatus === 'partial') && (
-                      <p className="text-[9px] font-medium text-amber-600 mt-1.5">⚠️ {t('checkin.unpaidWarning')}</p>
+                      <p className="text-[11px] font-medium text-amber-600 mt-1.5">⚠️ {t('checkin.unpaidWarning')}</p>
                     )}
                     <div className="mt-2 pt-2 border-t border-zinc-100 flex justify-end gap-2">
                       <Button size="lg" disabled={!selectedBedId || !selectedGuest.passportScanned} onClick={handleCheckIn}
-                        className="w-full sm:w-auto h-9 px-5 text-xs shadow-lg">{t('checkin.completeCheckIn')}</Button>
+                        className="w-full sm:w-auto h-10 px-5 text-sm shadow-lg">{t('checkin.completeCheckIn')}</Button>
                     </div>
                   </Card>
                 </div>

@@ -1,0 +1,147 @@
+<h2>设计 2/3 · UI 变更</h2>
+<p class="subtitle">Walk-in 表单 (A 线性) + 详情卡 (C 双栏) + 列表项 (保持简洁)</p>
+
+<div class="section">
+<h3>① Walk-in 表单 (新建客人)</h3>
+<p>3 段分组：PERSONAL INFO / STAY / ID &amp; SOURCE</p>
+<div class="mockup">
+<div class="mockup-header">Walk-in Form · Linear Growth</div>
+<div class="mockup-body" style="background:#fafafa;padding:12px;font-size:10px">
+
+<div style="background:#fff;border:1px solid #d4d4d8;border-radius:6px;padding:10px;margin-bottom:8px">
+<div style="font-size:9px;font-weight:700;color:#71717a;letter-spacing:0.5px;margin-bottom:6px">PERSONAL INFO</div>
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:6px">
+<div>👤 <b>First name *</b></div>
+<div>👤 <b>Last name *</b></div>
+<div>🌐 <b>Country *</b> (US)</div>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:6px">
+<div>📞 <b>Phone *</b> +1-555-0100</div>
+<div>📧 <b>Email *</b> john@mail.com</div>
+<div>👥 Gender</div>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+<div>🎂 DOB</div>
+<div>— 空 —</div>
+</div>
+</div>
+
+<div style="background:#fff;border:1px solid #d4d4d8;border-radius:6px;padding:10px;margin-bottom:8px">
+<div style="font-size:9px;font-weight:700;color:#71717a;letter-spacing:0.5px;margin-bottom:6px">STAY</div>
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px">
+<div>📅 <b>Check-in *</b></div>
+<div>📅 <b>Check-out *</b></div>
+<div>🕒 Arrival time (Morning/Afternoon/Evening/Late)</div>
+</div>
+</div>
+
+<div style="background:#fff;border:1px solid #d4d4d8;border-radius:6px;padding:10px;margin-bottom:8px">
+<div style="font-size:9px;font-weight:700;color:#71717a;letter-spacing:0.5px;margin-bottom:6px">ID &amp; SOURCE</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:6px">
+<div>🛂 <b>ID Type *</b> (Passport / ID Card / Driver License)</div>
+<div>🛂 <b>ID Number *</b></div>
+</div>
+<div>🔗 Referral (自由文本 / 智能提示)</div>
+</div>
+
+<div style="background:#fff;border:1px solid #d4d4d8;border-radius:6px;padding:10px;margin-bottom:8px">
+<div style="font-size:9px;font-weight:700;color:#71717a;letter-spacing:0.5px;margin-bottom:6px">OPTIONAL</div>
+<div>📝 Notes (自由文本)</div>
+</div>
+
+<div style="background:#fef3c7;border:1px solid #fbbf24;border-radius:6px;padding:8px;display:flex;align-items:center;gap:6px">
+<input type="checkbox" checked><span style="font-size:10px;font-weight:600">⚠ Police registration consent *</span>
+</div>
+
+<div style="margin-top:10px;text-align:right">
+<span style="background:#18181b;color:#fff;padding:8px 18px;border-radius:6px;font-size:11px;font-weight:600">Create Arrival</span>
+</div>
+</div>
+</div>
+<p class="label" style="color:#16a34a">必填：First / Last / Country / Phone / Email / Check-in / Check-out / ID Type / ID Number / Police Consent</p>
+</div>
+
+<div class="section">
+<h3>② 详情卡 (选中客人) — 方案 C 双栏</h3>
+<div class="mockup">
+<div class="mockup-header">Detail View · Two Columns</div>
+<div class="mockup-body" style="background:#fafafa;padding:12px;font-size:10px">
+<div style="display:grid;grid-template-columns:6fr 4fr;gap:8px">
+
+<div style="background:#fff;border:1px solid #d4d4d8;border-radius:6px;padding:10px">
+<div style="font-size:13px;font-weight:700">John Smith</div>
+<div style="font-size:9px;color:#71717a;margin-top:2px">🇺🇸 USA · 3 nights · check-out 6/18</div>
+<div style="background:#fef3c7;color:#92400e;display:inline-block;padding:2px 8px;border-radius:10px;font-size:8px;margin-top:4px">⚠ Payment Due $255</div>
+<hr style="margin:8px 0;border:0;border-top:1px solid #e4e4e7">
+<div style="font-size:8px;font-weight:700;color:#71717a;letter-spacing:0.5px;margin-bottom:4px">CONTACT</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:3px;font-size:9px;margin-bottom:6px">
+<div>📧 john@mail.com</div>
+<div>📞 +1-555-0100</div>
+<div>🕒 Arriving ~3pm</div>
+<div>🔗 Booking.com</div>
+</div>
+<div style="font-size:8px;font-weight:700;color:#71717a;letter-spacing:0.5px;margin-bottom:4px">ID</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:3px;font-size:9px">
+<div>🛂 Passport</div>
+<div>P1234567</div>
+<div>🎂 1990-05-12</div>
+<div>👥 Male</div>
+</div>
+<div style="margin-top:8px;text-align:right">
+<span style="background:#f4f4f5;color:#52525b;padding:4px 10px;border-radius:4px;font-size:9px">✎ Edit Info</span>
+</div>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:6px">
+<div style="background:#fff;border:1px solid #d4d4d8;border-radius:6px;padding:8px">
+<div style="font-size:8px;font-weight:700;color:#71717a;letter-spacing:0.5px">VERIFICATION</div>
+<div style="font-size:9px;margin-top:4px;color:#16a34a">✓ Passport scanned</div>
+</div>
+<div style="background:#fff;border:1px solid #d4d4d8;border-radius:6px;padding:8px">
+<div style="font-size:8px;font-weight:700;color:#71717a;letter-spacing:0.5px">PAYMENT</div>
+<div style="font-size:9px;margin-top:4px;color:#dc2626">⚠ Unpaid · $255</div>
+<div style="background:#dc2626;color:#fff;padding:4px;border-radius:4px;text-align:center;font-size:9px;margin-top:4px">Collect $255</div>
+</div>
+<div style="background:#fff;border:1px solid #d4d4d8;border-radius:6px;padding:8px">
+<div style="font-size:8px;font-weight:700;color:#71717a;letter-spacing:0.5px">NOTES</div>
+<div style="background:#fafafa;border:1px solid #d4d4d8;border-radius:3px;padding:3px;font-size:9px;margin-top:3px">Prefers bottom bunk</div>
+</div>
+<div style="background:#fff;border:1px solid #d4d4d8;border-radius:6px;padding:8px">
+<div style="font-size:8px;font-weight:700;color:#71717a;letter-spacing:0.5px;margin-bottom:4px">BED ASSIGNMENT</div>
+<div style="background:#2563eb;color:#fff;padding:6px;border-radius:4px;text-align:center;font-size:9px;margin-bottom:4px">⚡ Auto-Assign</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:3px">
+<div style="background:#ecfdf5;border:1px solid #6ee7b7;padding:3px;border-radius:3px;font-size:8px">★ Best · Mixed R3</div>
+<div style="background:#fafafa;border:1px solid #d4d4d8;padding:3px;border-radius:3px;font-size:8px">Female R5</div>
+</div>
+</div>
+<div style="background:#fff;border:1px solid #d4d4d8;border-radius:6px;padding:8px">
+<div style="background:#16a34a;color:#fff;padding:6px;border-radius:4px;text-align:center;font-size:9px;font-weight:600">✓ Complete Check-in</div>
+</div>
+</div>
+
+</div>
+</div>
+</div>
+<p class="label" style="color:#71717a">左 60% 信息卡（只读 + Edit Info 弹窗编辑）/ 右 40% 操作堆栈（Verification/Payment/Notes/Bed/Complete）</p>
+</div>
+
+<div class="section">
+<h3>③ 左侧列表项（保持简洁）</h3>
+<div class="mockup">
+<div class="mockup-header">Pending List Item · unchanged</div>
+<div class="mockup-body" style="background:#fafafa;padding:10px;font-size:10px;display:flex;flex-direction:column;gap:4px;width:280px">
+<div style="background:#18181b;color:#fff;padding:8px 10px;border-radius:6px">
+<div style="font-weight:600">John Smith ›</div>
+<div style="font-size:9px;opacity:0.7">US · 3N</div>
+</div>
+<div style="background:#fff;border:1px solid #d4d4d8;padding:8px 10px;border-radius:6px">
+<div style="font-weight:600;color:#27272a">Maria Garcia ›</div>
+<div style="font-size:9px;color:#71717a">ES · 2N</div>
+</div>
+</div>
+</div>
+<p class="label" style="color:#71717a">列表项不变：姓名 + countryCode + nights。详情看右侧。</p>
+</div>
+
+<p class="label" style="margin-top:16px;color:#71717a">SECTION 2 OF 3 · UI 变更 · 请确认 ✅ / 调整</p>
+</div>

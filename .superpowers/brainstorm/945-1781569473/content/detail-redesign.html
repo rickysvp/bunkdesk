@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BunkDesk v1.6.1 — Detail Card Redesign</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, 'SF Pro Display', 'Helvetica Neue', sans-serif; background: #f0f0f5; color: #1a1a2e; padding: 32px; }
+  h1 { font-size: 22px; font-weight: 700; margin-bottom: 4px; }
+  .subtitle { font-size: 14px; color: #6b7280; margin-bottom: 28px; }
+  .options { display: flex; flex-direction: column; gap: 32px; }
+  .option { display: flex; gap: 16px; border: 3px solid #e5e7eb; border-radius: 16px; padding: 20px; cursor: pointer; transition: all .2s; }
+  .option:hover { border-color: #6366f1; box-shadow: 0 4px 24px rgba(99,102,241,.12); }
+  .option.selected { border-color: #6366f1; background: #eef2ff; }
+  .letter { width: 44px; height: 44px; border-radius: 12px; background: #6366f1; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 800; flex-shrink: 0; }
+  .content { flex: 1; }
+  .content h3 { font-size: 17px; font-weight: 700; margin-bottom: 6px; }
+  .content p { font-size: 13px; color: #6b7280; line-height: 1.5; margin-bottom: 12px; }
+
+  /* Mockup base */
+  .mockup { border-radius: 14px; overflow: hidden; box-shadow: 0 2px 16px rgba(0,0,0,.08); }
+  .mockup-header { background: #1e1e2e; color: #fff; padding: 10px 16px; font-size: 12px; font-weight: 600; letter-spacing: .5px; }
+  .mockup-body { background: #f8f9fc; padding: 20px; }
+
+  /* Card styles */
+  .card { background: #fff; border: 1.5px solid #e5e7eb; border-radius: 14px; padding: 18px; box-shadow: 0 1px 4px rgba(0,0,0,.04); }
+  .card + .card { margin-top: 12px; }
+
+  /* Section headers */
+  .section-label { font-size: 10px; font-weight: 800; color: #9ca3af; letter-spacing: 1.2px; text-transform: uppercase; margin-bottom: 10px; }
+
+  /* Field rows */
+  .field-row { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid #f3f4f6; }
+  .field-row:last-child { border-bottom: none; }
+  .field-icon { width: 30px; height: 30px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
+  .field-icon.blue { background: #eff6ff; }
+  .field-icon.green { background: #ecfdf5; }
+  .field-icon.amber { background: #fffbeb; }
+  .field-icon.purple { background: #f5f3ff; }
+  .field-icon.rose { background: #fff1f2; }
+  .field-label { font-size: 10px; font-weight: 700; color: #9ca3af; text-transform: uppercase; letter-spacing: .5px; }
+  .field-value { font-size: 13px; font-weight: 600; color: #1f2937; }
+  .field-value.empty { color: #d1d5db; font-style: italic; font-weight: 400; }
+
+  /* Badge */
+  .badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; }
+  .badge-amber { background: #fef3c7; color: #92400e; }
+  .badge-green { background: #d1fae5; color: #065f46; }
+  .badge-blue { background: #dbeafe; color: #1e40af; }
+  .badge-rose { background: #ffe4e6; color: #9f1239; }
+
+  /* Source dropdown */
+  .source-dropdown { background: #f9fafb; border: 1.5px solid #e5e7eb; border-radius: 8px; padding: 6px 12px; font-size: 12px; font-weight: 600; color: #374151; display: inline-flex; align-items: center; gap: 6px; }
+  .source-dropdown .arrow { color: #9ca3af; font-size: 10px; }
+
+  /* Bed card */
+  .bed-card { border: 2px solid #e5e7eb; border-radius: 12px; padding: 12px; cursor: pointer; transition: all .15s; position: relative; }
+  .bed-card:hover { border-color: #6366f1; }
+  .bed-card.best { border-color: #10b981; background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%); }
+  .bed-card .best-tag { position: absolute; top: -8px; left: 10px; background: #10b981; color: #fff; font-size: 9px; font-weight: 800; padding: 2px 8px; border-radius: 6px; letter-spacing: .5px; }
+  .bed-card .room-type { font-size: 12px; font-weight: 700; color: #1f2937; }
+  .bed-card .bed-info { font-size: 10px; color: #6b7280; margin-top: 2px; }
+  .bed-card .reason-tags { display: flex; gap: 4px; margin-top: 6px; flex-wrap: wrap; }
+  .reason-tag { font-size: 9px; font-weight: 700; padding: 2px 7px; border-radius: 5px; }
+  .reason-tag.gender { background: #dbeafe; color: #1e40af; }
+  .reason-tag.pref { background: #f5f3ff; color: #6d28d9; }
+  .reason-tag.fill { background: #f3f4f6; color: #4b5563; }
+  .reason-tag.frag { background: #fef3c7; color: #92400e; }
+
+  /* Button */
+  .btn { padding: 10px 20px; border-radius: 10px; font-size: 13px; font-weight: 700; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
+  .btn-primary { background: #4f46e5; color: #fff; box-shadow: 0 2px 8px rgba(79,70,229,.3); }
+  .btn-outline { background: #fff; color: #374151; border: 1.5px solid #d1d5db; }
+  .btn-danger { background: #ef4444; color: #fff; }
+  .btn-success { background: #10b981; color: #fff; box-shadow: 0 2px 8px rgba(16,185,129,.3); }
+  .btn-blue { background: #3b82f6; color: #fff; box-shadow: 0 2px 8px rgba(59,130,246,.3); }
+
+  /* Grid helpers */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+  .flex-between { display: flex; justify-content: space-between; align-items: center; }
+
+  .pros-cons { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 14px; }
+  .pros-cons h4 { font-size: 13px; font-weight: 700; margin-bottom: 6px; }
+  .pros h4 { color: #059669; }
+  .cons h4 { color: #dc2626; }
+  .pros-cons ul { padding-left: 16px; font-size: 12px; line-height: 1.7; color: #4b5563; }
+</style>
+</head>
+<body>
+
+<h1>待办理详情卡 — 重新设计</h1>
+<p class="subtitle">3 个方案，更大字号、更鲜明配色、更精致的卡片</p>
+
+<div class="options">
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- OPTION A -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<div class="option" data-choice="A" onclick="toggleSelect(this)">
+  <div class="letter">A</div>
+  <div class="content" style="width:100%">
+    <h3>信息流式 — 单列堆叠 + 分区色带</h3>
+    <p>放弃左右双栏，改为单列堆叠。每个分区用不同色带标题（蓝色 Contact / 紫色 ID / 绿色 Stay）。来源做成内嵌下拉。床位推荐卡片展示推荐原因标签。</p>
+
+    <div class="mockup" style="margin-top:12px">
+      <div class="mockup-header">Detail View · Single Column with Color Bands</div>
+      <div class="mockup-body">
+
+        <!-- Header Card -->
+        <div class="card" style="border-left: 4px solid #4f46e5;">
+          <div class="flex-between">
+            <div>
+              <div style="font-size:20px;font-weight:800;color:#1f2937">Sophie Müller</div>
+              <div style="font-size:12px;color:#6b7280;margin-top:4px">
+                <span class="badge badge-blue" style="margin-right:4px">🇩🇪 Germany</span>
+                <span class="badge badge-rose">♀ Female</span>
+                <span style="margin-left:8px;color:#9ca3af">3 nights · checkout 6/18</span>
+              </div>
+            </div>
+            <button class="btn btn-outline" style="font-size:11px;padding:6px 14px">✎ Edit</button>
+          </div>
+          <div style="margin-top:10px;display:flex;gap:6px">
+            <span class="badge badge-amber">⚠ Unpaid $255</span>
+            <span class="badge badge-blue">🕒 Afternoon</span>
+          </div>
+        </div>
+
+        <!-- Contact Section -->
+        <div class="card" style="border-left: 4px solid #3b82f6;">
+          <div class="section-label" style="color:#3b82f6">📇 CONTACT</div>
+          <div class="field-row">
+            <div class="field-icon blue">📧</div>
+            <div style="flex:1"><div class="field-label">Email</div><div class="field-value">sophie@mail.de</div></div>
+          </div>
+          <div class="field-row">
+            <div class="field-icon blue">📞</div>
+            <div style="flex:1"><div class="field-label">Phone</div><div class="field-value">+49-30-12345678</div></div>
+          </div>
+          <div class="field-row">
+            <div class="field-icon blue">🔗</div>
+            <div style="flex:1"><div class="field-label">Referral</div><div class="field-value">Hostelworld</div></div>
+          </div>
+          <div class="field-row">
+            <div class="field-icon blue">📋</div>
+            <div style="flex:1"><div class="field-label">Source</div>
+              <div class="source-dropdown">Walk-in <span class="arrow">▾</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ID Section -->
+        <div class="card" style="border-left: 4px solid #8b5cf6;">
+          <div class="section-label" style="color:#8b5cf6">🛂 ID & VERIFICATION</div>
+          <div class="field-row">
+            <div class="field-icon purple">🛂</div>
+            <div style="flex:1"><div class="field-label">Document</div><div class="field-value">Passport · C01X00T47</div></div>
+            <span class="badge badge-green">✓ Scanned</span>
+          </div>
+          <div class="field-row">
+            <div class="field-icon purple">🎂</div>
+            <div style="flex:1"><div class="field-label">Date of Birth</div><div class="field-value">1995-03-14</div></div>
+          </div>
+        </div>
+
+        <!-- Payment Section -->
+        <div class="card" style="border-left: 4px solid #ef4444;">
+          <div class="section-label" style="color:#ef4444">💳 PAYMENT</div>
+          <div class="flex-between">
+            <div>
+              <div style="font-size:14px;font-weight:700;color:#dc2626">$255.00 unpaid</div>
+              <div style="font-size:10px;color:#9ca3af">3 nights × $85/night</div>
+            </div>
+            <button class="btn btn-danger" style="font-size:11px;padding:6px 14px">Collect $255</button>
+          </div>
+        </div>
+
+        <!-- Bed Assignment Section -->
+        <div class="card" style="border-left: 4px solid #10b981;">
+          <div class="section-label" style="color:#10b981">🛏️ BED ASSIGNMENT</div>
+          <div style="font-size:11px;color:#6b7280;margin-bottom:10px">
+            Recommendations based on <span class="badge badge-rose" style="font-size:9px">♀ Female</span> gender + <span class="badge badge-blue" style="font-size:9px">Mixed dorm</span> preference
+          </div>
+          <button class="btn btn-blue" style="width:100%;justify-content:center;margin-bottom:12px">⚡ Auto-Assign Best Bed</button>
+          <div class="grid-2">
+            <div class="bed-card best">
+              <div class="best-tag">★ BEST</div>
+              <div class="room-type">Female Dorm</div>
+              <div class="bed-info">Bed 3 · Room 5 · $85/night</div>
+              <div class="reason-tags">
+                <span class="reason-tag gender">♀ Gender match</span>
+                <span class="reason-tag fill">Fill existing</span>
+              </div>
+            </div>
+            <div class="bed-card">
+              <div class="room-type">Mixed Dorm</div>
+              <div class="bed-info">Bed 7 · Room 2 · $80/night</div>
+              <div class="reason-tags">
+                <span class="reason-tag pref">✓ Preference</span>
+                <span class="reason-tag fill">Fill existing</span>
+              </div>
+            </div>
+          </div>
+          <div style="margin-top:12px;text-align:right">
+            <button class="btn btn-success" style="font-size:12px;padding:8px 24px">✓ Complete Check-in</button>
+          </div>
+        </div>
+
+        <!-- Notes -->
+        <div class="card" style="border-left: 4px solid #f59e0b;">
+          <div class="section-label" style="color:#f59e0b">📝 NOTES</div>
+          <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:8px 12px;font-size:12px;color:#92400e">Prefers bottom bunk, light sleeper</div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="pros-cons">
+      <div class="pros"><h4>优点</h4><ul>
+        <li>色带分区一目了然</li>
+        <li>单列适配所有屏幕</li>
+        <li>来源下拉内嵌自然</li>
+        <li>床位推荐原因清晰</li>
+      </ul></div>
+      <div class="cons"><h4>权衡</h4><ul>
+        <li>纵向滚动较多</li>
+        <li>不如双栏信息密度高</li>
+      </ul></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- OPTION B -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<div class="option" data-choice="B" onclick="toggleSelect(this)">
+  <div class="letter">B</div>
+  <div class="content" style="width:100%">
+    <h3>仪表盘式 — 顶部摘要 + 下方 3 栏卡片</h3>
+    <p>顶部全宽摘要条（姓名+国家+性别+付款状态+来源下拉），下方 3 栏并排（Contact / ID+Payment / Bed Assignment）。桌面端一屏看完。</p>
+
+    <div class="mockup" style="margin-top:12px">
+      <div class="mockup-header">Detail View · Dashboard Layout</div>
+      <div class="mockup-body">
+
+        <!-- Top Summary Bar -->
+        <div class="card" style="background:linear-gradient(135deg,#4f46e5 0%,#7c3aed 100%);color:#fff;border:none;padding:20px">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start">
+            <div>
+              <div style="font-size:22px;font-weight:800">Sophie Müller</div>
+              <div style="font-size:12px;opacity:.8;margin-top:4px">🇩🇪 Germany · ♀ Female · 3 nights · checkout 6/18</div>
+            </div>
+            <button class="btn" style="background:rgba(255,255,255,.2);color:#fff;font-size:11px;padding:6px 14px;border:1px solid rgba(255,255,255,.3)">✎ Edit</button>
+          </div>
+          <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">
+            <span style="background:rgba(255,255,255,.2);padding:4px 12px;border-radius:8px;font-size:11px;font-weight:700">⚠ Unpaid $255</span>
+            <span style="background:rgba(255,255,255,.2);padding:4px 12px;border-radius:8px;font-size:11px;font-weight:700">🕒 Afternoon</span>
+            <div class="source-dropdown" style="background:rgba(255,255,255,.15);color:#fff;border-color:rgba(255,255,255,.3)">Walk-in <span class="arrow" style="color:rgba(255,255,255,.6)">▾</span></div>
+          </div>
+        </div>
+
+        <!-- 3-Column Cards -->
+        <div style="display:grid;grid-template-columns:1fr 1fr 1.2fr;gap:12px;margin-top:12px">
+
+          <!-- Col 1: Contact -->
+          <div class="card">
+            <div class="section-label" style="color:#3b82f6">📇 CONTACT</div>
+            <div class="field-row"><div class="field-icon blue">📧</div><div><div class="field-label">Email</div><div class="field-value">sophie@mail.de</div></div></div>
+            <div class="field-row"><div class="field-icon blue">📞</div><div><div class="field-label">Phone</div><div class="field-value">+49-30-12345678</div></div></div>
+            <div class="field-row"><div class="field-icon blue">🔗</div><div><div class="field-label">Referral</div><div class="field-value">Hostelworld</div></div></div>
+          </div>
+
+          <!-- Col 2: ID + Payment -->
+          <div class="card">
+            <div class="section-label" style="color:#8b5cf6">🛂 ID & PAYMENT</div>
+            <div class="field-row"><div class="field-icon purple">🛂</div><div><div class="field-label">Document</div><div class="field-value">Passport · C01X00T47</div></div></div>
+            <div class="field-row"><div class="field-icon purple">🎂</div><div><div class="field-label">DOB</div><div class="field-value">1995-03-14</div></div></div>
+            <div style="margin-top:8px;padding-top:8px;border-top:1px solid #f3f4f6">
+              <div class="flex-between">
+                <div style="font-size:13px;font-weight:700;color:#dc2626">$255 unpaid</div>
+                <button class="btn btn-danger" style="font-size:10px;padding:4px 10px">Collect</button>
+              </div>
+            </div>
+            <div style="margin-top:6px">
+              <span class="badge badge-green">✓ Passport scanned</span>
+            </div>
+          </div>
+
+          <!-- Col 3: Bed Assignment -->
+          <div class="card" style="border-color:#10b981">
+            <div class="section-label" style="color:#10b981">🛏️ BED ASSIGNMENT</div>
+            <div style="font-size:10px;color:#6b7280;margin-bottom:8px">
+              Based on <span class="badge badge-rose" style="font-size:8px">♀ Female</span> + <span class="badge badge-blue" style="font-size:8px">Mixed</span>
+            </div>
+            <button class="btn btn-blue" style="width:100%;justify-content:center;font-size:11px;padding:8px;margin-bottom:8px">⚡ Auto-Assign</button>
+            <div class="bed-card best" style="margin-bottom:6px">
+              <div class="best-tag">★ BEST</div>
+              <div class="room-type">Female Dorm</div>
+              <div class="bed-info">Bed 3 · R5 · $85</div>
+              <div class="reason-tags"><span class="reason-tag gender">♀ Gender</span><span class="reason-tag fill">Fill</span></div>
+            </div>
+            <div class="bed-card">
+              <div class="room-type">Mixed Dorm</div>
+              <div class="bed-info">Bed 7 · R2 · $80</div>
+              <div class="reason-tags"><span class="reason-tag pref">✓ Pref</span><span class="reason-tag fill">Fill</span></div>
+            </div>
+            <button class="btn btn-success" style="width:100%;justify-content:center;font-size:11px;padding:8px;margin-top:8px">✓ Complete Check-in</button>
+          </div>
+
+        </div>
+
+        <!-- Notes bar -->
+        <div class="card" style="margin-top:12px;padding:12px 18px">
+          <div style="display:flex;align-items:center;gap:8px">
+            <span style="font-size:10px;font-weight:800;color:#f59e0b;text-transform:uppercase;letter-spacing:.5px">📝 Notes</span>
+            <span style="font-size:12px;color:#92400e">Prefers bottom bunk, light sleeper</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="pros-cons">
+      <div class="pros"><h4>优点</h4><ul>
+        <li>桌面端一屏看完所有信息</li>
+        <li>顶部渐变摘要条视觉冲击强</li>
+        <li>3 栏信息密度最高</li>
+      </ul></div>
+      <div class="cons"><h4>权衡</h4><ul>
+        <li>移动端需退化为单列</li>
+        <li>3 栏窄屏时拥挤</li>
+        <li>实现复杂度最高</li>
+      </ul></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- OPTION C -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<div class="option" data-choice="C" onclick="toggleSelect(this)">
+  <div class="letter">C</div>
+  <div class="content" style="width:100%">
+    <h3>改进双栏 — 左信息面板 + 右操作面板（推荐）</h3>
+    <p>保留双栏结构但大幅改进：左栏用色带分区 + 来源下拉内嵌；右栏把 Verification/Payment/Notes 压缩为状态条，把 Bed Assignment 放大展示推荐原因。移动端自动单列。</p>
+
+    <div class="mockup" style="margin-top:12px">
+      <div class="mockup-header">Detail View · Improved Two-Column (Recommended)</div>
+      <div class="mockup-body">
+        <div style="display:grid;grid-template-columns:5fr 4fr;gap:14px">
+
+          <!-- LEFT: Info Panel -->
+          <div>
+            <!-- Header -->
+            <div class="card" style="border-left:4px solid #4f46e5;margin-bottom:12px">
+              <div class="flex-between">
+                <div>
+                  <div style="font-size:20px;font-weight:800;color:#1f2937">Sophie Müller</div>
+                  <div style="font-size:11px;color:#6b7280;margin-top:3px">
+                    <span class="badge badge-blue" style="margin-right:3px">🇩🇪 DEU</span>
+                    <span class="badge badge-rose">♀ Female</span>
+                    <span style="margin-left:6px;color:#9ca3af">3N · out 6/18</span>
+                  </div>
+                </div>
+                <button class="btn btn-outline" style="font-size:10px;padding:5px 12px">✎ Edit</button>
+              </div>
+              <div style="margin-top:8px;display:flex;gap:5px;flex-wrap:wrap">
+                <span class="badge badge-amber">⚠ Unpaid $255</span>
+                <span class="badge badge-blue">🕒 Afternoon</span>
+              </div>
+            </div>
+
+            <!-- Contact -->
+            <div class="card" style="border-left:4px solid #3b82f6;margin-bottom:12px">
+              <div class="section-label" style="color:#3b82f6">📇 CONTACT</div>
+              <div class="field-row"><div class="field-icon blue">📧</div><div style="flex:1"><div class="field-label">Email</div><div class="field-value">sophie@mail.de</div></div></div>
+              <div class="field-row"><div class="field-icon blue">📞</div><div style="flex:1"><div class="field-label">Phone</div><div class="field-value">+49-30-12345678</div></div></div>
+              <div class="field-row"><div class="field-icon blue">🔗</div><div style="flex:1"><div class="field-label">Referral</div><div class="field-value">Hostelworld</div></div></div>
+              <div class="field-row">
+                <div class="field-icon blue">📋</div>
+                <div style="flex:1"><div class="field-label">Source</div>
+                  <div class="source-dropdown">Walk-in <span class="arrow">▾</span></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- ID -->
+            <div class="card" style="border-left:4px solid #8b5cf6">
+              <div class="section-label" style="color:#8b5cf6">🛂 ID DOCUMENT</div>
+              <div class="field-row"><div class="field-icon purple">🛂</div><div style="flex:1"><div class="field-label">Type + Number</div><div class="field-value">Passport · C01X00T47</div></div></div>
+              <div class="field-row"><div class="field-icon purple">🎂</div><div style="flex:1"><div class="field-label">Date of Birth</div><div class="field-value">1995-03-14</div></div></div>
+            </div>
+          </div>
+
+          <!-- RIGHT: Actions Panel -->
+          <div>
+            <!-- Status Bar (compressed Verification + Payment + Notes) -->
+            <div class="card" style="margin-bottom:12px">
+              <div style="display:flex;flex-direction:column;gap:8px">
+                <!-- Verification -->
+                <div class="flex-between" style="padding:6px 0;border-bottom:1px solid #f3f4f6">
+                  <div style="display:flex;align-items:center;gap:6px">
+                    <div style="width:24px;height:24px;border-radius:6px;background:#d1fae5;display:flex;align-items:center;justify-content:center;font-size:12px">✓</div>
+                    <span style="font-size:11px;font-weight:600;color:#065f46">Passport scanned</span>
+                  </div>
+                </div>
+                <!-- Payment -->
+                <div class="flex-between" style="padding:6px 0;border-bottom:1px solid #f3f4f6">
+                  <div style="display:flex;align-items:center;gap:6px">
+                    <div style="width:24px;height:24px;border-radius:6px;background:#fee2e2;display:flex;align-items:center;justify-content:center;font-size:12px">⚠</div>
+                    <span style="font-size:11px;font-weight:600;color:#dc2626">$255 unpaid</span>
+                  </div>
+                  <button class="btn btn-danger" style="font-size:9px;padding:3px 8px">Collect</button>
+                </div>
+                <!-- Notes -->
+                <div style="padding:6px 0">
+                  <div style="font-size:9px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px">Notes</div>
+                  <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:6px;padding:5px 10px;font-size:11px;color:#92400e">Prefers bottom bunk</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Bed Assignment (prominent) -->
+            <div class="card" style="border:2px solid #10b981;background:linear-gradient(180deg,#f0fdf4 0%,#fff 30%)">
+              <div class="section-label" style="color:#10b981">🛏️ BED ASSIGNMENT</div>
+              <div style="font-size:10px;color:#6b7280;margin-bottom:10px;line-height:1.5">
+                Smart recommendations for <span style="font-weight:700;color:#e11d48">♀ Female</span> guest
+                <span style="color:#d1d5db">·</span>
+                preference: <span style="font-weight:700;color:#6366f1">Mixed dorm</span>
+              </div>
+              <button class="btn btn-blue" style="width:100%;justify-content:center;margin-bottom:10px">⚡ Auto-Assign Best Bed</button>
+              <div style="display:flex;flex-direction:column;gap:8px">
+                <div class="bed-card best">
+                  <div class="best-tag">★ BEST MATCH</div>
+                  <div style="display:flex;justify-content:space-between;align-items:center">
+                    <div>
+                      <div class="room-type">Female Dorm</div>
+                      <div class="bed-info">Bed 3 · Room 5 · $85/night</div>
+                    </div>
+                    <div style="text-align:right;font-size:18px;font-weight:800;color:#10b981">92</div>
+                  </div>
+                  <div class="reason-tags" style="margin-top:6px">
+                    <span class="reason-tag gender">♀ Gender match +30</span>
+                    <span class="reason-tag fill">Fill existing +40</span>
+                    <span class="reason-tag frag">Low frag +8</span>
+                  </div>
+                </div>
+                <div class="bed-card">
+                  <div style="display:flex;justify-content:space-between;align-items:center">
+                    <div>
+                      <div class="room-type">Mixed Dorm</div>
+                      <div class="bed-info">Bed 7 · Room 2 · $80/night</div>
+                    </div>
+                    <div style="text-align:right;font-size:18px;font-weight:800;color:#6b7280">78</div>
+                  </div>
+                  <div class="reason-tags" style="margin-top:6px">
+                    <span class="reason-tag pref">✓ Preference +20</span>
+                    <span class="reason-tag fill">Fill existing +40</span>
+                    <span class="reason-tag gender">♀ Mixed ok +18</span>
+                  </div>
+                </div>
+                <div class="bed-card">
+                  <div style="display:flex;justify-content:space-between;align-items:center">
+                    <div>
+                      <div class="room-type">Mixed Dorm</div>
+                      <div class="bed-info">Bed 2 · Room 3 · $80/night</div>
+                    </div>
+                    <div style="text-align:right;font-size:18px;font-weight:800;color:#6b7280">65</div>
+                  </div>
+                  <div class="reason-tags" style="margin-top:6px">
+                    <span class="reason-tag pref">✓ Preference +20</span>
+                    <span class="reason-tag frag">Low frag +7</span>
+                  </div>
+                </div>
+              </div>
+              <button class="btn btn-success" style="width:100%;justify-content:center;margin-top:10px">✓ Complete Check-in</button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <div class="pros-cons">
+      <div class="pros"><h4>优点</h4><ul>
+        <li>双栏信息密度高 + 色带分区清晰</li>
+        <li>来源下拉内嵌自然</li>
+        <li>床位推荐展示分数+原因标签</li>
+        <li>右栏 Verification/Payment 压缩为状态条，空间给 Bed</li>
+        <li>移动端自动单列</li>
+      </ul></div>
+      <div class="cons"><h4>权衡</h4><ul>
+        <li>比方案 A 实现稍复杂</li>
+        <li>比方案 B 信息密度略低</li>
+      </ul></div>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<script>
+function toggleSelect(el) {
+  document.querySelectorAll('.option').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+}
+</script>
+</body>
+</html>

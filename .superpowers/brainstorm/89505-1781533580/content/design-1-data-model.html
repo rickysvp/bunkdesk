@@ -1,0 +1,53 @@
+<h2>设计 1/3 · 数据模型 (src/types.ts)</h2>
+<p class="subtitle">Guest 接口扩展 + 新增枚举 + 向后兼容</p>
+
+<div class="section">
+<h3>Guest 接口变更</h3>
+<div class="mockup">
+<div class="mockup-body" style="background:#fafafa;padding:14px;font-family:monospace;font-size:11px;line-height:1.6">
+
+<div style="color:#71717a">// 新增字段（Optional，向后兼容）</div>
+<div><span style="color:#a21caf">firstName?</span>: string;  <span style="color:#71717a">// 拆分后的名</span></div>
+<div><span style="color:#a21caf">lastName?</span>: string;   <span style="color:#71717a">// 拆分后的姓</span></div>
+<div><span style="color:#a21caf">phone?</span>: string;      <span style="color:#71717a">// 已有</span></div>
+<div><span style="color:#a21caf">email?</span>: string;      <span style="color:#71717a">// 已有</span></div>
+<div><span style="color:#a21caf">idType?</span>: <span style="color:#0891b2">IdDocumentType</span>;  <span style="color:#71717a">// 新增枚举</span></div>
+<div><span style="color:#a21caf">arrivalTime?</span>: <span style="color:#0891b2">ArrivalSlot</span>;  <span style="color:#71717a">// 新增枚举</span></div>
+<div><span style="color:#a21caf">referral?</span>: string;    <span style="color:#71717a">// 推荐来源 / 自由文本</span></div>
+
+<hr style="margin:8px 0;border:0;border-top:1px solid #d4d4d8">
+
+<div style="color:#71717a">// 新枚举：证件类型</div>
+<div><span style="color:#0891b2">type IdDocumentType</span> = <span style="color:#16a34a">"passport" | "idCard" | "driverLicense"</span>;</div>
+
+<div style="color:#71717a;margin-top:6px">// 新枚举：抵店时段</div>
+<div><span style="color:#0891b2">type ArrivalSlot</span> = <span style="color:#16a34a">"morning" | "afternoon" | "evening" | "late"</span>;</div>
+
+<hr style="margin:8px 0;border:0;border-top:1px solid #d4d4d8">
+
+<div style="color:#71717a">// 保留 name 字段（向后兼容）</div>
+<div><span style="color:#a21caf">name</span>: string; <span style="color:#71717a">// 全名，新数据 first+last 拼接，旧数据保留</span></div>
+</div>
+</div>
+</div>
+
+<div class="pros-cons">
+<div class="pros">
+<h4>优点</h4>
+<ul>
+<li>所有新字段 optional，旧 localStorage 数据无需迁移</li>
+<li>firstName/lastName 不覆盖 name，向后兼容 iCal / 现有 seed</li>
+<li>枚举类型利于 i18n 显示和筛选</li>
+</ul>
+</div>
+<div class="cons">
+<h4>权衡</h4>
+<ul>
+<li>name 与 first/last 会有冗余（以 first/last 为准，name 自动拼接）</li>
+<li>旧数据 name 展示不变，新数据优先展示 first + last</li>
+</ul>
+</div>
+</div>
+
+<p class="label" style="margin-top:16px;color:#71717a">SECTION 1 OF 3 · 数据模型 · 请确认 ✅ / 调整</p>
+</div>

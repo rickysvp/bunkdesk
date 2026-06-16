@@ -1,0 +1,91 @@
+<h2>CheckInPanel 架构重构 — 4 个候选方案</h2>
+<p class="subtitle">目标：打通"找订单 → 录护照 → 收钱 → 选床"全链路。每张图展示一个子 tab 切换器的方案。</p>
+
+<div class="options" data-multiselect>
+  <div class="option" data-choice="A" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>保留 3 子 tab + 每 tab 内增强</h3>
+      <p>pending / checked-in / reserved 不变，每个 tab 内加：模糊搜索 / 护照 OCR / OTA 付款状态可视化 / 床位推荐增强</p>
+      <div class="mockup" style="margin-top:12px">
+        <div class="mockup-header">架构示意</div>
+        <div class="mockup-body">
+          <div style="display:flex;gap:6px;margin-bottom:8px">
+            <div class="mock-button" style="background:#18181b;color:white">待入住 (3)</div>
+            <div class="mock-button" style="background:white">已入住 (12)</div>
+            <div class="mock-button" style="background:white">已预订 (8)</div>
+          </div>
+          <div style="display:flex;gap:6px;height:80px">
+            <div class="mock-sidebar" style="width:100px;font-size:10px;padding:6px">客人列表</div>
+            <div class="mock-content" style="flex:1;font-size:10px;padding:6px">5 卡片详情（增强版）</div>
+          </div>
+        </div>
+      </div>
+      <p style="margin-top:8px;font-size:12px;color:#71717a">✅ 向后兼容，改动小 &nbsp; ❌ 3 个 mental model，未统一</p>
+    </div>
+  </div>
+
+  <div class="option" data-choice="B" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>重组为"操作导向"3 tab</h3>
+      <p>今日待办 / 未来 7 天 / 历史档案。围绕"我现在要做什么"组织，而不是"客人处于什么状态"</p>
+      <div class="mockup" style="margin-top:12px">
+        <div class="mockup-header">架构示意</div>
+        <div class="mockup-body">
+          <div style="display:flex;gap:6px;margin-bottom:8px">
+            <div class="mock-button" style="background:#18181b;color:white">📋 今日待办 (5)</div>
+            <div class="mock-button" style="background:white">📅 未来 7 天 (12)</div>
+            <div class="mock-button" style="background:white">🗄️ 历史档案</div>
+          </div>
+          <div class="mock-content" style="height:80px;font-size:10px;padding:6px">时间线视图：今天 14:00 John · 16:00 Maria · 19:00 Group of 6</div>
+        </div>
+      </div>
+      <p style="margin-top:8px;font-size:12px;color:#71717a">✅ 贴合高峰时段心智 &nbsp; ❌ 需迁移数据视角</p>
+    </div>
+  </div>
+
+  <div class="option" data-choice="C" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>分步向导（4 步线性）</h3>
+      <p>强制流程：① 找订单 → ② 录护照 → ③ 收钱 → ④ 选床。客人到店启动，4 步走完才能完成</p>
+      <div class="mockup" style="margin-top:12px">
+        <div class="mockup-header">架构示意</div>
+        <div class="mockup-body">
+          <div style="display:flex;gap:4px;margin-bottom:8px;font-size:10px">
+            <div class="mock-button" style="background:#10b981;color:white">① 找订单 ✓</div>
+            <div class="mock-button" style="background:#18181b;color:white">② 录护照</div>
+            <div class="mock-button" style="background:white;color:#71717a">③ 收钱</div>
+            <div class="mock-button" style="background:white;color:#71717a">④ 选床</div>
+          </div>
+          <div class="mock-content" style="height:60px;font-size:10px;padding:6px">当前步骤大画面，下一步按钮在底部</div>
+        </div>
+      </div>
+      <p style="margin-top:8px;font-size:12px;color:#71717a">✅ 零错误，新手友好 &nbsp; ❌ 慢，熟手要绕</p>
+    </div>
+  </div>
+
+  <div class="option" data-choice="D" onclick="toggleSelect(this)">
+    <div class="letter">D</div>
+    <div class="content">
+      <h3>统一智能队列（1 个视图）</h3>
+      <p>把所有客人合并成 1 个时间线 + 顶部过滤器（状态/来源/付款）。AI 智能排序"最该处理的在前"</p>
+      <div class="mockup" style="margin-top:12px">
+        <div class="mockup-header">架构示意</div>
+        <div class="mockup-body">
+          <div style="display:flex;gap:4px;margin-bottom:8px;font-size:10px">
+            <input class="mock-input" style="flex:1" placeholder="🔍 搜 姓名/确认号/护照">
+            <div class="mock-button" style="font-size:10px">全部</div>
+            <div class="mock-button" style="font-size:10px">⚠️ 待处理</div>
+            <div class="mock-button" style="font-size:10px">💰 待收款</div>
+          </div>
+          <div class="mock-content" style="height:60px;font-size:10px;padding:6px">
+            🔥 John Doe (14:00 到 · 需收款) → Maria (16:00 · 待分床) → 张三 (退房中)
+          </div>
+        </div>
+      </div>
+      <p style="margin-top:8px;font-size:12px;color:#71717a">✅ 灵活，AI 排序 &nbsp; ❌ 学习成本，需强过滤器</p>
+    </div>
+  </div>
+</div>

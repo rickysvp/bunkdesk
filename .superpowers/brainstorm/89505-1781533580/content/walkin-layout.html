@@ -1,0 +1,146 @@
+<h2>Walk-in 表单布局：3 个方案</h2>
+<p class="subtitle">在现有 8 字段基础上扩展到 ~13 字段。下方 3 个 mockup 展示了不同的组织方式</p>
+
+<div class="options" data-multiselect>
+  <div class="option" data-choice="A" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content" style="width:100%">
+      <h3>线性增长 - 现有布局直接加字段</h3>
+      <p>保持 2 段（个人信息 + 入住信息），把所有新字段平铺进去。最少改动，但表单高度从 380px 涨到 ~620px，需要向下滚动。</p>
+      <div class="mockup" style="margin-top:8px">
+        <div class="mockup-header">Walk-in Form - Linear</div>
+        <div class="mockup-body" style="background:#fafafa;padding:10px;font-size:10px">
+          <div style="background:#e4e4e7;border-radius:4px;padding:2px 6px;margin-bottom:4px;display:inline-block;font-size:8px">PERSONAL INFO</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;margin-bottom:6px">
+            <div style="background:#fff;border:1px solid #d4d4d8;border-radius:4px;padding:4px">First name</div>
+            <div style="background:#fff;border:1px solid #d4d4d8;border-radius:4px;padding:4px">Last name</div>
+            <div style="background:#fff;border:1px solid #d4d4d8;border-radius:4px;padding:4px">Country (US)</div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;margin-bottom:6px">
+            <div style="background:#fff;border:1px solid #d4d4d8;border-radius:4px;padding:4px">Gender</div>
+            <div style="background:#fff;border:1px solid #d4d4d8;border-radius:4px;padding:4px">DOB</div>
+            <div style="background:#fff;border:1px solid #d4d4d8;border-radius:4px;padding:4px">Phone</div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-bottom:6px">
+            <div style="background:#fff;border:1px solid #d4d4d8;border-radius:4px;padding:4px">Email</div>
+            <div style="background:#fff;border:1px solid #d4d4d8;border-radius:4px;padding:4px">Arrival time</div>
+          </div>
+          <div style="background:#e4e4e7;border-radius:4px;padding:2px 6px;margin-bottom:4px;display:inline-block;font-size:8px">STAY</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-bottom:6px">
+            <div style="background:#fff;border:1px solid #d4d4d8;border-radius:4px;padding:4px">Check-in</div>
+            <div style="background:#fff;border:1px solid #d4d4d8;border-radius:4px;padding:4px">Check-out</div>
+          </div>
+          <div style="background:#e4e4e7;border-radius:4px;padding:2px 6px;margin-bottom:4px;display:inline-block;font-size:8px">ID & SOURCE</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-bottom:6px">
+            <div style="background:#fff;border:1px solid #d4d4d8;border-radius:4px;padding:4px">ID Type</div>
+            <div style="background:#fff;border:1px solid #d4d4d8;border-radius:4px;padding:4px">ID Number</div>
+          </div>
+          <div style="background:#fff;border:1px solid #d4d4d8;border-radius:4px;padding:4px;margin-bottom:6px">Referral</div>
+          <div style="background:#fff;border:1px solid #d4d4d8;border-radius:4px;padding:4px">Notes</div>
+        </div>
+      </div>
+      <p class="label" style="margin-top:6px;color:#71717a">PROS · 改动最小、字段全可见<br>CONS · 表单变长、滚动多</p>
+    </div>
+  </div>
+
+  <div class="option" data-choice="B" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content" style="width:100%">
+      <h3>分块折叠 - 3 个可折叠 Section</h3>
+      <p>分成 Personal / Stay / ID & Source 三个折叠区，每段带图标 + 摘要。必填字段在 Personal 段，其余默认折叠可展开。最适合 "更利于操作"。</p>
+      <div class="mockup" style="margin-top:8px">
+        <div class="mockup-header">Walk-in Form - Collapsible Sections</div>
+        <div class="mockup-body" style="background:#fafafa;padding:10px;font-size:10px">
+          <div style="background:#fff;border:1px solid #d4d4d8;border-radius:6px;margin-bottom:6px;overflow:hidden">
+            <div style="background:#f4f4f5;padding:6px 10px;display:flex;justify-content:space-between;border-bottom:1px solid #e4e4e7">
+              <span style="font-weight:600">▼ 1. Personal Info</span>
+              <span style="color:#71717a">5/5 filled</span>
+            </div>
+            <div style="padding:8px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px">
+              <div style="background:#fafafa;border:1px solid #d4d4d8;border-radius:4px;padding:4px">First *</div>
+              <div style="background:#fafafa;border:1px solid #d4d4d8;border-radius:4px;padding:4px">Last *</div>
+              <div style="background:#fafafa;border:1px solid #d4d4d8;border-radius:4px;padding:4px">Country *</div>
+              <div style="background:#fafafa;border:1px solid #d4d4d8;border-radius:4px;padding:4px">Phone</div>
+              <div style="background:#fafafa;border:1px solid #d4d4d8;border-radius:4px;padding:4px">Email</div>
+              <div style="background:#fafafa;border:1px solid #d4d4d8;border-radius:4px;padding:4px">Gender</div>
+            </div>
+          </div>
+          <div style="background:#fff;border:1px solid #d4d4d8;border-radius:6px;margin-bottom:6px;overflow:hidden">
+            <div style="background:#f4f4f5;padding:6px 10px;display:flex;justify-content:space-between">
+              <span style="font-weight:600">▶ 2. Stay &amp; ID</span>
+              <span style="color:#a1a1aa">collapsed</span>
+            </div>
+          </div>
+          <div style="background:#fff;border:1px solid #d4d4d8;border-radius:6px;margin-bottom:6px;overflow:hidden">
+            <div style="background:#f4f4f5;padding:6px 10px;display:flex;justify-content:space-between">
+              <span style="font-weight:600">▶ 3. Source &amp; Notes</span>
+              <span style="color:#a1a1aa">collapsed</span>
+            </div>
+          </div>
+          <div style="background:#fef3c7;border:1px solid #fbbf24;border-radius:6px;padding:6px;display:flex;align-items:center;gap:6px">
+            <input type="checkbox"><span style="font-size:10px">Police registration consent</span>
+          </div>
+          <div style="margin-top:8px;text-align:right">
+            <span style="background:#18181b;color:#fff;padding:6px 14px;border-radius:6px;font-size:10px">Create Arrival</span>
+          </div>
+        </div>
+      </div>
+      <p class="label" style="margin-top:6px;color:#71717a">PROS · 默认简洁、必填集中、利于操作<br>CONS · 多一层点击</p>
+    </div>
+  </div>
+
+  <div class="option" data-choice="C" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content" style="width:100%">
+      <h3>左右两栏 - 主信息 + 摘要栏</h3>
+      <p>左侧 60% 显示所有输入字段，右侧 40% 实时显示「摘要卡」（已填项汇总 + 还差什么）。参考截图接近这个模式，但更紧凑。</p>
+      <div class="mockup" style="margin-top:8px">
+        <div class="mockup-header">Walk-in Form - Two Columns</div>
+        <div class="mockup-body" style="background:#fafafa;padding:10px;font-size:10px">
+          <div style="display:grid;grid-template-columns:3fr 2fr;gap:6px">
+            <div style="background:#fff;border:1px solid #d4d4d8;border-radius:6px;padding:8px">
+              <div style="font-weight:600;margin-bottom:4px">Personal</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-bottom:4px">
+                <div style="background:#fafafa;border:1px solid #d4d4d8;border-radius:4px;padding:3px">First *</div>
+                <div style="background:#fafafa;border:1px solid #d4d4d8;border-radius:4px;padding:3px">Last *</div>
+              </div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-bottom:4px">
+                <div style="background:#fafafa;border:1px solid #d4d4d8;border-radius:4px;padding:3px">Country</div>
+                <div style="background:#fafafa;border:1px solid #d4d4d8;border-radius:4px;padding:3px">Phone</div>
+              </div>
+              <div style="background:#fafafa;border:1px solid #d4d4d8;border-radius:4px;padding:3px;margin-bottom:6px">Email</div>
+              <div style="font-weight:600;margin-bottom:4px">Stay</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-bottom:4px">
+                <div style="background:#fafafa;border:1px solid #d4d4d8;border-radius:4px;padding:3px">Check-in</div>
+                <div style="background:#fafafa;border:1px solid #d4d4d8;border-radius:4px;padding:3px">Check-out</div>
+              </div>
+              <div style="font-weight:600;margin-bottom:4px">ID</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-bottom:4px">
+                <div style="background:#fafafa;border:1px solid #d4d4d8;border-radius:4px;padding:3px">ID Type</div>
+                <div style="background:#fafafa;border:1px solid #d4d4d8;border-radius:4px;padding:3px">ID Number</div>
+              </div>
+              <div style="background:#fafafa;border:1px solid #d4d4d8;border-radius:4px;padding:3px">Referral</div>
+            </div>
+            <div style="background:#fff;border:1px solid #d4d4d8;border-radius:6px;padding:8px">
+              <div style="font-weight:600;margin-bottom:4px">Summary</div>
+              <div style="background:#f0f9ff;border-radius:4px;padding:6px;font-size:9px">
+                <div>👤 John Smith</div>
+                <div>🇺🇸 USA · ♂ · 1990-05-12</div>
+                <div>📧 john@mail.com</div>
+                <div>📞 +1-555-0100</div>
+                <div>📅 6/15 → 6/18 (3N)</div>
+                <div>🛂 Passport: P1234567</div>
+                <div>🔗 Referral: Booking.com</div>
+              </div>
+              <div style="background:#fef3c7;border-radius:4px;padding:4px;font-size:9px;margin-top:4px">
+                ⚠ Need: Police consent
+              </div>
+              <div style="background:#18181b;color:#fff;padding:6px;border-radius:4px;text-align:center;margin-top:8px;font-size:9px">Create</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <p class="label" style="margin-top:6px;color:#71717a">PROS · 实时预览、参考截图最接近<br>CONS · 移动端适配复杂</p>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BunkDesk — 床位选择交互优化</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, 'SF Pro Display', 'Helvetica Neue', sans-serif; background: #0f0f1a; color: #e5e7eb; padding: 24px; }
+  h1 { font-size: 18px; font-weight: 700; color: #fff; margin-bottom: 4px; }
+  .subtitle { font-size: 12px; color: #9ca3af; margin-bottom: 20px; }
+  .compare { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .panel { background: #1a1a2e; border-radius: 16px; overflow: hidden; }
+  .panel-label { padding: 10px 16px; font-size: 11px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; }
+  .panel-label.before { background: #7f1d1d; color: #fca5a5; }
+  .panel-label.after { background: #065f46; color: #6ee7b7; }
+  .panel-body { padding: 16px; background: #f8f9fc; color: #1f2937; }
+
+  .card { background: #fff; border: 1.5px solid #e5e7eb; border-radius: 14px; padding: 16px; box-shadow: 0 1px 3px rgba(0,0,0,.04); }
+
+  /* BEFORE: 2-col grid */
+  .before-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+  .before-bed { border: 1.5px solid #e5e7eb; border-radius: 10px; padding: 10px; position: relative; cursor: pointer; }
+  .before-bed.best { border-color: #10b981; background: #ecfdf5; }
+  .before-bed .best-tag { position: absolute; top: -7px; left: 8px; background: #10b981; color: #fff; font-size: 8px; font-weight: 800; padding: 1px 7px; border-radius: 4px; }
+  .before-bed .room { font-size: 11px; font-weight: 700; color: #1f2937; }
+  .before-bed .info { font-size: 9px; color: #6b7280; margin-top: 1px; }
+  .before-bed .tags { display: flex; gap: 3px; margin-top: 4px; flex-wrap: wrap; }
+  .btag { font-size: 8px; font-weight: 700; padding: 1px 5px; border-radius: 3px; }
+  .btag-g { background: #dbeafe; color: #1e40af; }
+  .btag-p { background: #ede9fe; color: #6d28d9; }
+  .btag-f { background: #f3f4f6; color: #4b5563; }
+  .btag-fr { background: #fef3c7; color: #92400e; }
+
+  /* AFTER: single-column list */
+  .after-list { display: flex; flex-direction: column; gap: 8px; }
+  .bed-item { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border: 2px solid #e5e7eb; border-radius: 12px; cursor: pointer; transition: all .15s; background: #fff; }
+  .bed-item:hover { border-color: #6366f1; background: #f5f3ff; }
+  .bed-item.best { border-color: #10b981; background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%); }
+  .bed-item.best:hover { border-color: #059669; }
+  .bed-item.selected { border-color: #4f46e5; background: #eef2ff; box-shadow: 0 0 0 3px rgba(79,70,229,.15); }
+  .bed-item .rank { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 800; flex-shrink: 0; }
+  .bed-item.best .rank { background: #10b981; color: #fff; }
+  .bed-item:not(.best) .rank { background: #f3f4f6; color: #6b7280; }
+  .bed-item .details { flex: 1; min-width: 0; }
+  .bed-item .room-name { font-size: 13px; font-weight: 700; color: #1f2937; }
+  .bed-item .bed-meta { font-size: 10px; color: #6b7280; margin-top: 1px; }
+  .bed-item .reasons { display: flex; gap: 4px; margin-top: 4px; flex-wrap: wrap; }
+  .bed-item .price { font-size: 15px; font-weight: 800; color: #1f2937; flex-shrink: 0; }
+  .bed-item .price span { font-size: 10px; font-weight: 500; color: #9ca3af; }
+  .bed-item .radio { width: 20px; height: 20px; border-radius: 50%; border: 2px solid #d1d5db; flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: all .15s; }
+  .bed-item.selected .radio { border-color: #4f46e5; background: #4f46e5; }
+  .bed-item.selected .radio::after { content: '✓'; color: #fff; font-size: 11px; font-weight: 800; }
+
+  .btn { padding: 10px 20px; border-radius: 10px; font-size: 12px; font-weight: 700; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
+  .btn-blue { background: #3b82f6; color: #fff; box-shadow: 0 2px 8px rgba(59,130,246,.25); }
+  .btn-green { background: #10b981; color: #fff; box-shadow: 0 2px 8px rgba(16,185,129,.25); }
+  .btn-outline { background: #fff; color: #374151; border: 1.5px solid #d1d5db; }
+
+  .badge { display: inline-flex; align-items: center; gap: 3px; padding: 2px 8px; border-radius: 12px; font-size: 10px; font-weight: 700; }
+  .badge-amber { background: #fef3c7; color: #92400e; }
+  .badge-rose { background: #ffe4e6; color: #9f1239; }
+  .badge-blue { background: #dbeafe; color: #1e40af; }
+
+  .callout { background: #1e293b; border: 1px solid #334155; border-radius: 10px; padding: 14px; margin-top: 20px; }
+  .callout h3 { font-size: 13px; font-weight: 700; color: #60a5fa; margin-bottom: 8px; }
+  .callout ul { padding-left: 16px; font-size: 12px; line-height: 1.8; color: #cbd5e1; }
+  .callout li span { color: #fbbf24; font-weight: 600; }
+</style>
+</head>
+<body>
+
+<h1>床位选择交互 — 当前 vs 优化</h1>
+<p class="subtitle">2 列网格 → 单列列表 + 选中态 + 更大点击区域</p>
+
+<div class="compare">
+
+<!-- BEFORE -->
+<div class="panel">
+  <div class="panel-label before">✕ 当前：2 列网格</div>
+  <div class="panel-body">
+    <div class="card" style="border-color:#10b981">
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px">
+        <span style="font-size:14px">🛏️</span>
+        <span style="font-size:11px;font-weight:800;color:#10b981;text-transform:uppercase;letter-spacing:.5px">Bed Assignment</span>
+      </div>
+      <div style="font-size:10px;color:#6b7280;margin-bottom:8px">
+        For <span style="font-weight:700;color:#e11d48">♀ Female</span> · prefers <span style="font-weight:700;color:#6366f1">Mixed dorm</span>
+      </div>
+      <button class="btn btn-blue" style="width:100%;justify-content:center;margin-bottom:8px">⚡ Auto-Assign Best Bed</button>
+      <div class="before-grid">
+        <div class="before-bed best">
+          <div class="best-tag">★</div>
+          <div class="room">Female Dorm</div>
+          <div class="info">Bed 3 · R5 · $85</div>
+          <div class="tags"><span class="btag btag-g">♀ Gender</span><span class="btag btag-f">Fill</span><span class="btag btag-fr">Frag</span></div>
+        </div>
+        <div class="before-bed">
+          <div class="room">Mixed Dorm</div>
+          <div class="info">Bed 7 · R2 · $80</div>
+          <div class="tags"><span class="btag btag-p">✓ Pref</span><span class="btag btag-f">Fill</span><span class="btag btag-g">♀ Mixed</span></div>
+        </div>
+        <div class="before-bed">
+          <div class="room">Mixed Dorm</div>
+          <div class="info">Bed 2 · R3 · $80</div>
+          <div class="tags"><span class="btag btag-p">✓ Pref</span><span class="btag btag-fr">Frag</span></div>
+        </div>
+        <div class="before-bed">
+          <div class="room">Private</div>
+          <div class="info">Room 8 · $120</div>
+          <div class="tags"><span class="btag btag-f">Fill</span></div>
+        </div>
+      </div>
+      <button class="btn btn-green" style="width:100%;justify-content:center;margin-top:8px">✓ Complete Check-in</button>
+    </div>
+    <div style="margin-top:10px;font-size:11px;color:#ef4444;font-weight:600">
+      问题：卡片小、点击区域窄、选中状态不明显、信息密度过高
+    </div>
+  </div>
+</div>
+
+<!-- AFTER -->
+<div class="panel">
+  <div class="panel-label after">✓ 优化：单列列表 + 选中态</div>
+  <div class="panel-body">
+    <div class="card" style="border-color:#10b981">
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px">
+        <span style="font-size:14px">🛏️</span>
+        <span style="font-size:11px;font-weight:800;color:#10b981;text-transform:uppercase;letter-spacing:.5px">Bed Assignment</span>
+      </div>
+      <div style="font-size:10px;color:#6b7280;margin-bottom:8px">
+        For <span style="font-weight:700;color:#e11d48">♀ Female</span> · prefers <span style="font-weight:700;color:#6366f1">Mixed dorm</span>
+      </div>
+      <button class="btn btn-blue" style="width:100%;justify-content:center;margin-bottom:10px">⚡ Auto-Assign Best Bed</button>
+
+      <div class="after-list">
+        <!-- Bed 1: BEST (selected) -->
+        <div class="bed-item best selected" onclick="selectBed(this)">
+          <div class="rank">1</div>
+          <div class="details">
+            <div class="room-name">Female Dorm <span style="font-size:9px;background:#10b981;color:#fff;padding:1px 6px;border-radius:4px;margin-left:4px;font-weight:800">★ BEST</span></div>
+            <div class="bed-meta">Bed 3 · Room 5</div>
+            <div class="reasons">
+              <span class="btag btag-g">♀ Gender match</span>
+              <span class="btag btag-f">Fill existing</span>
+              <span class="btag btag-fr">Low frag</span>
+            </div>
+          </div>
+          <div class="price">$85<span>/n</span></div>
+          <div class="radio"></div>
+        </div>
+
+        <!-- Bed 2 -->
+        <div class="bed-item" onclick="selectBed(this)">
+          <div class="rank">2</div>
+          <div class="details">
+            <div class="room-name">Mixed Dorm</div>
+            <div class="bed-meta">Bed 7 · Room 2</div>
+            <div class="reasons">
+              <span class="btag btag-p">✓ Preference</span>
+              <span class="btag btag-f">Fill existing</span>
+              <span class="btag btag-g">♀ Mixed ok</span>
+            </div>
+          </div>
+          <div class="price">$80<span>/n</span></div>
+          <div class="radio"></div>
+        </div>
+
+        <!-- Bed 3 -->
+        <div class="bed-item" onclick="selectBed(this)">
+          <div class="rank">3</div>
+          <div class="details">
+            <div class="room-name">Mixed Dorm</div>
+            <div class="bed-meta">Bed 2 · Room 3</div>
+            <div class="reasons">
+              <span class="btag btag-p">✓ Preference</span>
+              <span class="btag btag-fr">Low frag</span>
+            </div>
+          </div>
+          <div class="price">$80<span>/n</span></div>
+          <div class="radio"></div>
+        </div>
+
+        <!-- Bed 4 -->
+        <div class="bed-item" onclick="selectBed(this)">
+          <div class="rank">4</div>
+          <div class="details">
+            <div class="room-name">Private Room</div>
+            <div class="bed-meta">Room 8</div>
+            <div class="reasons">
+              <span class="btag btag-f">Fill existing</span>
+            </div>
+          </div>
+          <div class="price">$120<span>/n</span></div>
+          <div class="radio"></div>
+        </div>
+      </div>
+
+      <button class="btn btn-green" style="width:100%;justify-content:center;margin-top:10px">✓ Complete Check-in</button>
+    </div>
+    <div style="margin-top:10px;font-size:11px;color:#10b981;font-weight:600">
+      改进：单列列表、整行可点击、右侧 radio 选中态、排名序号、价格右对齐
+    </div>
+  </div>
+</div>
+
+</div>
+
+<div class="callout">
+  <h3>床位选择交互改动</h3>
+  <ul>
+    <li><span>2 列网格 → 单列列表</span>：每个床位一行，整行可点击，点击区域大 3 倍</li>
+    <li><span>排名序号</span>：左侧 1/2/3/4 序号，Best 用绿色圆底</li>
+    <li><span>右侧 radio</span>：选中时紫色实心圆 + ✓，视觉反馈明确</li>
+    <li><span>价格右对齐</span>：$85/n 大字，一眼比价</li>
+    <li><span>推荐原因标签</span>：保持但更宽松，不再挤在 2 列小卡里</li>
+    <li><span>点击交互</span>：点击整行即选中，选中后底部 Complete 按钮亮起</li>
+  </ul>
+</div>
+
+<script>
+function selectBed(el) {
+  document.querySelectorAll('.bed-item').forEach(b => b.classList.remove('selected'));
+  el.classList.add('selected');
+}
+</script>
+</body>
+</html>

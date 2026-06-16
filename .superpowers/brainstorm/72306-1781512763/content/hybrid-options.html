@@ -1,0 +1,86 @@
+<h2>D + A 混合的 3 种接法</h2>
+<p class="subtitle">你选了 D（统一智能队列）+ A（3 子 tab）。混合方式 3 种，选 1 种。</p>
+
+<div class="options" data-multiselect>
+  <div class="option" data-choice="H1" onclick="toggleSelect(this)">
+    <div class="letter">H1</div>
+    <div class="content">
+      <h3>D 为主 · A 退化为顶部 filter chip</h3>
+      <p>默认落地就是 D 智能队列。3 tab 变成 4 个 filter chip：⚡ 智能 / 待入住 / 已入住 / 已预订。点 chip 切换数据范围。</p>
+      <div class="mockup" style="margin-top:12px">
+        <div class="mockup-header">实际布局</div>
+        <div class="mockup-body" style="font-size:11px">
+          <div style="display:flex;gap:4px;margin-bottom:8px">
+            <div class="mock-button" style="background:#18181b;color:white;font-size:10px">⚡ 智能 (智能排序)</div>
+            <div class="mock-button" style="background:white;font-size:10px">待入住 (3)</div>
+            <div class="mock-button" style="background:white;font-size:10px">已入住 (12)</div>
+            <div class="mock-button" style="background:white;font-size:10px">已预订 (8)</div>
+          </div>
+          <div class="mock-content" style="height:90px;padding:6px">
+            <div style="color:#71717a;font-size:10px;margin-bottom:4px">🔥 AI 优先级（按"该处理紧急度"排序）：</div>
+            <div>① 14:00 John · 5 min 前到 · <span style="color:#dc2626">未付款 + 未分床</span></div>
+            <div>② 16:00 Maria · <span style="color:#f59e0b">护照未录</span></div>
+            <div>③ 19:00 Group of 6 · 1 床已分 5 待</div>
+            <div>④ 明天 09:00 Liam · <span style="color:#10b981">全齐</span></div>
+          </div>
+        </div>
+      </div>
+      <p style="margin-top:8px;font-size:12px;color:#71717a">✅ AI 主导，少跳转 &nbsp; ✅ 旧 tab 仍能直接过滤 &nbsp; ⚠️ 仍需维护 2 套心智</p>
+    </div>
+  </div>
+
+  <div class="option" data-choice="H2" onclick="toggleSelect(this)">
+    <div class="letter">H2</div>
+    <div class="content">
+      <h3>A 为底 · D 作为一个新 tab"⚡ 今日待办"</h3>
+      <p>保留 3 tab 原位不动，在最前面加 1 个"⚡ 今日待办" tab 作为默认首页。其内部用 AI 排序。</p>
+      <div class="mockup" style="margin-top:12px">
+        <div class="mockup-header">实际布局</div>
+        <div class="mockup-body" style="font-size:11px">
+          <div style="display:flex;gap:4px;margin-bottom:8px">
+            <div class="mock-button" style="background:#f59e0b;color:white;font-size:10px">⚡ 今日待办 (4)</div>
+            <div class="mock-button" style="background:white;font-size:10px">待入住 (3)</div>
+            <div class="mock-button" style="background:white;font-size:10px">已入住 (12)</div>
+            <div class="mock-button" style="background:white;font-size:10px">已预订 (8)</div>
+          </div>
+          <div class="mock-content" style="height:90px;padding:6px">
+            <div>① 14:00 John（红 · 待收款+待分床）</div>
+            <div>② 16:00 Maria（黄 · 护照未录）</div>
+            <div>③ 19:00 Group of 6（蓝 · 部分分床）</div>
+            <div>④ 张三（绿 · 退房中）</div>
+            <div style="color:#71717a;font-size:10px;margin-top:4px">— 其他 tab 数据未变 —</div>
+          </div>
+        </div>
+      </div>
+      <p style="margin-top:8px;font-size:12px;color:#71717a">✅ 改动最小 &nbsp; ✅ 老用户无感 &nbsp; ❌ 智能 tab 和 pending tab 有重复</p>
+    </div>
+  </div>
+
+  <div class="option" data-choice="H3" onclick="toggleSelect(this)">
+    <div class="letter">H3</div>
+    <div class="content">
+      <h3>单页分区 · D 在顶 · A 折叠在下面</h3>
+      <p>一个长页面，从上到下：① 智能队列（折叠只看 3 条） → ② 待入住完整列表 → ③ 已入住（折叠预览） → ④ 已预订（折叠预览）。</p>
+      <div class="mockup" style="margin-top:12px">
+        <div class="mockup-header">实际布局</div>
+        <div class="mockup-body" style="font-size:10px">
+          <div style="background:#fef3c7;padding:6px;border-radius:6px;margin-bottom:6px">
+            <b>🔥 智能队列（AI 排序 · 前 3 条）</b>
+            <div>① John ② Maria ③ 张三</div>
+          </div>
+          <div style="background:#f4f4f5;padding:6px;border-radius:6px;margin-bottom:6px">
+            <b>待入住 (3) 展开 ▼</b>
+            <div>完整列表...</div>
+          </div>
+          <div style="background:#f4f4f5;padding:6px;border-radius:6px;margin-bottom:6px">
+            <b>已入住 (12) 折叠 ▶</b>
+          </div>
+          <div style="background:#f4f4f5;padding:6px;border-radius:6px">
+            <b>已预订 (8) 折叠 ▶</b>
+          </div>
+        </div>
+      </div>
+      <p style="margin-top:8px;font-size:12px;color:#71717a">✅ 单页全景 &nbsp; ✅ 零跳转 &nbsp; ❌ 长滚动，性能 &nbsp; ❌ 移动端不友好</p>
+    </div>
+  </div>
+</div>

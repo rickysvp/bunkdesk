@@ -41,7 +41,7 @@ export const INITIAL_ROOMS: Room[] = [
           idType: 'passport',
           arrivalTime: 'afternoon',
           bookingSource: 'walk-in',
-          referral: '',
+          bedPreference: 'bottom',
         }
       },
       {
@@ -71,8 +71,7 @@ export const INITIAL_ROOMS: Room[] = [
             phone: '+1-555-123-4567',
             idType: 'passport',
             arrivalTime: 'afternoon',
-            bookingSource: 'email',
-            referral: '',
+            bookingSource: 'booking-com',
           }
         ]
       },
@@ -101,8 +100,8 @@ export const INITIAL_ROOMS: Room[] = [
           phone: '+34-612-345-678',
           idType: 'passport',
           arrivalTime: 'morning',
-          bookingSource: 'email',
-          referral: '',
+          bookingSource: 'booking-com',
+          bedPreference: 'any',
         }
       },
       {
@@ -132,8 +131,7 @@ export const INITIAL_ROOMS: Room[] = [
             phone: '+82-10-1234-5678',
             idType: 'passport',
             arrivalTime: 'evening',
-            bookingSource: 'email',
-            referral: '',
+            bookingSource: 'booking-com',
           }
         ]
       },
@@ -163,8 +161,8 @@ export const INITIAL_ROOMS: Room[] = [
           phone: '+81-90-1234-5678',
           idType: 'passport',
           arrivalTime: 'evening',
-          bookingSource: 'email',
-          referral: '',
+          bookingSource: 'airbnb',
+          bedPreference: 'top',
         }
       },
       {
@@ -193,7 +191,6 @@ export const INITIAL_ROOMS: Room[] = [
           idType: 'passport',
           arrivalTime: 'afternoon',
           bookingSource: 'walk-in',
-          referral: '',
         }
       },
       {
@@ -248,8 +245,7 @@ export const INITIAL_ROOMS: Room[] = [
           phone: '+33-6-12-34-56-78',
           idType: 'passport',
           arrivalTime: 'late',
-          bookingSource: 'email',
-          referral: '',
+          bookingSource: 'booking-com',
         }
       },
       { id: 'b_102_2', roomId: 'r_102', name: 'B (Top)', bedType: 'top', status: 'empty', reservations: [
@@ -273,8 +269,7 @@ export const INITIAL_ROOMS: Room[] = [
           phone: '+1-555-987-6543',
           idType: 'passport',
           arrivalTime: 'morning',
-          bookingSource: 'email',
-          referral: '',
+          bookingSource: 'booking-com',
         }
       ] },
       { id: 'b_102_3', roomId: 'r_102', name: 'C (Bottom)', bedType: 'bottom', status: 'empty' },
@@ -305,8 +300,7 @@ export const INITIAL_ROOMS: Room[] = [
           phone: '+49-170-1234567',
           idType: 'idCard',
           arrivalTime: 'morning',
-          bookingSource: 'email',
-          referral: '',
+          bookingSource: 'booking-com',
         }
       },
       { id: 'b_102_6', roomId: 'r_102', name: 'F (Top)', bedType: 'top', status: 'cleaning' },
@@ -346,8 +340,7 @@ export const INITIAL_ROOMS: Room[] = [
           phone: '+1-416-555-0123',
           idType: 'passport',
           arrivalTime: 'afternoon',
-          bookingSource: 'email',
-          referral: '',
+          bookingSource: 'booking-com',
         }
       }
     ]
@@ -374,8 +367,8 @@ export const ARRIVALS: Guest[] = [
     passportOrId: 'BR1234567',
     idType: 'passport',
     arrivalTime: 'afternoon',
-    referral: 'Hostelworld',
-    bookingSource: 'walk-in',
+    bookingSource: 'hostelworld',
+    bedPreference: 'bottom',
     notes: 'Requested bottom bed if possible.',
     source: 'walk-in',
     roomPreference: 'Bottom bunk',
@@ -400,8 +393,7 @@ export const ARRIVALS: Guest[] = [
     passportOrId: 'DK9876543',
     idType: 'passport',
     arrivalTime: 'morning',
-    referral: '',
-    bookingSource: 'email',
+    bookingSource: 'booking-com',
     source: 'booking',
   },
   {
@@ -423,8 +415,7 @@ export const ARRIVALS: Guest[] = [
     passportOrId: 'DE20150101234',
     idType: 'idCard',
     arrivalTime: 'late',
-    referral: 'Google',
-    bookingSource: 'walk-in',
+    bookingSource: 'google',
     notes: 'Late check-in — leave key at reception.',
     source: 'walk-in',
   },
@@ -448,8 +439,7 @@ export const ARRIVALS: Guest[] = [
     passportOrId: 'IT-DL-20250101-7890',
     idType: 'driverLicense',
     arrivalTime: 'morning',
-    referral: 'Booking.com',
-    bookingSource: 'phone',
+    bookingSource: 'booking-com',
     source: 'booking',
   },
   {
@@ -471,8 +461,7 @@ export const ARRIVALS: Guest[] = [
     passportOrId: 'JPTR9988',
     idType: 'passport',
     arrivalTime: 'evening',
-    referral: 'Instagram',
-    bookingSource: 'walk-in',
+    bookingSource: 'airbnb',
     source: 'walk-in',
   },
   {
@@ -495,8 +484,7 @@ export const ARRIVALS: Guest[] = [
     passportOrId: 'CN20250101X',
     idType: 'passport',
     arrivalTime: 'afternoon',
-    referral: 'Friend',
-    bookingSource: 'referral',
+    bookingSource: 'other-ota',
     source: 'referral',
   },
 ];
