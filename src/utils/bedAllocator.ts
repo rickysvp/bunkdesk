@@ -14,6 +14,7 @@ export interface BedScore {
   fillExisting: boolean;
   genderMatch: boolean;
   preferenceMatch: boolean;
+  bedTierMatch: boolean;
   fragmentationScore: number;
 }
 
@@ -91,18 +92,20 @@ export function getRoomSummaries(rooms: Room[]): RoomSummary[] {
 const WEIGHT_FILL_EXISTING = 40;
 const WEIGHT_GENDER_MATCH = 30;
 const WEIGHT_PREFERENCE_MATCH = 20;
+const WEIGHT_BED_TIER = 50; // Highest weight - respect what guest paid for
 const WEIGHT_FRAGMENTATION = 10;
 
 function computeBedScore(
   guest: Guest,
   room: Room,
   bed: Bed,
-): { score: number; fillExisting: boolean; genderMatch: boolean; preferenceMatch: boolean; fragmentationScore: number; reasons: string[] } | null {
+): { score: number; fillExisting: boolean; genderMatch: boolean; preferenceMatch: boolean; bedTierMatch: boolean; fragmentationScore: number; reasons: string[] } | null {
   let score = 0;
   const reasons: string[] = [];
   let fillExisting = false;
   let genderMatch = false;
   let preferenceMatch = false;
+  let bedTierMatch = false;
   let fragmentationScore = 0;
 
   // ── 0. Gender hard constraint ──
@@ -111,6 +114,42 @@ function computeBedScore(
     return null; // Hard block
   }
   // Female can go anywhere, but female-only dorm is preferred
+
+  // ── 5. Bed tier match (weight 50) - respect what guest actually paid for ──
+  // Use guest.totalAmount to detect which tier they paid for.
+  // Top bunk = room base price, Bottom = base + bottomBunkPremium.
+  // If totalAmount doesn't match (e.g. for a custom promo price), fall back to bedPreference.
+  const topPrice = room.pricePerNight;
+  const bottomPrice = room.pricePerNight + (room.bottomBunkPremium || 0);
+  const nights = guest.nights || 1;
+  const expectedTopTotal = topPrice * nights;
+  const expectedBottomTotal = bottomPrice * nights;
+  const actualTotal = guest.totalAmount || 0;
+  const tierTolerance = 0.05; // ±5% to handle rounding
+
+  const paidForBottom = actualTotal > 0 && expectedBottomTotal > 0 &&
+    Math.abs(actualTotal - expectedBottomTotal) / expectedBottomTotal < tierTolerance;
+  const paidForTop = actualTotal > 0 && expectedTopTotal > 0 &&
+    Math.abs(actualTotal - expectedTopTotal) / expectedTopTotal < tierTolerance;
+
+  if (paidForBottom && bed.bedType === 'bottom') {
+    score += WEIGHT_BED_TIER;
+    bedTierMatch = true;
+    reasons.push('tier-match-bottom-paid');
+  } else if (paidForTop && bed.bedType === 'top') {
+    score += WEIGHT_BED_TIER;
+    bedTierMatch = true;
+    reasons.push('tier-match-top-paid');
+  } else if (guest.bedPreference === 'bottom' && bed.bedType === 'bottom') {
+    // User explicitly chose bottom preference (no totalAmount hint)
+    score += Math.floor(WEIGHT_BED_TIER * 0.8);
+    bedTierMatch = true;
+    reasons.push('tier-pref-bottom');
+  } else if (guest.bedPreference === 'top' && bed.bedType === 'top') {
+    score += Math.floor(WEIGHT_BED_TIER * 0.8);
+    bedTierMatch = true;
+    reasons.push('tier-pref-top');
+  }
 
   // ── 1. Fill existing (weight 40%) ──
   const occupiedCount = room.beds.filter(b => b.status === 'occupied').length;
@@ -154,7 +193,7 @@ function computeBedScore(
   fragmentationScore = computeFragmentationScore(guest, bed, room);
   score += fragmentationScore * WEIGHT_FRAGMENTATION / 10;
 
-  return { score, fillExisting, genderMatch, preferenceMatch, fragmentationScore, reasons };
+  return { score, fillExisting, genderMatch, preferenceMatch, bedTierMatch, fragmentationScore, reasons };
 }
 
 // ── Fragmentation Calculation ────────────────────────────────────

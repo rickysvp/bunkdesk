@@ -1485,6 +1485,7 @@ export const translations = {
       tagPref: "偏好匹配",
       tagFill: "填充床位",
       tagLowFrag: "低碎片化",
+      tagTierMatch: "付款匹配",
       bestFit: "最佳匹配",
       confirmAutoAssign: "将客人分配到",
       confirmProceed: "确认执行？",

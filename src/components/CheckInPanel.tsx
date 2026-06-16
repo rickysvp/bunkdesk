@@ -645,6 +645,7 @@ export function CheckInPanel({ setActiveTab }: { setActiveTab?: (tab: string) =>
                               )}
                             </div>
                             <div className="flex flex-wrap gap-1 mt-auto">
+                              {score.bedTierMatch && <span className="text-[10px] font-bold bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded">💰 {t('checkin.tagTierMatch')}</span>}
                               {score.genderMatch && <span className="text-[10px] font-bold bg-pink-100 text-pink-700 px-1.5 py-0.5 rounded">♀ {t('checkin.tagGender')}</span>}
                               {score.preferenceMatch && <span className="text-[10px] font-bold bg-violet-100 text-violet-700 px-1.5 py-0.5 rounded">✓ {t('checkin.tagPref')}</span>}
                               {score.fillExisting && <span className="text-[10px] font-bold bg-zinc-100 text-zinc-700 px-1.5 py-0.5 rounded">▣ {t('checkin.tagFill')}</span>}
