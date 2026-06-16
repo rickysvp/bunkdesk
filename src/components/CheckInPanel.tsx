@@ -576,11 +576,19 @@ export function CheckInPanel({ setActiveTab }: { setActiveTab?: (tab: string) =>
                     </div>
                     <Button size="lg" className="w-full h-10 text-sm mb-2 bg-blue-600 hover:bg-blue-700 text-white shadow-md"
                       onClick={() => {
-                        const result = autoAssignBed(selectedGuest.id);
-                        if (result) {
-                          setCheckInSuccess(selectedGuest.name);
-                          setSelectedGuestId(null);
-                          setSelectedBedId(null);
+                        if (!scoredBeds.length) return;
+                        const best = scoredBeds[0];
+                        const roomTypeName = best.roomType === 'dorm-mixed' ? t('bedboard.mixedDorm') : best.roomType === 'dorm-female' ? t('bedboard.femaleDorm') : t('bedboard.private');
+                        const totalForStay = Math.round(best.pricePerNight * selectedGuest.nights * 100) / 100;
+                        const reasonSummary = [best.genderMatch && t('checkin.tagGender'), best.preferenceMatch && t('checkin.tagPref'), best.fillExisting && t('checkin.tagFill'), best.fragmentationScore >= 7 && t('checkin.tagLowFrag')].filter(Boolean).join(' · ') || t('checkin.bestFit') || 'Best fit';
+                        const confirmMsg = `${t('checkin.confirmAutoAssign') || 'Assign guest to'}\n\n${selectedGuest.name} → ${roomTypeName} ${best.bedName} · R${best.roomNumber}\n${formatCurrency(best.pricePerNight, language)}/night × ${selectedGuest.nights} ${t('dashboard.nights')} = ${formatCurrency(totalForStay, language)}\n\n✓ ${reasonSummary}\n\n${t('checkin.confirmProceed') || 'Proceed?'}`;
+                        if (window.confirm(confirmMsg)) {
+                          const result = autoAssignBed(selectedGuest.id);
+                          if (result) {
+                            setCheckInSuccess(selectedGuest.name);
+                            setSelectedGuestId(null);
+                            setSelectedBedId(null);
+                          }
                         }
                       }}>
                       <svg className="w-3.5 h-3.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
@@ -590,6 +598,7 @@ export function CheckInPanel({ setActiveTab }: { setActiveTab?: (tab: string) =>
                       {scoredBeds.map((score, idx) => {
                         const isTop = idx === 0;
                         const isSelected = selectedBedId === score.bedId;
+                        const showBestTag = isTop && !isSelected;
                         const totalForStay = Math.round(score.pricePerNight * selectedGuest.nights * 100) / 100;
                         const priceDiff = score.pricePerNight - AVG_PRICE;
                         return (
@@ -598,7 +607,7 @@ export function CheckInPanel({ setActiveTab }: { setActiveTab?: (tab: string) =>
                               isSelected ? 'border-blue-600 bg-blue-50 ring-2 ring-blue-200 shadow-md' :
                               isTop ? 'border-emerald-400 bg-emerald-50/40 hover:border-emerald-500 shadow-sm' :
                               'border-zinc-200 bg-white hover:border-zinc-400')}>
-                            {isTop && <span className="absolute -top-2 left-3 text-[10px] font-extrabold bg-emerald-500 text-white px-2 py-0.5 rounded-full">★ BEST MATCH</span>}
+                            {showBestTag && <span className="absolute -top-2.5 left-3 text-[10px] font-extrabold bg-emerald-500 text-white px-2.5 py-0.5 rounded-full shadow-md ring-2 ring-white">★ BEST MATCH</span>}
                             <div className="flex items-center justify-between gap-1 mb-1">
                               <span className="font-bold text-sm text-zinc-900 truncate">
                                 {score.roomType === 'dorm-mixed' ? t('bedboard.mixedDorm') : score.roomType === 'dorm-female' ? t('bedboard.femaleDorm') : t('bedboard.private')}

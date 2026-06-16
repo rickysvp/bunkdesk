@@ -460,6 +460,13 @@ export const translations = {
       bottomBunk: "Bottom bunk",
       topBunk: "Top bunk",
       autoAssign: "Auto Assign & Check-in",
+      tagGender: "Gender match",
+      tagPref: "Preference match",
+      tagFill: "Fill existing",
+      tagLowFrag: "Low fragmentation",
+      bestFit: "Best fit",
+      confirmAutoAssign: "Assign guest to",
+      confirmProceed: "Proceed?",
     },
     guest: {
       details: "Guest Details",
@@ -1478,6 +1485,9 @@ export const translations = {
       tagPref: "偏好匹配",
       tagFill: "填充床位",
       tagLowFrag: "低碎片化",
+      bestFit: "最佳匹配",
+      confirmAutoAssign: "将客人分配到",
+      confirmProceed: "确认执行？",
     },
     guest: {
       details: "住客详情",
