@@ -254,12 +254,12 @@ export function BookingEngine() {
   return (
     <div className="mx-auto max-w-xl px-4 py-6">
       {/* Step Indicator */}
-      <div className="mb-8 flex items-center justify-center gap-2">
+      <div className="mb-6 sm:mb-8 flex items-center justify-center gap-1.5 sm:gap-2">
         {([1, 2, 3, 4] as Step[]).map((s, i) => (
           <React.Fragment key={s}>
             <div className="flex flex-col items-center gap-1">
               <div
-                className={`flex h-9 w-9 items-center justify-center rounded-full text-sm font-semibold transition-all ${
+                className={`flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-full text-sm font-semibold transition-all ${
                   s < step
                     ? 'bg-emerald-500 text-white'
                     : s === step
@@ -267,14 +267,14 @@ export function BookingEngine() {
                     : 'bg-zinc-200 text-zinc-500'
                 }`}
               >
-                {s < step ? <CheckCircle2 className="size-4" /> : s}
+                {s < step ? <CheckCircle2 className="size-3.5 sm:size-4" /> : s}
               </div>
-              <span className={`text-[10px] font-medium ${s === step ? 'text-emerald-700' : 'text-zinc-400'}`}>
+              <span className={`text-[9px] sm:text-[10px] font-medium ${s === step ? 'text-emerald-700' : 'text-zinc-400'}`}>
                 {stepLabels[i]}
               </span>
             </div>
             {i < 3 && (
-              <div className={`h-0.5 w-8 rounded-full transition-all ${s < step ? 'bg-emerald-500' : 'bg-zinc-200'}`} />
+              <div className={`h-0.5 w-4 sm:w-8 rounded-full transition-all ${s < step ? 'bg-emerald-500' : 'bg-zinc-200'}`} />
             )}
           </React.Fragment>
         ))}
@@ -290,7 +290,7 @@ export function BookingEngine() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-5">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-1.5">
                 <label className="text-xs font-medium text-zinc-600">{t('booking.checkIn')}</label>
                 <Input
@@ -449,7 +449,7 @@ export function BookingEngine() {
                 placeholder="you@example.com"
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-1.5">
                 <label className="text-xs font-medium text-zinc-600">{t('booking.phone')}</label>
                 <Input

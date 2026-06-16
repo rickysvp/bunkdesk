@@ -126,7 +126,7 @@ export function LandingPage({ onEnterApp }: LandingPageProps) {
               {t('landing.heroBadge') || 'Built for hostel owners · Bed-level'}
             </div>
 
-            <h1 className="mt-6 text-4xl md:text-6xl font-bold tracking-tight leading-[1.1]">
+            <h1 className="mt-6 text-3xl sm:text-4xl md:text-6xl font-bold tracking-tight leading-[1.1]">
               {t('landing.heroTitle1') || 'Bed-level'}
               <br />
               <span className="bg-gradient-to-r from-blue-400 to-indigo-300 bg-clip-text text-transparent">
@@ -134,7 +134,7 @@ export function LandingPage({ onEnterApp }: LandingPageProps) {
               </span>
             </h1>
 
-            <p className="mt-6 text-lg text-zinc-300 max-w-md leading-relaxed">
+            <p className="mt-6 text-base sm:text-lg text-zinc-300 max-w-md leading-relaxed">
               {t('landing.heroSubtitle') ||
                 'Visual bed board, direct booking page, and built-in CRM. No commissions, no API headaches — $19/month, all in.'}
             </p>
@@ -211,7 +211,7 @@ export function LandingPage({ onEnterApp }: LandingPageProps) {
                 transition={{ duration: 0.3, delay: i * 0.05 }}
               >
                 <Card className="h-full border-zinc-100 shadow-none hover:shadow-sm transition-shadow bg-white">
-                  <CardContent className="p-6 space-y-3">
+                  <CardContent className="p-4 sm:p-6 space-y-3">
                     <div
                       className={cn(
                         'inline-flex items-center justify-center text-2xl font-bold px-3 py-1.5 rounded-lg',
@@ -267,7 +267,7 @@ export function LandingPage({ onEnterApp }: LandingPageProps) {
           <div className="grid md:grid-cols-2 gap-6">
             {/* BEFORE */}
             <Card className="border-zinc-200 shadow-none bg-white">
-              <CardContent className="p-7 space-y-4">
+              <CardContent className="p-5 sm:p-7 space-y-4">
                 <div className="flex items-baseline justify-between">
                   <h3 className="text-sm font-semibold text-zinc-900">
                     {t('landing.beforeTitle') || 'Without BunkDesk'}
@@ -289,7 +289,7 @@ export function LandingPage({ onEnterApp }: LandingPageProps) {
 
             {/* AFTER */}
             <Card className="border-blue-200 shadow-md shadow-blue-600/5 bg-gradient-to-br from-blue-50/50 to-white">
-              <CardContent className="p-7 space-y-4">
+              <CardContent className="p-5 sm:p-7 space-y-4">
                 <div className="flex items-baseline justify-between">
                   <h3 className="text-sm font-semibold text-zinc-900">
                     {t('landing.afterTitle') || 'With BunkDesk'}
@@ -491,7 +491,7 @@ export function LandingPage({ onEnterApp }: LandingPageProps) {
                   transition={{ duration: 0.3, delay: i * 0.05 }}
                 >
                   <Card className="h-full border-zinc-800 bg-zinc-900/60 shadow-none hover:border-zinc-700 transition-colors">
-                    <CardContent className="p-6 space-y-3">
+                    <CardContent className="p-4 sm:p-6 space-y-3">
                       <div className="flex items-center justify-between">
                         <span className="text-2xl font-bold font-mono bg-gradient-to-br from-blue-400 to-indigo-300 bg-clip-text text-transparent">
                           {s.num}
@@ -571,7 +571,7 @@ export function LandingPage({ onEnterApp }: LandingPageProps) {
               <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 bg-blue-600 text-white text-[10px] font-semibold uppercase tracking-wider px-2.5 py-0.5 rounded-full">
                 {t('landing.pricingProBadge') || 'Most popular'}
               </span>
-              <CardContent className="p-7 space-y-5">
+              <CardContent className="p-5 sm:p-7 space-y-5">
                 <div>
                   <p className="text-xs font-semibold text-blue-600 uppercase tracking-wider">
                     {t('landing.pricingProName') || 'Standard'}

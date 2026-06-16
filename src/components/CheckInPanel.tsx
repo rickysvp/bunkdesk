@@ -178,7 +178,7 @@ export function CheckInPanel({ setActiveTab }: { setActiveTab?: (tab: string) =>
   };
 
   return (
-    <div className="flex flex-col h-full pb-20 md:pb-0">
+    <div className="flex flex-col h-full">
       {/* Check-in Success Banner */}
       <AnimatePresence>
         {checkInSuccess && (
@@ -186,7 +186,7 @@ export function CheckInPanel({ setActiveTab }: { setActiveTab?: (tab: string) =>
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="fixed top-4 left-1/2 -translate-x-1/2 z-50 bg-emerald-600 text-white px-5 py-3 rounded-xl shadow-lg flex items-center gap-3"
+            className="fixed top-4 left-1/2 -translate-x-1/2 z-50 bg-emerald-600 text-white px-4 sm:px-5 py-3 rounded-xl shadow-lg flex items-center gap-3 max-w-[calc(100vw-2rem)]"
           >
             <CheckCircle2 className="h-5 w-5 shrink-0" />
             <span className="text-sm font-medium">{checkInSuccess} {t('checkin.checkedInSuccess') || 'checked in successfully!'}</span>
@@ -200,7 +200,7 @@ export function CheckInPanel({ setActiveTab }: { setActiveTab?: (tab: string) =>
 
       {/* Sub Tab Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4">
-        <div className="flex gap-1 bg-zinc-100 rounded-xl p-1">
+        <div className="flex gap-1 bg-zinc-100 rounded-xl p-1 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden max-w-full">
           {([
             { id: 'pending' as SubTab, label: t('checkin.pending') || 'Pending', count: pendingCount, color: 'text-amber-600' },
             { id: 'checked-in' as SubTab, label: t('checkin.checkedIn') || 'Checked In', count: checkedInCount, color: 'text-emerald-600' },
@@ -208,7 +208,7 @@ export function CheckInPanel({ setActiveTab }: { setActiveTab?: (tab: string) =>
           ]).map(tab => (
             <button key={tab.id} onClick={() => setSubTab(tab.id)}
               className={cn(
-                "px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-1.5",
+                "px-3 sm:px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-1.5 whitespace-nowrap shrink-0",
                 subTab === tab.id ? 'bg-white shadow-sm text-zinc-900' : 'text-zinc-500 hover:text-zinc-700'
               )}>
               {tab.label}
@@ -227,7 +227,7 @@ export function CheckInPanel({ setActiveTab }: { setActiveTab?: (tab: string) =>
       {subTab === 'pending' && (
         <div className="flex-1 flex flex-col md:flex-row gap-4 min-h-0">
           {/* Arrivals List */}
-          <div className="w-full md:w-72 flex-shrink-0 flex flex-col bg-white border border-zinc-200 rounded-2xl overflow-hidden shadow-sm">
+          <div className="w-full md:w-72 flex-shrink-0 flex flex-col bg-white border border-zinc-200 rounded-2xl overflow-hidden shadow-sm max-h-[260px] md:max-h-none">
             <div className="p-3 border-b border-zinc-100 bg-zinc-50 flex items-center justify-between">
               <span className="text-xs font-semibold text-zinc-500 uppercase">{t('checkin.pending')}</span>
               <span className="bg-zinc-200 text-zinc-700 px-2 py-0.5 rounded-full text-xs font-bold">{pendingCount}</span>
@@ -482,14 +482,14 @@ export function CheckInPanel({ setActiveTab }: { setActiveTab?: (tab: string) =>
                       <div className="w-1.5 h-1.5 rounded-full bg-blue-500" />
                       <div className="text-[11px] font-extrabold text-blue-500 uppercase tracking-wider">{t('checkin.contactSection')}</div>
                     </div>
-                    <div className="grid grid-cols-2 gap-x-5">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-5 gap-y-1">
                       <FieldRow icon="📧" iconBg="bg-blue-50" label={t('checkin.email')} value={selectedGuest.email} placeholder={t('checkin.notProvided')} />
                       <FieldRow icon="📞" iconBg="bg-blue-50" label={t('checkin.phone')} value={selectedGuest.phone} placeholder={t('checkin.notProvided')} />
                       <FieldRow icon="🕒" iconBg="bg-blue-50" label={t('checkin.arrivalTime.label')} value={selectedGuest.arrivalTime ? t(`checkin.arrivalTime.${selectedGuest.arrivalTime}`) : undefined} placeholder={t('checkin.notProvided')} />
-                      <div className="col-span-2">
+                      <div className="col-span-1 sm:col-span-2">
                         <FieldRow icon="📋" iconBg="bg-blue-50" label={t('checkin.source.label')} value="" placeholder="">
                           <Select value={selectedGuest.bookingSource ?? 'walk-in'} onValueChange={(val: string) => updateArrival(selectedGuest.id, { bookingSource: val as Guest['bookingSource'] })}>
-                            <SelectTrigger className="h-7 text-xs bg-zinc-100 border-zinc-200 w-32">
+                            <SelectTrigger className="h-9 sm:h-7 text-xs bg-zinc-100 border-zinc-200 w-32">
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
@@ -511,7 +511,7 @@ export function CheckInPanel({ setActiveTab }: { setActiveTab?: (tab: string) =>
                         <div className="w-1.5 h-1.5 rounded-full bg-violet-500" />
                         <div className="text-[11px] font-extrabold text-violet-500 uppercase tracking-wider">{t('checkin.idSection')}</div>
                       </div>
-                      <div className="grid grid-cols-2 gap-x-5">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-5 gap-y-1">
                         <FieldRow icon="🛂" iconBg="bg-violet-50" label={t('checkin.idType.label')} value={selectedGuest.idType ? t(`checkin.idType.${selectedGuest.idType}`) : undefined} placeholder={t('checkin.notProvided')}>
                           {selectedGuest.passportScanned && (
                             <div className="flex items-center gap-1.5">
@@ -560,7 +560,7 @@ export function CheckInPanel({ setActiveTab }: { setActiveTab?: (tab: string) =>
                           </span>
                         </div>
                         {selectedGuest.paymentStatus === 'unpaid' && (
-                          <Button size="sm" variant="destructive" className="h-5 text-[9px] px-2" onClick={() => { if (window.confirm(t('checkin.confirmCollect') || 'Mark this guest as paid?')) settlePayment(selectedGuest.id); }}>{t('checkin.collect')}</Button>
+                          <Button size="sm" variant="destructive" className="h-8 sm:h-7 text-[10px] sm:text-[9px] px-2.5 sm:px-2 min-w-[56px]" onClick={() => { if (window.confirm(t('checkin.confirmCollect') || 'Mark this guest as paid?')) settlePayment(selectedGuest.id); }}>{t('checkin.collect')}</Button>
                         )}
                       </div>
                       {/* Notes */}
@@ -583,7 +583,7 @@ export function CheckInPanel({ setActiveTab }: { setActiveTab?: (tab: string) =>
                         <> · <span className="font-bold text-indigo-600">{t('checkin.prefers') || 'prefers'} {selectedGuest.roomPreference}</span></>
                       )}
                     </div>
-                    <Button size="lg" className="w-full h-10 text-sm mb-2 bg-blue-600 hover:bg-blue-700 text-white shadow-md disabled:bg-zinc-300 disabled:cursor-not-allowed"
+                    <Button size="lg" className="w-full h-11 sm:h-10 text-sm mb-2 bg-blue-600 hover:bg-blue-700 text-white shadow-md disabled:bg-zinc-300 disabled:cursor-not-allowed"
                       disabled={!scoredBeds.length || selectedGuest.paymentStatus === 'unpaid' || selectedGuest.paymentStatus === 'partial'}
                       onClick={() => {
                         if (!scoredBeds.length) return;
@@ -618,7 +618,7 @@ export function CheckInPanel({ setActiveTab }: { setActiveTab?: (tab: string) =>
                         const bedTypeName = score.bedType === 'bottom' ? t('checkin.bottomBunk') : t('checkin.topBunk');
                         return (
                           <button key={score.bedId} onClick={() => setSelectedBedId(score.bedId)}
-                            className={cn("p-3.5 rounded-xl border-2 text-left transition-all cursor-pointer relative min-h-[150px] flex flex-col",
+                            className={cn("p-3 sm:p-3.5 rounded-xl border-2 text-left transition-all cursor-pointer relative min-h-[140px] sm:min-h-[150px] flex flex-col",
                               isSelected ? 'border-blue-600 bg-blue-50 ring-4 ring-blue-200 shadow-lg scale-[1.02]' :
                               isTop ? 'border-emerald-400 bg-emerald-50/40 hover:border-emerald-500 shadow-sm' :
                               'border-zinc-200 bg-white hover:border-zinc-400 hover:shadow-sm')}>
@@ -662,10 +662,10 @@ export function CheckInPanel({ setActiveTab }: { setActiveTab?: (tab: string) =>
                       <p className="text-[11px] font-medium text-amber-600 mt-1.5">⚠️ {t('checkin.unpaidWarning')}</p>
                     )}
                     <div className="mt-2 pt-2 border-t border-zinc-100 flex justify-end gap-2">
-                      <Button size="lg" 
-                        disabled={!selectedBedId || !selectedGuest.passportScanned || selectedGuest.paymentStatus === 'unpaid' || selectedGuest.paymentStatus === 'partial'} 
+                      <Button size="lg"
+                        disabled={!selectedBedId || !selectedGuest.passportScanned || selectedGuest.paymentStatus === 'unpaid' || selectedGuest.paymentStatus === 'partial'}
                         onClick={handleCheckIn}
-                        className="w-full sm:w-auto h-10 px-5 text-sm shadow-lg disabled:bg-zinc-300 disabled:cursor-not-allowed">
+                        className="w-full sm:w-auto h-11 sm:h-10 px-5 text-sm shadow-lg disabled:bg-zinc-300 disabled:cursor-not-allowed">
                         {t('checkin.completeCheckIn')}
                       </Button>
                     </div>

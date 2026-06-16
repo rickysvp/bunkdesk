@@ -6,6 +6,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { TopBar } from './components/TopBar';
+import { BottomTabBar } from './components/BottomTabBar';
 import { BedBoard } from './components/BedBoard';
 import { CheckInPanel } from './components/CheckInPanel';
 import { ShiftLog } from './components/ShiftLog';
@@ -93,7 +94,8 @@ function AppContent() {
       <TopBar activeTab={effectiveTab} setActiveTab={setActiveTab} />
 
       <main className="flex-1 h-full overflow-hidden flex flex-col relative w-full">
-        <div className="flex-1 overflow-y-auto p-4 md:p-8 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        {/* pb-16 leaves room for the mobile BottomTabBar (56px + safe area). */}
+        <div className="flex-1 overflow-y-auto p-3 sm:p-4 md:p-8 pb-20 md:pb-8 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           <AnimatePresence mode="wait">
             <motion.div
               key={effectiveTab}
@@ -123,6 +125,9 @@ function AppContent() {
           </AnimatePresence>
         </div>
       </main>
+
+      {/* Mobile-only bottom navigation (hidden on >= md screens) */}
+      <BottomTabBar activeTab={effectiveTab} setActiveTab={setActiveTab} />
     </div>
   );
 }

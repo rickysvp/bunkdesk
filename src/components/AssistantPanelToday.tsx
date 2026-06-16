@@ -251,7 +251,7 @@ export function AssistantPanelToday({ setActiveTab, onSwitchToGrowth }: Assistan
             {t('assistant.threeDay.title')}
           </h3>
         </div>
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           {weekForecast.threeDay.map((day, i) => (
             <Fragment key={day.date}>
               <ThreeDayCard

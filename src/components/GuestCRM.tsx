@@ -60,10 +60,10 @@ export function GuestCRM() {
 
   return (
     <div className="space-y-6">
-      {/* Stats Bar */}
-      <div className="grid grid-cols-3 gap-3">
+      {/* Stats Bar — stacks 3 cards vertically on mobile, horizontal on >= sm */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <Card className="border shadow-none bg-white">
-          <CardContent className="p-4 flex items-center gap-3">
+          <CardContent className="p-3 sm:p-4 flex items-center gap-3">
             <div className="p-2 rounded-lg bg-blue-50 text-blue-500">
               <Users className="h-4 w-4" />
             </div>
@@ -74,7 +74,7 @@ export function GuestCRM() {
           </CardContent>
         </Card>
         <Card className="border shadow-none bg-white">
-          <CardContent className="p-4 flex items-center gap-3">
+          <CardContent className="p-3 sm:p-4 flex items-center gap-3">
             <div className="p-2 rounded-lg bg-amber-50 text-amber-500">
               <Star className="h-4 w-4" />
             </div>
@@ -85,7 +85,7 @@ export function GuestCRM() {
           </CardContent>
         </Card>
         <Card className="border shadow-none bg-white cursor-pointer hover:shadow-sm transition-shadow" onClick={() => setView(view === 'recall' ? 'all' : 'recall')}>
-          <CardContent className="p-4 flex items-center gap-3">
+          <CardContent className="p-3 sm:p-4 flex items-center gap-3">
             <div className="p-2 rounded-lg bg-rose-50 text-rose-500">
               <Clock className="h-4 w-4" />
             </div>
@@ -179,22 +179,22 @@ export function GuestCRM() {
                 className="border shadow-none bg-white cursor-pointer hover:shadow-sm transition-shadow"
                 onClick={() => setSelectedProfile(profile)}
               >
-                <CardContent className="p-4 flex items-center gap-4">
+                <CardContent className="p-3 sm:p-4 flex items-center gap-3 sm:gap-4">
                   <div className="h-10 w-10 rounded-full bg-zinc-100 flex items-center justify-center text-sm font-medium text-zinc-600 shrink-0">
                     {profile.name.charAt(0)}
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
                       <span className="text-sm font-medium text-zinc-900 truncate">{profile.name}</span>
-                      <span className="text-[10px] text-zinc-400">{profile.countryCode}</span>
+                      <span className="text-[10px] text-zinc-400 shrink-0">{profile.countryCode}</span>
                     </div>
-                    <div className="flex items-center gap-3 mt-1">
+                    <div className="flex items-center gap-2 sm:gap-3 mt-1 flex-wrap">
                       <span className="text-xs text-zinc-500">{profile.totalStays}x {t('crm.stays')}</span>
                       <span className="text-xs text-zinc-500">{profile.totalNights}N</span>
                       <span className="text-xs font-medium text-emerald-600">{formatCurrency(profile.totalSpent, language)}</span>
                     </div>
                   </div>
-                  <div className="flex flex-wrap gap-1 justify-end max-w-[200px]">
+                  <div className="hidden sm:flex flex-wrap gap-1 justify-end max-w-[200px]">
                     {profile.tags.slice(0, 3).map(tag => {
                       const label = getTagLabel(tag);
                       return (
@@ -207,12 +207,26 @@ export function GuestCRM() {
                       <span className="text-[10px] text-zinc-400">+{profile.tags.length - 3}</span>
                     )}
                   </div>
-                  <div className="flex items-center gap-1.5 shrink-0">
+                  <div className="hidden sm:flex items-center gap-1.5 shrink-0">
                     {profile.email && <Mail className="h-3.5 w-3.5 text-zinc-300" />}
                     {profile.whatsapp && <MessageCircle className="h-3.5 w-3.5 text-green-400" />}
                     {profile.phone && <Phone className="h-3.5 w-3.5 text-zinc-300" />}
                   </div>
                 </CardContent>
+                {/* Mobile-only tags row */}
+                <div className="sm:hidden px-3 pb-3 -mt-1 flex flex-wrap gap-1">
+                  {profile.tags.slice(0, 3).map(tag => {
+                    const label = getTagLabel(tag);
+                    return (
+                      <span key={tag} className={cn("text-[10px] font-medium px-1.5 py-0.5 rounded", label.color)}>
+                        {language === 'zh' ? label.zh : label.en}
+                      </span>
+                    );
+                  })}
+                  {profile.tags.length > 3 && (
+                    <span className="text-[10px] text-zinc-400">+{profile.tags.length - 3}</span>
+                  )}
+                </div>
               </Card>
             </motion.div>
           ))}

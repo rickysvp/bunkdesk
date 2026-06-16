@@ -89,7 +89,7 @@ export function StaffPanel() {
       {/* Add Staff Form */}
       {showAddForm && (
         <div className="bg-white rounded-xl border border-zinc-200 shadow-sm p-4 mb-4 space-y-3">
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             <div>
               <label className="text-xs font-medium text-zinc-500 mb-1 block">{t("staff.name")}</label>
               <input

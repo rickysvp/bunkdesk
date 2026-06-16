@@ -1,5 +1,7 @@
 /**
- * TopBar — horizontal navigation that replaces the old left Sidebar.
+ * TopBar — 桌面端水平导航（≥ md 屏显示）
+ *
+ * 移动端由 BottomTabBar 接管。两者通过 `useStaff().visibleTabs` 同步角色权限。
  *
  * Layout (left → right):
  *   [BunkDesk logo]  [5 primary tabs]  [LanguageToggle] [user badge + sign-out]
@@ -10,8 +12,6 @@
  *   a long-form toggle that stays in sync.
  * - User badge (name + role) and sign-out are two separate buttons for
  *   a low-friction pattern (per the redesign decision).
- * - On narrow screens the tab row falls back to `overflow-x-auto` so
- *   the 5 tabs remain reachable without a hamburger menu.
  */
 
 import React from 'react';
@@ -60,7 +60,7 @@ export function TopBar({ activeTab, setActiveTab }: TopBarProps) {
 
   return (
     <header
-      className="h-14 flex-shrink-0 border-b border-[#EBEBEB] bg-white/80 backdrop-blur-md flex items-center px-3 md:px-6 sticky top-0 z-30 gap-2"
+      className="hidden md:flex h-14 flex-shrink-0 border-b border-[#EBEBEB] bg-white/80 backdrop-blur-md items-center px-3 md:px-6 sticky top-0 z-30 gap-2"
       data-topbar
     >
       {/* Logo — kept on the left so the brand is always anchored */}
