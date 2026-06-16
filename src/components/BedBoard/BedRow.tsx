@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import { useDroppable } from '@dnd-kit/core';
 import { Room, Bed, Guest } from '../../types';
 import { parseISO, differenceInDays, format, addDays } from 'date-fns';
-import { useTranslation } from '../../i18nContext';
+import { useTranslation, formatCurrency } from '../../i18nContext';
 import { useHostel } from '../../HostelContext';
 import { getBookingsForBed, getBookingForDate, getVisibleNights } from '../../utils/timelineEngine';
 import { getBedPrice } from '../../utils/bedPricing';
@@ -53,7 +53,7 @@ export function BedRow({
   onResizeLeft,
   onResizeRight,
 }: BedRowProps) {
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
   const { markBedClean } = useHostel();
 
   const { isOver, setNodeRef } = useDroppable({
@@ -120,7 +120,7 @@ export function BedRow({
         <span className="text-sm" title={bed.bedType}>
           {bedTypeIcons[bed.bedType || 'single'] || '▤'}
         </span>
-        <span className="text-xs text-zinc-400 ml-auto">${price}</span>
+        <span className="text-xs text-zinc-400 ml-auto">{formatCurrency(price, language)}</span>
         {bed.status === 'cleaning' && (
           <button
             className="p-0.5 hover:bg-purple-100 rounded text-purple-500 shrink-0"

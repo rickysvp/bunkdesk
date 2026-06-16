@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useHostel } from '../HostelContext';
-import { useTranslation } from '../i18nContext';
+import { useTranslation, formatCurrency } from '../i18nContext';
 import { GuestProfile, GuestTag } from '../types';
 import { findRecallCandidates, getTagLabel, syncGuestProfiles } from '../utils/guestCrmEngine';
 import { Users, Search, Tag, Mail, Phone, MessageCircle, Star, Clock, RefreshCw } from 'lucide-react';
@@ -191,7 +191,7 @@ export function GuestCRM() {
                     <div className="flex items-center gap-3 mt-1">
                       <span className="text-xs text-zinc-500">{profile.totalStays}x {t('crm.stays')}</span>
                       <span className="text-xs text-zinc-500">{profile.totalNights}N</span>
-                      <span className="text-xs font-medium text-emerald-600">${profile.totalSpent}</span>
+                      <span className="text-xs font-medium text-emerald-600">{formatCurrency(profile.totalSpent, language)}</span>
                     </div>
                   </div>
                   <div className="flex flex-wrap gap-1 justify-end max-w-[200px]">
@@ -269,7 +269,7 @@ export function GuestCRM() {
                   <p className="text-[10px] text-zinc-500 uppercase">{t('crm.nights')}</p>
                 </div>
                 <div className="bg-zinc-50 rounded-lg p-3 text-center">
-                  <p className="text-lg font-semibold text-emerald-600">${selectedProfile.totalSpent}</p>
+                  <p className="text-lg font-semibold text-emerald-600">{formatCurrency(selectedProfile.totalSpent, language)}</p>
                   <p className="text-[10px] text-zinc-500 uppercase">{t('crm.spent')}</p>
                 </div>
               </div>

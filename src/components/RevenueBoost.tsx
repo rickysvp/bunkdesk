@@ -15,16 +15,16 @@ import {
 import { motion, AnimatePresence } from "motion/react";
 import { addDays, format } from "date-fns";
 import { useHostel } from "../HostelContext";
-import { useTranslation } from "../i18nContext";
+import { useTranslation, formatCurrency } from "../i18nContext";
 import type { PromotionType } from "../types";
 
 // ── Pricing demo data ──────────────────────────────────────────
-const PRICING_DATA = [
-  { key: "peakSeason", current: 95, suggested: 110, change: 16 },
+const PRICING_DATA_FALLBACK = [
+  { key: "peakSeason", current: 85, suggested: 110, change: 16 },
   { key: "offSeason", current: 55, suggested: 45, change: -18 },
   { key: "weekend", current: 85, suggested: 90, change: 6 },
   { key: "weekday", current: 65, suggested: 60, change: -8 },
-] as const;
+];
 
 const PROMO_TYPES: { value: PromotionType; labelKey: string }[] = [
   { value: "last-minute", labelKey: "revenue.typeLastMinute" },
@@ -42,7 +42,18 @@ const PROMO_TYPE_BADGE_COLORS: Record<PromotionType, string> = {
 
 export function RevenueBoost({ autoOpenPromo, onAutoOpenPromoConsumed }: { autoOpenPromo?: boolean; onAutoOpenPromoConsumed?: () => void }) {
   const { rooms, promotions, addPromotion, togglePromotion } = useHostel();
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
+
+  const PRICING_DATA = useMemo(() => {
+    if (rooms.length === 0) return PRICING_DATA_FALLBACK;
+    const avg = Math.round(rooms.reduce((s, r) => s + r.pricePerNight, 0) / rooms.length);
+    return [
+      { key: "peakSeason", current: avg, suggested: Math.round(avg * 1.15), change: 15 },
+      { key: "offSeason", current: Math.round(avg * 0.65), suggested: Math.round(avg * 0.55), change: -15 },
+      { key: "weekend", current: avg, suggested: Math.round(avg * 1.06), change: 6 },
+      { key: "weekday", current: Math.round(avg * 0.75), suggested: Math.round(avg * 0.7), change: -7 },
+    ];
+  }, [rooms]);
 
   const [showForm, setShowForm] = useState(false);
   const [formType, setFormType] = useState<PromotionType>("last-minute");
@@ -301,10 +312,10 @@ export function RevenueBoost({ autoOpenPromo, onAutoOpenPromoConsumed }: { autoO
                     {t(`revenue.${row.key}`)}
                   </td>
                   <td className="py-2.5 px-4 text-right text-zinc-600">
-                    ${row.current}
+                    {formatCurrency(row.current, language)}
                   </td>
                   <td className="py-2.5 px-4 text-right font-semibold text-zinc-900">
-                    ${row.suggested}
+                    {formatCurrency(row.suggested, language)}
                   </td>
                   <td className="py-2.5 pl-4 text-right">
                     <span

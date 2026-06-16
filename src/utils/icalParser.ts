@@ -29,27 +29,39 @@ function extractProperty(lines: string[], key: string): string {
 }
 
 export function parseICal(text: string): ParsedEvent[] {
-  const events: ParsedEvent[] = [];
-  const veventRegex = /BEGIN:VEVENT[\s\S]*?END:VEVENT/gi;
-  let match: RegExpExecArray | null;
+  try {
+    const events: ParsedEvent[] = [];
+    const veventRegex = /BEGIN:VEVENT[\s\S]*?END:VEVENT/gi;
+    let match: RegExpExecArray | null;
 
-  while ((match = veventRegex.exec(text)) !== null) {
-    const block = match[0];
-    const lines = block.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+    while ((match = veventRegex.exec(text)) !== null) {
+      const block = match[0];
+      const lines = block.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
 
-    const uid = extractProperty(lines, 'UID');
-    const summary = extractProperty(lines, 'SUMMARY');
-    const dtStart = parseICalDate(extractProperty(lines, 'DTSTART'));
-    const dtEnd = parseICalDate(extractProperty(lines, 'DTEND'));
-    const description = extractProperty(lines, 'DESCRIPTION');
-    const location = extractProperty(lines, 'LOCATION');
+      let uid = extractProperty(lines, 'UID');
+      const summary = extractProperty(lines, 'SUMMARY');
+      const dtStart = parseICalDate(extractProperty(lines, 'DTSTART'));
+      const dtEnd = parseICalDate(extractProperty(lines, 'DTEND'));
+      const description = extractProperty(lines, 'DESCRIPTION');
+      const location = extractProperty(lines, 'LOCATION');
 
-    if (summary && dtStart && dtEnd) {
-      events.push({ uid, summary, dtStart, dtEnd, description: description || undefined, location: location || undefined });
+      if (!uid) {
+        uid = 'ical-' + Date.now() + '-' + Math.random().toString(36).slice(2, 8);
+      }
+      if (!summary && !dtStart && !dtEnd) {
+        continue;
+      }
+      if (!dtStart || !dtEnd) {
+        continue;
+      }
+
+      events.push({ uid, summary: summary || 'Unknown Guest', dtStart, dtEnd, description: description || undefined, location: location || undefined });
     }
-  }
 
-  return events;
+    return events;
+  } catch {
+    return [];
+  }
 }
 
 export function parseSummaryToName(summary: string): { firstName: string; lastName: string; name: string } {

@@ -23,6 +23,8 @@ export const INITIAL_ROOMS: Room[] = [
         guest: {
           id: 'g_1',
           name: 'Alex Johnson',
+          firstName: 'Alex',
+          lastName: 'Johnson',
           country: 'Australia',
           countryCode: 'AU',
           gender: 'male',
@@ -34,6 +36,12 @@ export const INITIAL_ROOMS: Room[] = [
           paidAmount: 340,
           passportScanned: true,
           source: 'walk-in',
+          email: 'alex.johnson@email.com',
+          phone: '+61-412-345-678',
+          idType: 'passport',
+          arrivalTime: 'afternoon',
+          bookingSource: 'walk-in',
+          referral: '',
         }
       },
       {
@@ -46,6 +54,8 @@ export const INITIAL_ROOMS: Room[] = [
           {
             id: 'g_res_1',
             name: 'John Doe',
+            firstName: 'John',
+            lastName: 'Doe',
             country: 'USA',
             countryCode: 'US',
             gender: 'male',
@@ -57,6 +67,12 @@ export const INITIAL_ROOMS: Room[] = [
             paidAmount: 255,
             passportScanned: false,
             source: 'booking',
+            email: 'john.doe@email.com',
+            phone: '+1-555-123-4567',
+            idType: 'passport',
+            arrivalTime: 'afternoon',
+            bookingSource: 'email',
+            referral: '',
           }
         ]
       },
@@ -69,6 +85,8 @@ export const INITIAL_ROOMS: Room[] = [
         guest: {
           id: 'g_2',
           name: 'Maria Garcia',
+          firstName: 'Maria',
+          lastName: 'Garcia',
           country: 'Spain',
           countryCode: 'ES',
           gender: 'female',
@@ -79,6 +97,12 @@ export const INITIAL_ROOMS: Room[] = [
           totalAmount: 255,
           passportScanned: false,
           source: 'booking',
+          email: 'maria.garcia@email.com',
+          phone: '+34-612-345-678',
+          idType: 'passport',
+          arrivalTime: 'morning',
+          bookingSource: 'email',
+          referral: '',
         }
       },
       {
@@ -91,8 +115,11 @@ export const INITIAL_ROOMS: Room[] = [
           {
             id: 'g_res_2',
             name: 'Anna Lee',
+            firstName: 'Anna',
+            lastName: 'Lee',
             country: 'South Korea',
             countryCode: 'KR',
+            gender: 'female',
             checkInDate: t(4),
             checkOutDate: t(9),
             nights: 5,
@@ -101,6 +128,12 @@ export const INITIAL_ROOMS: Room[] = [
             paidAmount: 200,
             passportScanned: false,
             source: 'expedia',
+            email: 'anna.lee@email.com',
+            phone: '+82-10-1234-5678',
+            idType: 'passport',
+            arrivalTime: 'evening',
+            bookingSource: 'email',
+            referral: '',
           }
         ]
       },
@@ -113,8 +146,11 @@ export const INITIAL_ROOMS: Room[] = [
         guest: {
           id: 'g_3',
           name: 'Yuki Tanaka',
+          firstName: 'Yuki',
+          lastName: 'Tanaka',
           country: 'Japan',
           countryCode: 'JP',
+          gender: 'female',
           checkInDate: t(-1),
           checkOutDate: t(1),
           nights: 2,
@@ -123,6 +159,12 @@ export const INITIAL_ROOMS: Room[] = [
           paidAmount: 170,
           passportScanned: true,
           source: 'airbnb',
+          email: 'yuki.tanaka@email.com',
+          phone: '+81-90-1234-5678',
+          idType: 'passport',
+          arrivalTime: 'evening',
+          bookingSource: 'email',
+          referral: '',
         }
       },
       {
@@ -134,6 +176,8 @@ export const INITIAL_ROOMS: Room[] = [
         guest: {
           id: 'g_4',
           name: 'Emma Smith',
+          firstName: 'Emma',
+          lastName: 'Smith',
           country: 'UK',
           countryCode: 'GB',
           gender: 'female',
@@ -144,6 +188,12 @@ export const INITIAL_ROOMS: Room[] = [
           totalAmount: 340,
           passportScanned: false,
           source: 'walk-in',
+          email: 'emma.smith@email.com',
+          phone: '+44-7911-123456',
+          idType: 'passport',
+          arrivalTime: 'afternoon',
+          bookingSource: 'walk-in',
+          referral: '',
         }
       },
       {
@@ -180,8 +230,11 @@ export const INITIAL_ROOMS: Room[] = [
         guest: {
           id: 'g_5',
           name: 'Sophie Martin',
+          firstName: 'Sophie',
+          lastName: 'Martin',
           country: 'France',
           countryCode: 'FR',
+          gender: 'female',
           checkInDate: t(0),
           checkOutDate: t(2),
           nights: 2,
@@ -191,14 +244,23 @@ export const INITIAL_ROOMS: Room[] = [
           passportScanned: false,
           notes: 'Arriving at 1AM. Flight delayed.',
           source: 'booking',
+          email: 'sophie.martin@email.com',
+          phone: '+33-6-12-34-56-78',
+          idType: 'passport',
+          arrivalTime: 'late',
+          bookingSource: 'email',
+          referral: '',
         }
       },
       { id: 'b_102_2', roomId: 'r_102', name: 'B (Top)', bedType: 'top', status: 'empty', reservations: [
         {
           id: 'g_res_3',
           name: 'Sarah Connor',
+          firstName: 'Sarah',
+          lastName: 'Connor',
           country: 'USA',
           countryCode: 'US',
+          gender: 'female',
           checkInDate: t(1),
           checkOutDate: t(3),
           nights: 2,
@@ -207,6 +269,12 @@ export const INITIAL_ROOMS: Room[] = [
           paidAmount: 170,
           passportScanned: true,
           source: 'booking',
+          email: 'sarah.connor@email.com',
+          phone: '+1-555-987-6543',
+          idType: 'passport',
+          arrivalTime: 'morning',
+          bookingSource: 'email',
+          referral: '',
         }
       ] },
       { id: 'b_102_3', roomId: 'r_102', name: 'C (Bottom)', bedType: 'bottom', status: 'empty' },
@@ -220,8 +288,11 @@ export const INITIAL_ROOMS: Room[] = [
         guest: {
           id: 'g_6',
           name: 'Clara Weber',
+          firstName: 'Clara',
+          lastName: 'Weber',
           country: 'Germany',
           countryCode: 'DE',
+          gender: 'female',
           checkInDate: t(-3),
           checkOutDate: t(0),
           nights: 3,
@@ -230,6 +301,12 @@ export const INITIAL_ROOMS: Room[] = [
           paidAmount: 255,
           passportScanned: true,
           source: 'expedia',
+          email: 'clara.weber@email.com',
+          phone: '+49-170-1234567',
+          idType: 'idCard',
+          arrivalTime: 'morning',
+          bookingSource: 'email',
+          referral: '',
         }
       },
       { id: 'b_102_6', roomId: 'r_102', name: 'F (Top)', bedType: 'top', status: 'cleaning' },
@@ -252,8 +329,11 @@ export const INITIAL_ROOMS: Room[] = [
         guest: {
           id: 'g_7',
           name: 'David & Lisa',
+          firstName: 'David',
+          lastName: 'Miller',
           country: 'Canada',
           countryCode: 'CA',
+          gender: 'other',
           checkInDate: t(-1),
           checkOutDate: t(1),
           nights: 2,
@@ -262,6 +342,12 @@ export const INITIAL_ROOMS: Room[] = [
           paidAmount: 300,
           passportScanned: true,
           source: 'booking',
+          email: 'david.lisa@email.com',
+          phone: '+1-416-555-0123',
+          idType: 'passport',
+          arrivalTime: 'afternoon',
+          bookingSource: 'email',
+          referral: '',
         }
       }
     ]
@@ -313,6 +399,8 @@ export const ARRIVALS: Guest[] = [
     passportScanned: false,
     passportOrId: 'DK9876543',
     idType: 'passport',
+    arrivalTime: 'morning',
+    referral: '',
     bookingSource: 'email',
     source: 'booking',
   },

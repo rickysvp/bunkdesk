@@ -496,7 +496,7 @@ export function BookingEngine() {
                     }
                     setReferralError('');
                   }}
-                  placeholder="BUNKDESK-XXXX-XXX"
+                  placeholder={t('booking.referralPlaceholder')}
                 />
                 <Button
                   variant="outline"
@@ -549,29 +549,29 @@ export function BookingEngine() {
               <div className="border-t border-zinc-200 pt-2">
                 <div className="flex justify-between text-sm">
                   <span className="text-zinc-500">{t('booking.basePrice')}</span>
-                  <span>${basePrice.toFixed(2)}</span>
+                  <span>{formatCurrency(basePrice, language)}</span>
                 </div>
                 {groupDiscount > 0 && (
                   <div className="flex justify-between text-sm text-emerald-600">
                     <span>{t('booking.groupDiscount')} (10%)</span>
-                    <span>−${groupDiscount.toFixed(2)}</span>
+                    <span>−{formatCurrency(groupDiscount, language)}</span>
                   </div>
                 )}
                 {promoDiscount > 0 && activePromo && (
                   <div className="flex justify-between text-sm text-emerald-600">
                     <span>{t('booking.promoDiscount')} ({activePromo.name} {activePromo.discount}%)</span>
-                    <span>−${promoDiscount.toFixed(2)}</span>
+                    <span>−{formatCurrency(promoDiscount, language)}</span>
                   </div>
                 )}
                 {referralDiscount > 0 && (
                   <div className="flex justify-between text-sm text-emerald-600">
                     <span>{t('booking.referralDiscount')} (10%)</span>
-                    <span>−${referralDiscount.toFixed(2)}</span>
+                    <span>−{formatCurrency(referralDiscount, language)}</span>
                   </div>
                 )}
                 <div className="flex justify-between pt-1 text-base font-bold">
                   <span>{t('booking.total')}</span>
-                  <span className="text-emerald-700">${totalPrice.toFixed(2)}</span>
+                  <span className="text-emerald-700">{formatCurrency(totalPrice, language)}</span>
                 </div>
               </div>
             </div>
@@ -581,7 +581,7 @@ export function BookingEngine() {
               <Sparkles className="mt-0.5 size-5 shrink-0 text-emerald-600" />
               <div>
                 <p className="text-sm font-semibold text-emerald-800">
-                  {t('booking.otaSaved')} ${otaSaved.toFixed(2)} {t('booking.otaSavedSuffix')}
+                  {t('booking.otaSaved')} {formatCurrency(otaSaved, language)} {t('booking.otaSavedSuffix')}
                 </p>
                 <p className="text-xs text-emerald-600">
                   {t('booking.otaSavedDesc')}

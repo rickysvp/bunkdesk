@@ -6,12 +6,21 @@ import { pickBestBed, scoreBeds, type BedScore } from "./utils/bedAllocator";
 import { getBedPrice } from './utils/bedPricing';
 import { migrateGuestsDeep } from './utils/guestMigration';
 import { addDays, format, parseISO } from "date-fns";
+import { formatCurrency } from './i18nContext';
+import type { Language } from './i18nContext';
 
 function loadState<T>(key: string, fallback: T): T {
   try {
     const saved = localStorage.getItem(`bunkdesk_${key}`);
     return saved ? JSON.parse(saved) : fallback;
   } catch { return fallback; }
+}
+
+function currentLanguage(): Language {
+  try {
+    const v = localStorage.getItem('bunkdesk_language');
+    return v === 'en' || v === 'zh' ? v : 'zh';
+  } catch { return 'zh'; }
 }
 
 // Persist all 9 hostel slices under a single versioned key to:
@@ -168,7 +177,7 @@ export function HostelProvider({ children }: { children: ReactNode }) {
       } catch (e) {
         // QuotaExceededError, circular refs, etc. — log and let the app keep running.
         // eslint-disable-next-line no-console
-        console.warn('[bunkly] localStorage persist failed:', e);
+        console.warn('[bunkdesk] localStorage persist failed:', e);
       }
     }, 300);
     return () => clearTimeout(timer);
@@ -494,7 +503,7 @@ export function HostelProvider({ children }: { children: ReactNode }) {
       logAction(
         guest.id,
         'check-out',
-        `Checked out from ${room?.name} - ${bed?.name} (${guest.nights || 0}n, paid $${guest.paidAmount || 0}/$${guest.totalAmount || 0})`,
+        `Checked out from ${room?.name} - ${bed?.name} (${guest.nights || 0}n, paid ${formatCurrency(guest.paidAmount || 0, currentLanguage())}/${formatCurrency(guest.totalAmount || 0, currentLanguage())})`,
       );
     }
   }, [rooms, addAutoNote, logAction]);
@@ -535,7 +544,7 @@ export function HostelProvider({ children }: { children: ReactNode }) {
   const addArrival = useCallback((guest: Omit<Guest, "id">) => {
     const newGuest: Guest = { ...guest, id: `g_${crypto.randomUUID()}` };
     setArrivals((prev) => [...prev, newGuest]);
-    logAction(newGuest.id, 'created', `Arrival created: ${newGuest.checkInDate} → ${newGuest.checkOutDate} (${newGuest.nights}n, $${newGuest.totalAmount})`);
+    logAction(newGuest.id, 'created', `Arrival created: ${newGuest.checkInDate} → ${newGuest.checkOutDate} (${newGuest.nights}n, ${formatCurrency(newGuest.totalAmount, currentLanguage())})`);
     return newGuest.id;
   }, [logAction]);
 
@@ -593,7 +602,7 @@ export function HostelProvider({ children }: { children: ReactNode }) {
         return u;
       }),
     })));
-    logAction(guestId, 'charge', `Charge $${amount.toFixed(2)}: ${reason || 'misc'}`, { amount });
+    logAction(guestId, 'charge', `Charge ${formatCurrency(amount, currentLanguage())}: ${reason || 'misc'}`, { amount });
   }, [logAction]);
 
   const extendStay = useCallback((guestId: string, extraNights: number) => {
@@ -632,7 +641,7 @@ export function HostelProvider({ children }: { children: ReactNode }) {
     logAction(
       guestId,
       'extend-stay',
-      `Extended +${extraNights}n → ${newCheckOut} (total now $${newTotal})`,
+      `Extended +${extraNights}n → ${newCheckOut} (total now ${formatCurrency(newTotal, currentLanguage())})`,
       { amount: pricePerNight > 0 ? pricePerNight * extraNights : undefined, meta: { extraNights, newNights, newCheckOut, newTotal } },
     );
   }, [arrivals, rooms, logAction]);
@@ -655,7 +664,7 @@ export function HostelProvider({ children }: { children: ReactNode }) {
         return u;
       }),
     })));
-    logAction(guestId, 'payment', `Partial payment $${amount.toFixed(2)}`, { amount });
+    logAction(guestId, 'payment', `Partial payment ${formatCurrency(amount, currentLanguage())}`, { amount });
   }, [logAction]);
 
   const addGuestNote = useCallback((guestId: string, note: string) => {

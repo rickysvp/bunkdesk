@@ -36,6 +36,7 @@ export function scoreBeds(
   guest: Guest,
   rooms: Room[],
 ): BedScore[] {
+  if (!guest) return [];
   const results: BedScore[] = [];
 
   for (const room of rooms) {
@@ -170,8 +171,9 @@ function computeFragmentationScore(guest: Guest, bed: Bed, room: Room): number {
   if (bed.guest) {
     bookings.push({ checkIn: parseISO(bed.guest.checkInDate), checkOut: parseISO(bed.guest.checkOutDate) });
   }
-  if (bed.reservations) {
-    for (const r of bed.reservations) {
+  const reservations = bed.reservations || [];
+  if (reservations.length > 0) {
+    for (const r of reservations) {
       bookings.push({ checkIn: parseISO(r.checkInDate), checkOut: parseISO(r.checkOutDate) });
     }
   }

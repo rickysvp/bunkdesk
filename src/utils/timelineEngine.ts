@@ -5,6 +5,16 @@ import { rangesOverlap } from './bedRules';
 // Re-export so existing imports from timelineEngine keep working.
 export { rangesOverlap };
 
+function safeParseISO(dateStr: string, fallback: Date = new Date(0)): Date {
+  try {
+    const d = parseISO(dateStr);
+    if (isNaN(d.getTime())) return fallback;
+    return d;
+  } catch {
+    return fallback;
+  }
+}
+
 /**
  * Get all bookings for a bed (current guest + future reservations), deduplicated by ID.
  */
@@ -32,8 +42,8 @@ export function getBookingsForBed(bed: Bed): Guest[] {
 export function getBookingForDate(bookings: Guest[], date: Date): Guest | undefined {
   const dateTime = date.getTime();
   return bookings.find(b => {
-    const inTime = parseISO(b.checkInDate).getTime();
-    const outTime = parseISO(b.checkOutDate).getTime();
+    const inTime = safeParseISO(b.checkInDate).getTime();
+    const outTime = safeParseISO(b.checkOutDate).getTime();
     return inTime <= dateTime && outTime > dateTime;
   });
 }
@@ -42,8 +52,8 @@ export function getBookingForDate(bookings: Guest[], date: Date): Guest | undefi
  * How many nights of a booking are visible within the current date window.
  */
 export function getVisibleNights(booking: Guest, dateIndex: number, dates: Date[]): number {
-  const checkIn = parseISO(booking.checkInDate);
-  const checkOut = parseISO(booking.checkOutDate);
+  const checkIn = safeParseISO(booking.checkInDate);
+  const checkOut = safeParseISO(booking.checkOutDate);
   const totalNights = differenceInDays(checkOut, checkIn);
   const startOffset = Math.max(0, -dateIndex);
   const remaining = totalNights - startOffset;
@@ -60,8 +70,8 @@ export function computeRoomDailyFree(room: Room, dates: Date[]): number[] {
     const occupied = room.beds.filter(bed => {
       const bookings = getBookingsForBed(bed);
       return bookings.some(b => {
-        const inTime = parseISO(b.checkInDate).getTime();
-        const outTime = parseISO(b.checkOutDate).getTime();
+        const inTime = safeParseISO(b.checkInDate).getTime();
+        const outTime = safeParseISO(b.checkOutDate).getTime();
         return inTime <= dateTime && outTime > dateTime;
       });
     }).length;

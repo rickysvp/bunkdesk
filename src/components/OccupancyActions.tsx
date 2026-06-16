@@ -71,7 +71,7 @@ export function OccupancyActions() {
 
           <div className="mt-3 flex items-center justify-between text-xs text-zinc-500">
             <span>{totalEmptyBedNights} {t('occupancy.emptyBedNights')}</span>
-            <span>{t('occupancy.potentialRevenue')}: <span className="font-medium text-emerald-600">${totalPotentialRevenue}</span></span>
+            <span>{t('occupancy.potentialRevenue')}: <span className="font-medium text-emerald-600">{formatCurrency(totalPotentialRevenue, language)}</span></span>
           </div>
         </CardContent>
       </Card>

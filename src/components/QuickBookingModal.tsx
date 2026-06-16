@@ -12,7 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { useTranslation } from '../i18nContext';
+import { useTranslation, formatCurrency } from '../i18nContext';
 import { useHostel } from '../HostelContext';
 import { Guest, Bed, Room } from '../types';
 import { getBedPrice } from '../utils/bedPricing';
@@ -44,7 +44,7 @@ const COUNTRY_OPTIONS = [
 ];
 
 export function QuickBookingModal({ isOpen, onClose, bed, room, initialDate }: QuickBookingModalProps) {
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
   const { addArrival, occupyBed } = useHostel();
 
   const [name, setName] = useState('');
@@ -148,7 +148,7 @@ export function QuickBookingModal({ isOpen, onClose, bed, room, initialDate }: Q
                   <svg className="w-6 h-6 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
                 </div>
                 <p className="font-semibold text-emerald-700">{t('calendarview.bookingCreated')}</p>
-                <p className="text-xs text-zinc-500">{bed.name} · {nights}N · ${totalAmount}</p>
+                <p className="text-xs text-zinc-500">{bed.name} · {nights}N · {formatCurrency(totalAmount, language)}</p>
               </motion.div>
             ) : (
               <form onSubmit={handleSubmit} className="p-5 space-y-4">

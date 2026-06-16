@@ -9,7 +9,7 @@
 
 import React, { useState } from 'react';
 import { Plus, BedDouble, Pencil, Users, Trash2 } from 'lucide-react';
-import { useTranslation } from '../i18nContext';
+import { useTranslation, formatCurrency } from '../i18nContext';
 import { useHostel } from '../HostelContext';
 import { Room } from '../types';
 import { Button } from '@/components/ui/button';
@@ -18,7 +18,7 @@ import { cn } from '@/lib/utils';
 import { AddRoomDialog, RoomSettingsDialog } from './RoomsDialogs';
 
 export function RoomsSection() {
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
   const { rooms, deleteRoom } = useHostel();
   const [addOpen, setAddOpen] = useState(false);
   const [editingRoom, setEditingRoom] = useState<Room | null>(null);
@@ -89,7 +89,7 @@ export function RoomsSection() {
                     <p className="text-[11px] text-zinc-500 mt-0.5">{typeLabel(room.type)}</p>
                   </div>
                   <span className="text-[10px] font-mono text-zinc-400 px-1.5 py-0.5 bg-zinc-50 rounded">
-                    ${room.pricePerNight}
+                    {formatCurrency(room.pricePerNight, language)}
                   </span>
                 </div>
 

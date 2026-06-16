@@ -1,7 +1,7 @@
 import React from 'react';
 import { Room, Guest } from '../../types';
 import { format } from 'date-fns';
-import { useTranslation } from '../../i18nContext';
+import { useTranslation, formatCurrency } from '../../i18nContext';
 import { BedRow } from './BedRow';
 import { computeRoomDailyFree } from '../../utils/timelineEngine';
 import { getRoomPriceRange } from '../../utils/bedPricing';
@@ -49,7 +49,7 @@ export function TimelineGrid({
   onResizeRight,
   onRoomSettings,
 }: TimelineGridProps) {
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
 
   return (
     <>
@@ -105,8 +105,8 @@ export function TimelineGrid({
                 </span>
                 <span className="text-[10px] text-zinc-400 ml-auto">
                   {priceRange.min === priceRange.max
-                    ? `$${priceRange.min}`
-                    : `$${priceRange.min}-${priceRange.max}`}
+                    ? formatCurrency(priceRange.min, language)
+                    : `${formatCurrency(priceRange.min, language)}-${formatCurrency(priceRange.max, language)}`}
                 </span>
               </div>
               <div className="flex flex-1">

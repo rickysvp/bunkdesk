@@ -20,6 +20,13 @@ export function migrateGuest(g: Guest): Guest {
     result.idType = 'passport';
   }
 
+  if (!result.name && (result.firstName || result.lastName)) {
+    result.name = [result.firstName, result.lastName].filter(Boolean).join(' ');
+  }
+  if (!result.name) {
+    result.name = 'Unknown';
+  }
+
   return result;
 }
 

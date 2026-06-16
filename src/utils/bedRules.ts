@@ -10,5 +10,16 @@ export function canGuestOccupyRoom(guest: Guest, room: Room): boolean {
 }
 
 export function rangesOverlap(startA: string, endA: string, startB: string, endB: string): boolean {
-  return parseISO(startA).getTime() < parseISO(endB).getTime() && parseISO(startB).getTime() < parseISO(endA).getTime();
+  try {
+    const aStart = parseISO(startA);
+    const aEnd = parseISO(endA);
+    const bStart = parseISO(startB);
+    const bEnd = parseISO(endB);
+    if (isNaN(aStart.getTime()) || isNaN(aEnd.getTime()) || isNaN(bStart.getTime()) || isNaN(bEnd.getTime())) {
+      return false;
+    }
+    return aStart.getTime() < bEnd.getTime() && bStart.getTime() < aEnd.getTime();
+  } catch {
+    return false;
+  }
 }
