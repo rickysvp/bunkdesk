@@ -341,6 +341,14 @@ export function HostelProvider({ children }: { children: ReactNode }) {
 
   const assignArrival = useCallback((guestId: string, bedId: string) => {
     const guest = arrivals.find((g) => g.id === guestId);
+
+    // Find room/bed to get the actual price for the assigned bed
+    const room = rooms.find((r) => r.beds.some((b) => b.id === bedId));
+    const bed = room?.beds.find((b) => b.id === bedId);
+    const actualPricePerNight = room && bed
+      ? (room.pricePerNight || 0) + (bed.bedType === 'bottom' ? (room.bottomBunkPremium || 0) : 0)
+      : 0;
+
     setArrivals((prev) => prev.filter((g) => g.id !== guestId));
     setRooms((prevRooms) =>
       prevRooms.map((r) => ({
@@ -351,7 +359,12 @@ export function HostelProvider({ children }: { children: ReactNode }) {
               .flatMap((r2) => r2.beds.map((b2) => b2.guest))
               .find((g) => g?.id === guestId) || guest;
             if (assignedGuest) {
-              return { ...b, status: "occupied", guest: assignedGuest };
+              // Recalculate totalAmount based on the actual bed's price
+              const updatedGuest: typeof assignedGuest = {
+                ...assignedGuest,
+                totalAmount: Math.round(actualPricePerNight * (assignedGuest.nights || 1) * 100) / 100,
+              };
+              return { ...b, status: "occupied", guest: updatedGuest };
             }
           }
           return b;
@@ -362,9 +375,7 @@ export function HostelProvider({ children }: { children: ReactNode }) {
     if (guest) {
       addAutoNote(`${guest.name} checked in`, "checkin", guestId, "guest");
       // Audit log
-      const room = rooms.find((r) => r.beds.some((b) => b.id === bedId));
-      const bed = room?.beds.find((b) => b.id === bedId);
-      logAction(guestId, 'check-in', `Checked in → ${room?.name} - ${bed?.name}`);
+      logAction(guestId, 'check-in', `Checked in → ${room?.name} - ${bed?.name} (${formatCurrency(actualPricePerNight, currentLanguage())}/night × ${guest.nights || 1}n = ${formatCurrency(Math.round(actualPricePerNight * (guest.nights || 1) * 100) / 100, currentLanguage())})`);
     }
   }, [arrivals, rooms, addAutoNote, logAction]);
 

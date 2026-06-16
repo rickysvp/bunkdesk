@@ -1474,6 +1474,10 @@ export const translations = {
       bottomBunk: "下铺",
       topBunk: "上铺",
       autoAssign: "自动分配并入住",
+      tagGender: "性别匹配",
+      tagPref: "偏好匹配",
+      tagFill: "填充床位",
+      tagLowFrag: "低碎片化",
     },
     guest: {
       details: "住客详情",

@@ -586,27 +586,48 @@ export function CheckInPanel({ setActiveTab }: { setActiveTab?: (tab: string) =>
                       <svg className="w-3.5 h-3.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
                       {t('checkin.autoAssign') || 'Auto Assign & Check-in'}
                     </Button>
-                    <div className="grid grid-cols-2 gap-1.5 max-h-72 overflow-y-auto">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-[420px] overflow-y-auto pr-1">
                       {scoredBeds.map((score, idx) => {
                         const isTop = idx === 0;
+                        const isSelected = selectedBedId === score.bedId;
+                        const totalForStay = Math.round(score.pricePerNight * selectedGuest.nights * 100) / 100;
+                        const priceDiff = score.pricePerNight - AVG_PRICE;
                         return (
                           <button key={score.bedId} onClick={() => setSelectedBedId(score.bedId)}
-                            className={cn("p-2.5 rounded-xl border text-left transition-all cursor-pointer min-h-[60px] relative",
-                              selectedBedId === score.bedId ? 'border-zinc-900 bg-zinc-900 text-white shadow-md' :
-                              isTop ? 'border-emerald-400 bg-emerald-50/70 hover:border-emerald-500 shadow-sm' :
+                            className={cn("p-3 rounded-xl border-2 text-left transition-all cursor-pointer min-h-[140px] relative",
+                              isSelected ? 'border-blue-600 bg-blue-50 ring-2 ring-blue-200 shadow-md' :
+                              isTop ? 'border-emerald-400 bg-emerald-50/40 hover:border-emerald-500 shadow-sm' :
                               'border-zinc-200 bg-white hover:border-zinc-400')}>
-                            {isTop && <span className="absolute -top-1.5 left-2 text-[10px] font-extrabold bg-emerald-500 text-white px-2 py-0.5 rounded">★ BEST</span>}
-                            <span className="font-bold text-sm">
-                              {score.roomType === 'dorm-mixed' ? t('bedboard.mixedDorm') : score.roomType === 'dorm-female' ? t('bedboard.femaleDorm') : t('bedboard.private')}
-                            </span>
-                            <span className={cn("text-xs mt-0.5 block", selectedBedId === score.bedId ? 'text-zinc-300' : 'text-zinc-500')}>
-                              {score.bedName} · R{score.roomNumber} · {formatCurrency(score.pricePerNight, language)}
-                            </span>
-                            <div className="flex items-center gap-0.5 mt-1 flex-wrap">
-                              {score.genderMatch && <span className="text-[10px] font-bold bg-blue-50 text-blue-700 px-1 py-0.5 rounded">♀ Gender</span>}
-                              {score.preferenceMatch && <span className="text-[10px] font-bold bg-violet-50 text-violet-700 px-1 py-0.5 rounded">✓ Pref</span>}
-                              {score.fillExisting && <span className="text-[10px] font-bold bg-zinc-100 text-zinc-600 px-1 py-0.5 rounded">Fill</span>}
-                              {score.fragmentationScore >= 7 && <span className="text-[10px] font-bold bg-amber-50 text-amber-700 px-1 py-0.5 rounded">Low frag</span>}
+                            {isTop && <span className="absolute -top-2 left-3 text-[10px] font-extrabold bg-emerald-500 text-white px-2 py-0.5 rounded-full">★ BEST MATCH</span>}
+                            <div className="flex items-center justify-between gap-1 mb-1">
+                              <span className="font-bold text-sm text-zinc-900 truncate">
+                                {score.roomType === 'dorm-mixed' ? t('bedboard.mixedDorm') : score.roomType === 'dorm-female' ? t('bedboard.femaleDorm') : t('bedboard.private')}
+                              </span>
+                              <span className="text-[10px] text-zinc-400 shrink-0">R{score.roomNumber}</span>
+                            </div>
+                            <div className="text-xs text-zinc-600 mb-1.5">
+                              {score.bedName} · {score.bedType === 'bottom' ? t('checkin.bottomBunk') : t('checkin.topBunk')}
+                            </div>
+                            <div className="flex items-baseline gap-1.5 mb-1.5">
+                              <span className="text-lg font-extrabold text-zinc-900">
+                                {formatCurrency(score.pricePerNight, language)}
+                              </span>
+                              <span className="text-[10px] text-zinc-500">/night</span>
+                              {priceDiff !== 0 && (
+                                <span className={cn("text-[10px] font-bold ml-auto",
+                                  priceDiff > 0 ? 'text-amber-600' : 'text-emerald-600')}>
+                                  {priceDiff > 0 ? '+' : ''}{formatCurrency(priceDiff, language)}
+                                </span>
+                              )}
+                            </div>
+                            <div className="text-[11px] text-zinc-600 mb-2 pb-1.5 border-b border-zinc-100">
+                              {selectedGuest.nights} {t('dashboard.nights')} = <span className="font-bold text-zinc-900">{formatCurrency(totalForStay, language)}</span>
+                            </div>
+                            <div className="flex flex-wrap gap-1">
+                              {score.genderMatch && <span className="text-[10px] font-bold bg-pink-100 text-pink-700 px-1.5 py-0.5 rounded">♀ {t('checkin.tagGender')}</span>}
+                              {score.preferenceMatch && <span className="text-[10px] font-bold bg-violet-100 text-violet-700 px-1.5 py-0.5 rounded">✓ {t('checkin.tagPref')}</span>}
+                              {score.fillExisting && <span className="text-[10px] font-bold bg-zinc-100 text-zinc-700 px-1.5 py-0.5 rounded">▣ {t('checkin.tagFill')}</span>}
+                              {score.fragmentationScore >= 7 && <span className="text-[10px] font-bold bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded">◇ {t('checkin.tagLowFrag')}</span>}
                             </div>
                           </button>
                         );
