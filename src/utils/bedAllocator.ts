@@ -129,12 +129,9 @@ function computeBedScore(
     score += WEIGHT_GENDER_MATCH;
     genderMatch = true;
     reasons.push('gender-match-mixed-dorm');
-  } else if (guest.gender === 'female' && room.type === 'dorm-mixed') {
-    // Mixed is fine for female too, but slightly less ideal
-    score += Math.floor(WEIGHT_GENDER_MATCH * 0.6);
-    genderMatch = true;
-    reasons.push('gender-match-mixed');
   }
+  // Female in mixed dorm: acceptable (no hard block) but no gender-match tag.
+  // The tag now only fires for ideal pairings: ♀→female-dorm or ♂→mixed-dorm.
 
   // ── 3. Room type preference (weight 20%) ──
   if (guest.roomPreference) {

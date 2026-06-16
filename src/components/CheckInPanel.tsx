@@ -129,7 +129,7 @@ export function CheckInPanel({ setActiveTab }: { setActiveTab?: (tab: string) =>
 
   const handleCreateArrival = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newGuestRef.firstName || !newGuestRef.lastName || !newGuestRef.countryCode || !newGuestRef.checkInDate || !newGuestRef.checkOutDate) return;
+    if (!newGuestRef.firstName || !newGuestRef.lastName || !newGuestRef.countryCode || !newGuestRef.checkInDate || !newGuestRef.checkOutDate || !newGuestRef.gender) return;
     const countryName = COUNTRY_MAP[newGuestRef.countryCode.toUpperCase()] || newGuestRef.countryCode.toUpperCase();
     const checkIn = parseISO(newGuestRef.checkInDate);
     const checkOut = parseISO(newGuestRef.checkOutDate);
@@ -304,7 +304,14 @@ export function CheckInPanel({ setActiveTab }: { setActiveTab?: (tab: string) =>
                       </div>
                       <div className="space-y-1.5">
                         <Label className="text-[10px] font-semibold text-zinc-500 uppercase">{t('guest.gender') || 'Gender'}<span className="text-red-500">*</span></Label>
-                        <Select required value={newGuestRef.gender} onValueChange={(val: string) => setNewGuestRef({...newGuestRef, gender: val as "male" | "female" | "other"})}>
+                        <Select required value={newGuestRef.gender} onValueChange={(val: string) => {
+                          // If changing to male and roomPreference is female-only, reset it
+                          const updates: Partial<typeof newGuestRef> = { gender: val as "male" | "female" | "other" };
+                          if (val === 'male' && newGuestRef.roomPreference === 'dorm-female') {
+                            updates.roomPreference = '';
+                          }
+                          setNewGuestRef({...newGuestRef, ...updates});
+                        }}>
                           <SelectTrigger className="h-10 bg-zinc-50 border-zinc-200"><SelectValue /></SelectTrigger>
                           <SelectContent>
                             <SelectItem value="male">{t('guest.male') || 'Male'}</SelectItem>
@@ -345,8 +352,10 @@ export function CheckInPanel({ setActiveTab }: { setActiveTab?: (tab: string) =>
                         <Select value={newGuestRef.roomPreference} onValueChange={(val: string) => setNewGuestRef({...newGuestRef, roomPreference: val as '' | 'dorm-mixed' | 'dorm-female' | 'private'})}>
                           <SelectTrigger className="h-10 bg-zinc-50 border-zinc-200"><SelectValue placeholder="—" /></SelectTrigger>
                           <SelectContent>
+                            {newGuestRef.gender === 'female' && (
+                              <SelectItem value="dorm-female">{t('bedboard.femaleDorm')}</SelectItem>
+                            )}
                             <SelectItem value="dorm-mixed">{t('bedboard.mixedDorm')}</SelectItem>
-                            <SelectItem value="dorm-female">{t('bedboard.femaleDorm')}</SelectItem>
                             <SelectItem value="private">{t('bedboard.private')}</SelectItem>
                           </SelectContent>
                         </Select>
@@ -574,7 +583,8 @@ export function CheckInPanel({ setActiveTab }: { setActiveTab?: (tab: string) =>
                         <> · <span className="font-bold text-indigo-600">{t('checkin.prefers') || 'prefers'} {selectedGuest.roomPreference}</span></>
                       )}
                     </div>
-                    <Button size="lg" className="w-full h-10 text-sm mb-2 bg-blue-600 hover:bg-blue-700 text-white shadow-md"
+                    <Button size="lg" className="w-full h-10 text-sm mb-2 bg-blue-600 hover:bg-blue-700 text-white shadow-md disabled:bg-zinc-300 disabled:cursor-not-allowed"
+                      disabled={!scoredBeds.length || selectedGuest.paymentStatus === 'unpaid' || selectedGuest.paymentStatus === 'partial'}
                       onClick={() => {
                         if (!scoredBeds.length) return;
                         const best = scoredBeds[0];
@@ -594,6 +604,9 @@ export function CheckInPanel({ setActiveTab }: { setActiveTab?: (tab: string) =>
                       <svg className="w-3.5 h-3.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
                       {t('checkin.autoAssign') || 'Auto Assign & Check-in'}
                     </Button>
+                    {(selectedGuest.paymentStatus === 'unpaid' || selectedGuest.paymentStatus === 'partial') && (
+                      <p className="text-xs text-amber-600 mb-2 -mt-1 font-medium">⚠ {t('checkin.collectBeforeAssign') || 'Please collect payment first before assigning a bed'}</p>
+                    )}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-[420px] overflow-y-auto pr-1">
                       {scoredBeds.map((score, idx) => {
                         const isTop = idx === 0;
@@ -601,38 +614,37 @@ export function CheckInPanel({ setActiveTab }: { setActiveTab?: (tab: string) =>
                         const showBestTag = isTop && !isSelected;
                         const totalForStay = Math.round(score.pricePerNight * selectedGuest.nights * 100) / 100;
                         const priceDiff = score.pricePerNight - AVG_PRICE;
+                        const roomTypeName = score.roomType === 'dorm-mixed' ? t('bedboard.mixedDorm') : score.roomType === 'dorm-female' ? t('bedboard.femaleDorm') : t('bedboard.private');
+                        const bedTypeName = score.bedType === 'bottom' ? t('checkin.bottomBunk') : t('checkin.topBunk');
                         return (
                           <button key={score.bedId} onClick={() => setSelectedBedId(score.bedId)}
-                            className={cn("p-3 rounded-xl border-2 text-left transition-all cursor-pointer min-h-[140px] relative",
-                              isSelected ? 'border-blue-600 bg-blue-50 ring-2 ring-blue-200 shadow-md' :
+                            className={cn("p-3.5 rounded-xl border-2 text-left transition-all cursor-pointer relative min-h-[150px] flex flex-col",
+                              isSelected ? 'border-blue-600 bg-blue-50 ring-4 ring-blue-200 shadow-lg scale-[1.02]' :
                               isTop ? 'border-emerald-400 bg-emerald-50/40 hover:border-emerald-500 shadow-sm' :
-                              'border-zinc-200 bg-white hover:border-zinc-400')}>
+                              'border-zinc-200 bg-white hover:border-zinc-400 hover:shadow-sm')}>
                             {showBestTag && <span className="absolute -top-2.5 left-3 text-[10px] font-extrabold bg-emerald-500 text-white px-2.5 py-0.5 rounded-full shadow-md ring-2 ring-white">★ BEST MATCH</span>}
                             <div className="flex items-center justify-between gap-1 mb-1">
-                              <span className="font-bold text-sm text-zinc-900 truncate">
-                                {score.roomType === 'dorm-mixed' ? t('bedboard.mixedDorm') : score.roomType === 'dorm-female' ? t('bedboard.femaleDorm') : t('bedboard.private')}
-                              </span>
+                              <span className="font-bold text-sm text-zinc-900 truncate">{roomTypeName}</span>
                               <span className="text-[10px] text-zinc-400 shrink-0">R{score.roomNumber}</span>
                             </div>
-                            <div className="text-xs text-zinc-600 mb-1.5">
-                              {score.bedName} · {score.bedType === 'bottom' ? t('checkin.bottomBunk') : t('checkin.topBunk')}
+                            <div className="text-[11px] text-zinc-500 mb-2">
+                              {score.bedName} · {bedTypeName}
                             </div>
-                            <div className="flex items-baseline gap-1.5 mb-1.5">
-                              <span className="text-lg font-extrabold text-zinc-900">
+                            <div className="flex items-baseline gap-1 mb-1.5">
+                              <span className="text-xl font-extrabold text-zinc-900">
                                 {formatCurrency(score.pricePerNight, language)}
                               </span>
                               <span className="text-[10px] text-zinc-500">/night</span>
+                            </div>
+                            <div className="text-[11px] text-zinc-600 mb-2 px-2 py-1 bg-white/70 rounded">
+                              × {selectedGuest.nights} {t('dashboard.nights')} = <span className="font-bold text-zinc-900">{formatCurrency(totalForStay, language)}</span>
                               {priceDiff !== 0 && (
-                                <span className={cn("text-[10px] font-bold ml-auto",
-                                  priceDiff > 0 ? 'text-amber-600' : 'text-emerald-600')}>
-                                  {priceDiff > 0 ? '+' : ''}{formatCurrency(priceDiff, language)}
+                                <span className={cn("ml-1 text-[10px]", priceDiff > 0 ? 'text-amber-600' : 'text-emerald-600')}>
+                                  ({priceDiff > 0 ? '+' : ''}{formatCurrency(priceDiff, language)} vs avg)
                                 </span>
                               )}
                             </div>
-                            <div className="text-[11px] text-zinc-600 mb-2 pb-1.5 border-b border-zinc-100">
-                              {selectedGuest.nights} {t('dashboard.nights')} = <span className="font-bold text-zinc-900">{formatCurrency(totalForStay, language)}</span>
-                            </div>
-                            <div className="flex flex-wrap gap-1">
+                            <div className="flex flex-wrap gap-1 mt-auto">
                               {score.genderMatch && <span className="text-[10px] font-bold bg-pink-100 text-pink-700 px-1.5 py-0.5 rounded">♀ {t('checkin.tagGender')}</span>}
                               {score.preferenceMatch && <span className="text-[10px] font-bold bg-violet-100 text-violet-700 px-1.5 py-0.5 rounded">✓ {t('checkin.tagPref')}</span>}
                               {score.fillExisting && <span className="text-[10px] font-bold bg-zinc-100 text-zinc-700 px-1.5 py-0.5 rounded">▣ {t('checkin.tagFill')}</span>}
@@ -649,8 +661,12 @@ export function CheckInPanel({ setActiveTab }: { setActiveTab?: (tab: string) =>
                       <p className="text-[11px] font-medium text-amber-600 mt-1.5">⚠️ {t('checkin.unpaidWarning')}</p>
                     )}
                     <div className="mt-2 pt-2 border-t border-zinc-100 flex justify-end gap-2">
-                      <Button size="lg" disabled={!selectedBedId || !selectedGuest.passportScanned} onClick={handleCheckIn}
-                        className="w-full sm:w-auto h-10 px-5 text-sm shadow-lg">{t('checkin.completeCheckIn')}</Button>
+                      <Button size="lg" 
+                        disabled={!selectedBedId || !selectedGuest.passportScanned || selectedGuest.paymentStatus === 'unpaid' || selectedGuest.paymentStatus === 'partial'} 
+                        onClick={handleCheckIn}
+                        className="w-full sm:w-auto h-10 px-5 text-sm shadow-lg disabled:bg-zinc-300 disabled:cursor-not-allowed">
+                        {t('checkin.completeCheckIn')}
+                      </Button>
                     </div>
                   </Card>
                 </div>

@@ -1488,6 +1488,8 @@ export const translations = {
       bestFit: "最佳匹配",
       confirmAutoAssign: "将客人分配到",
       confirmProceed: "确认执行？",
+      collectBeforeAssign: "请先收款再分配床位",
+      genderRequired: "请选择性别",
     },
     guest: {
       details: "住客详情",
