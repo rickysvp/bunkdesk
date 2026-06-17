@@ -10,6 +10,7 @@ import { useTranslation, formatCurrency } from '../i18nContext';
 import { differenceInDays, parseISO, format } from 'date-fns';
 import { ICalImport } from './ICalImport';
 import { EditGuestInfoModal } from './EditGuestInfoModal';
+import { AutoAssignConfirmDialog } from './AutoAssignConfirmDialog';
 import { Guest, Bed, Room } from '../types';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '@/lib/utils';
@@ -58,6 +59,9 @@ export function CheckInPanel({ setActiveTab }: { setActiveTab?: (tab: string) =>
   const [editNotes, setEditNotes] = useState('');
   const [editRoomPref, setEditRoomPref] = useState('');
   const [editInfoOpen, setEditInfoOpen] = useState(false);
+  // Auto-assign confirm dialog state
+  const [autoAssignOpen, setAutoAssignOpen] = useState(false);
+  const [pendingAutoAssign, setPendingAutoAssign] = useState<BedScore | null>(null);
 
   // New guest state
   const tomorrow = new Date();
@@ -587,19 +591,9 @@ export function CheckInPanel({ setActiveTab }: { setActiveTab?: (tab: string) =>
                       disabled={!scoredBeds.length || selectedGuest.paymentStatus === 'unpaid' || selectedGuest.paymentStatus === 'partial'}
                       onClick={() => {
                         if (!scoredBeds.length) return;
-                        const best = scoredBeds[0];
-                        const roomTypeName = best.roomType === 'dorm-mixed' ? t('bedboard.mixedDorm') : best.roomType === 'dorm-female' ? t('bedboard.femaleDorm') : t('bedboard.private');
-                        const totalForStay = Math.round(best.pricePerNight * selectedGuest.nights * 100) / 100;
-                        const reasonSummary = [best.genderMatch && t('checkin.tagGender'), best.preferenceMatch && t('checkin.tagPref'), best.fillExisting && t('checkin.tagFill'), best.fragmentationScore >= 7 && t('checkin.tagLowFrag')].filter(Boolean).join(' · ') || t('checkin.bestFit') || 'Best fit';
-                        const confirmMsg = `${t('checkin.confirmAutoAssign') || 'Assign guest to'}\n\n${selectedGuest.name} → ${roomTypeName} ${best.bedName} · R${best.roomNumber}\n${formatCurrency(best.pricePerNight, language)}/night × ${selectedGuest.nights} ${t('dashboard.nights')} = ${formatCurrency(totalForStay, language)}\n\n✓ ${reasonSummary}\n\n${t('checkin.confirmProceed') || 'Proceed?'}`;
-                        if (window.confirm(confirmMsg)) {
-                          const result = autoAssignBed(selectedGuest.id);
-                          if (result) {
-                            setCheckInSuccess(selectedGuest.name);
-                            setSelectedGuestId(null);
-                            setSelectedBedId(null);
-                          }
-                        }
+                        // Open mobile-first confirmation sheet/dialog
+                        setPendingAutoAssign(scoredBeds[0]);
+                        setAutoAssignOpen(true);
                       }}>
                       <svg className="w-3.5 h-3.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
                       {t('checkin.autoAssign') || 'Auto Assign & Check-in'}
@@ -678,6 +672,28 @@ export function CheckInPanel({ setActiveTab }: { setActiveTab?: (tab: string) =>
                   guest={selectedGuest}
                   onSave={(updates) => updateArrival(selectedGuest.id, updates)}
                 />
+
+                {/* Auto-assign confirmation (mobile: bottom sheet / desktop: modal) */}
+                {autoAssignOpen && pendingAutoAssign && (
+                  <AutoAssignConfirmDialog
+                    open={autoAssignOpen}
+                    onClose={() => setAutoAssignOpen(false)}
+                    onConfirm={() => {
+                      const result = autoAssignBed(selectedGuest.id);
+                      if (result) {
+                        setCheckInSuccess(selectedGuest.name);
+                        setSelectedGuestId(null);
+                        setSelectedBedId(null);
+                        setAutoAssignOpen(false);
+                        setPendingAutoAssign(null);
+                      }
+                    }}
+                    guest={selectedGuest}
+                    recommendedBed={pendingAutoAssign}
+                    totalForStay={Math.round(pendingAutoAssign.pricePerNight * selectedGuest.nights * 100) / 100}
+                    AVG_PRICE={AVG_PRICE}
+                  />
+                )}
               </div>
             ) : (
               <div className="h-full border-2 border-dashed border-zinc-200 rounded-2xl flex items-center justify-center text-zinc-400 bg-zinc-50/50 text-sm">
