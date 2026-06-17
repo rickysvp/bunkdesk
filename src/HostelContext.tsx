@@ -229,11 +229,13 @@ export function HostelProvider({ children }: { children: ReactNode }) {
     guestId: string,
     type: GuestLogType,
     description: string,
-    opts?: { amount?: number; meta?: Record<string, any> },
+    opts?: { amount?: number; meta?: Record<string, any>; guestSnapshot?: Guest },
   ) => {
-    // Snapshot the guest at the time of the action.
-    const arrival = arrivals.find((g) => g.id === guestId);
-    let guest: Guest | undefined = arrival;
+    // 优先使用传入的 guest 快照，避免闭包陈旧问题
+    let guest: Guest | undefined = opts?.guestSnapshot;
+    if (!guest) {
+      guest = arrivals.find((g) => g.id === guestId);
+    }
     if (!guest) {
       for (const r of rooms) {
         for (const b of r.beds) {
@@ -520,20 +522,27 @@ export function HostelProvider({ children }: { children: ReactNode }) {
   }, [rooms, addAutoNote, logAction]);
 
   const settlePayment = useCallback((guestId: string) => {
+    let settledAmount = 0;
     setArrivals((prev) =>
-      prev.map((g) => (g.id === guestId ? { ...g, paymentStatus: "paid" } : g)),
+      prev.map((g) => {
+        if (g.id !== guestId) return g;
+        settledAmount = g.totalAmount || 0;
+        return { ...g, paidAmount: g.totalAmount || 0, paymentStatus: "paid" };
+      }),
     );
     setRooms((prevRooms) =>
       prevRooms.map((r) => ({
         ...r,
-        beds: r.beds.map((b) =>
-          b.guest?.id === guestId
-            ? { ...b, guest: { ...b.guest, paymentStatus: "paid" } }
-            : b,
-        ),
+        beds: r.beds.map((b) => {
+          if (b.guest?.id !== guestId) return b;
+          const g = b.guest;
+          settledAmount = g.totalAmount || 0;
+          return { ...b, guest: { ...g, paidAmount: g.totalAmount || 0, paymentStatus: "paid" } };
+        }),
       })),
     );
-  }, []);
+    logAction(guestId, 'payment', `Payment settled: ${formatCurrency(settledAmount, currentLanguage())}`, { amount: settledAmount });
+  }, [logAction]);
 
   const scanPassport = useCallback((guestId: string) => {
     setArrivals((prev) =>
@@ -555,7 +564,7 @@ export function HostelProvider({ children }: { children: ReactNode }) {
   const addArrival = useCallback((guest: Omit<Guest, "id">) => {
     const newGuest: Guest = { ...guest, id: `g_${crypto.randomUUID()}` };
     setArrivals((prev) => [...prev, newGuest]);
-    logAction(newGuest.id, 'created', `Arrival created: ${newGuest.checkInDate} → ${newGuest.checkOutDate} (${newGuest.nights}n, ${formatCurrency(newGuest.totalAmount, currentLanguage())})`);
+    logAction(newGuest.id, 'created', `Arrival created: ${newGuest.checkInDate} → ${newGuest.checkOutDate} (${newGuest.nights}n, ${formatCurrency(newGuest.totalAmount, currentLanguage())})`, { guestSnapshot: newGuest });
     return newGuest.id;
   }, [logAction]);
 
@@ -585,7 +594,7 @@ export function HostelProvider({ children }: { children: ReactNode }) {
     const newGuests: Guest[] = guests.map((g) => ({ ...g, id: `g_${crypto.randomUUID()}` }));
     setArrivals((prev) => [...prev, ...newGuests]);
     for (const g of newGuests) {
-      logAction(g.id, 'created', `Imported arrival: ${g.checkInDate} → ${g.checkOutDate} (${g.nights}n)`);
+      logAction(g.id, 'created', `Imported arrival: ${g.checkInDate} → ${g.checkOutDate} (${g.nights}n)`, { guestSnapshot: g });
     }
   }, [logAction]);
 

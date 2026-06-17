@@ -262,6 +262,8 @@ export const translations = {
       locale: "en-US",
       resetDataDesc: "Wipe all bunkdesk_* keys from localStorage and return to the landing page.",
       currentLanguage: "English",
+      cancel: "Cancel",
+      save: "Save",
     },
     header: {
       visualBedBoard: "Visual Bed Board",
@@ -474,6 +476,9 @@ export const translations = {
       whyThisBed: "Why this bed",
       vsAvg: "vs avg",
       confirmAndCheckIn: "Confirm & Check-in",
+      collectBeforeAssign: "Please collect payment before assigning bed",
+      noAvailableBeds: "No available beds",
+      genderRequired: "Please select gender",
     },
     guest: {
       details: "Guest Details",
@@ -1290,6 +1295,8 @@ export const translations = {
       locale: "zh-CN",
       resetDataDesc: "清空 localStorage 中所有 bunkdesk_* 键并返回登录页。",
       currentLanguage: "中文",
+      cancel: "取消",
+      save: "保存",
     },
     header: {
       visualBedBoard: "可视化床位看板",
@@ -1504,6 +1511,7 @@ export const translations = {
       whyThisBed: "推荐原因",
       vsAvg: "对比均价",
       confirmAndCheckIn: "确认并入住",
+      noAvailableBeds: "没有可用床位",
     },
     guest: {
       details: "住客详情",
@@ -2208,12 +2216,12 @@ export function I18nProvider({ children }: { children: ReactNode }) {
     const keys = path.split('.');
     let raw = lookupPath(translations[language], keys);
     if (raw === undefined) {
-      // 严格：缺 key 不再回退英文（避免硬编码侥幸），直接显示 key
-      return options?.defaultValue ?? path;
+      // 缺 key 返回空字符串，让调用方的 || 'fallback' 生效
+      return options?.defaultValue ?? '';
     }
     if (typeof raw !== 'string') {
       // 路径指向对象（例如 copilot.subTabs）—— 视为配置错误
-      return options?.defaultValue ?? path;
+      return options?.defaultValue ?? '';
     }
     return interpolate(raw, params, language);
   };

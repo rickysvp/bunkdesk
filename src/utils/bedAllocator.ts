@@ -45,6 +45,18 @@ export function scoreBeds(
       // Skip occupied or cleaning beds
       if (bed.status === 'occupied' || bed.status === 'cleaning') continue;
 
+      // 检查日期冲突：客人入住日期与现有预订重叠则跳过
+      if (bed.reservations && bed.reservations.length > 0) {
+        const guestCheckIn = parseISO(guest.checkInDate);
+        const guestCheckOut = parseISO(guest.checkOutDate);
+        const hasConflict = bed.reservations.some(res => {
+          const resCheckIn = parseISO(res.checkInDate);
+          const resCheckOut = parseISO(res.checkOutDate);
+          return guestCheckIn < resCheckOut && resCheckIn < guestCheckOut;
+        });
+        if (hasConflict) continue;
+      }
+
       const score = computeBedScore(guest, room, bed);
       if (score === null) continue; // gender hard-block
 
