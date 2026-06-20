@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { format, addDays, parseISO } from 'date-fns';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, UserPlus } from 'lucide-react';
+import { X, UserPlus, IdCard } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -16,6 +16,7 @@ import { useTranslation, formatCurrency } from '../i18nContext';
 import { useHostel } from '../HostelContext';
 import { Guest, Bed, Room } from '../types';
 import { getBedPrice } from '../utils/bedPricing';
+import { toast } from 'sonner';
 
 interface QuickBookingModalProps {
   isOpen: boolean;
@@ -53,6 +54,8 @@ export function QuickBookingModal({ isOpen, onClose, bed, room, initialDate }: Q
   const [checkInDate, setCheckInDate] = useState(format(initialDate, 'yyyy-MM-dd'));
   const [checkOutDate, setCheckOutDate] = useState(format(addDays(initialDate, 1), 'yyyy-MM-dd'));
   const [source, setSource] = useState<'walk-in' | 'manual'>('walk-in');
+  const [idType, setIdType] = useState<'passport' | 'idCard' | 'driverLicense'>('passport');
+  const [passportOrId, setPassportOrId] = useState('');
   const [isSuccess, setIsSuccess] = useState(false);
 
   useEffect(() => {
@@ -64,6 +67,8 @@ export function QuickBookingModal({ isOpen, onClose, bed, room, initialDate }: Q
     setCheckInDate(format(initialDate, 'yyyy-MM-dd'));
     setCheckOutDate(format(addDays(initialDate, 1), 'yyyy-MM-dd'));
     setSource('walk-in');
+    setIdType('passport');
+    setPassportOrId('');
     setIsSuccess(false);
   }, [isOpen, initialDate, bed.id, room.id]);
 
@@ -74,6 +79,11 @@ export function QuickBookingModal({ isOpen, onClose, bed, room, initialDate }: Q
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim() || !countryCode) return;
+    // 护照/证件号必填校验
+    if (!passportOrId.trim()) {
+      toast.error(t('calendarview.passportRequired') || '请填写护照/证件号');
+      return;
+    }
 
     // Build the guest payload once and reuse for both addArrival and occupyBed
     // to keep the two states in lock-step.
@@ -90,13 +100,16 @@ export function QuickBookingModal({ isOpen, onClose, bed, room, initialDate }: Q
       paidAmount: 0,
       totalAmount,
       source,
-      passportScanned: false,
+      passportScanned: true,
+      passportOrId: passportOrId.trim(),
+      idType,
       roomPreference: room.name,
     };
 
     const guestId = addArrival(guestInput);
     occupyBed(bed.id, guestInput, guestId);
 
+    toast.success(`${name.trim()} 已预订 ${bed.name}`);
     setIsSuccess(true);
     setTimeout(() => {
       setIsSuccess(false);
@@ -107,6 +120,8 @@ export function QuickBookingModal({ isOpen, onClose, bed, room, initialDate }: Q
       setCheckInDate(format(initialDate, 'yyyy-MM-dd'));
       setCheckOutDate(format(addDays(initialDate, 1), 'yyyy-MM-dd'));
       setSource('walk-in');
+      setIdType('passport');
+      setPassportOrId('');
     }, 1200);
   };
 
@@ -196,6 +211,28 @@ export function QuickBookingModal({ isOpen, onClose, bed, room, initialDate }: Q
                   </div>
                 </div>
 
+                {/* 护照/证件 — 必填 */}
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1.5">
+                    <Label className="text-[10px] font-semibold text-zinc-500 uppercase">{t('checkin.idType.label')}<span className="text-red-500">*</span></Label>
+                    <Select value={idType} onValueChange={(v: string) => setIdType(v as 'passport' | 'idCard' | 'driverLicense')}>
+                      <SelectTrigger className="h-9 text-sm"><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="passport">{t('checkin.idType.passport')}</SelectItem>
+                        <SelectItem value="idCard">{t('checkin.idType.idCard')}</SelectItem>
+                        <SelectItem value="driverLicense">{t('checkin.idType.driverLicense')}</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-[10px] font-semibold text-zinc-500 uppercase">{t('checkin.passportOrId')}<span className="text-red-500">*</span></Label>
+                    <div className="relative">
+                      <IdCard className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-400" />
+                      <Input required className="pl-8 h-9 text-sm" value={passportOrId} onChange={(e) => setPassportOrId(e.target.value)} placeholder="AB1234567" />
+                    </div>
+                  </div>
+                </div>
+
                 <div className="space-y-1.5">
                   <Label className="text-[10px] font-semibold text-zinc-500 uppercase">{t('calendarview.source')}</Label>
                   <Select value={source} onValueChange={(v: string) => setSource(v as 'walk-in' | 'manual')}>
@@ -212,7 +249,7 @@ export function QuickBookingModal({ isOpen, onClose, bed, room, initialDate }: Q
                   <span className="font-bold text-zinc-900">${totalAmount}</span>
                 </div>
 
-                <Button type="submit" className="w-full h-9 text-sm" disabled={!name.trim() || !countryCode}>
+                <Button type="submit" className="w-full h-9 text-sm" disabled={!name.trim() || !countryCode || !passportOrId.trim()}>
                   {t('calendarview.createBooking')}
                 </Button>
               </form>

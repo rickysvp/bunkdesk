@@ -1,6 +1,6 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef, useCallback } from 'react';
 import { useHostel } from '../HostelContext';
-import { Users, Info, IdCard, CheckCircle2, ChevronRight, BedDouble, Plus, Calendar as CalendarIcon, User as UserIcon, Globe, FileText, Link as LinkIcon, ArrowRight, Search, LogOut } from 'lucide-react';
+import { Users, Info, IdCard, CheckCircle2, ChevronRight, BedDouble, Plus, Calendar as CalendarIcon, User as UserIcon, Globe, FileText, Link as LinkIcon, ArrowRight, Search, LogOut, Trash2, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -14,6 +14,7 @@ import { AutoAssignConfirmDialog } from './AutoAssignConfirmDialog';
 import { Guest, Bed, Room } from '../types';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
 import { getSourceConfig, getPaymentStatusClass } from '../utils/guestDisplay';
 import { scoreBeds, getRoomSummaries, type BedScore } from '../utils/bedAllocator';
 
@@ -45,11 +46,13 @@ function FieldRow({ icon, iconBg, label, value, placeholder, children }: {
 }
 
 export function CheckInPanel({ setActiveTab }: { setActiveTab?: (tab: string) => void }) {
-  const { arrivals, rooms, assignArrival, autoAssignBed, settlePayment, scanPassport, addArrival, updateArrival, importArrivals, checkoutGuest } = useHostel();
+  const { arrivals, rooms, assignArrival, autoAssignBed, settlePayment, scanPassport, addArrival, updateArrival, importArrivals, checkoutGuest, cancelArrival, undoCheckout } = useHostel();
   const { t, language } = useTranslation();
   const AVG_PRICE = useMemo(() => rooms.length > 0 ? Math.round(rooms.reduce((sum, r) => sum + r.pricePerNight, 0) / rooms.length) : 85, [rooms]);
   const [subTab, setSubTab] = useState<SubTab>('pending');
   const [searchQuery, setSearchQuery] = useState('');
+  const [isProcessing, setIsProcessing] = useState(false);
+  const notesDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Pending tab state
   const [selectedGuestId, setSelectedGuestId] = useState<string | null>(null);
@@ -123,17 +126,26 @@ export function CheckInPanel({ setActiveTab }: { setActiveTab?: (tab: string) =>
   const handleCheckIn = () => {
     if (selectedGuestId && selectedBedId) {
       const guestName = selectedGuest?.name || '';
-      assignArrival(selectedGuestId, selectedBedId);
-      setSelectedGuestId(null);
-      setSelectedBedId(null);
-      setCheckInSuccess(guestName);
-      setTimeout(() => setCheckInSuccess(null), 5000);
+      setIsProcessing(true);
+      // 使用微任务延迟，确保 spinner 能渲染
+      requestAnimationFrame(() => {
+        assignArrival(selectedGuestId, selectedBedId);
+        setSelectedGuestId(null);
+        setSelectedBedId(null);
+        setCheckInSuccess(guestName);
+        toast.success(`${guestName} 已入住`, { duration: 4000 });
+        setTimeout(() => setCheckInSuccess(null), 5000);
+        setIsProcessing(false);
+      });
     }
   };
 
   const handleCreateArrival = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newGuestRef.firstName || !newGuestRef.lastName || !newGuestRef.countryCode || !newGuestRef.checkInDate || !newGuestRef.checkOutDate || !newGuestRef.gender) return;
+    if (!newGuestRef.firstName || !newGuestRef.lastName || !newGuestRef.countryCode || !newGuestRef.checkInDate || !newGuestRef.checkOutDate || !newGuestRef.gender) {
+      toast.error('请填写必填字段');
+      return;
+    }
     const countryName = COUNTRY_MAP[newGuestRef.countryCode.toUpperCase()] || newGuestRef.countryCode.toUpperCase();
     const checkIn = parseISO(newGuestRef.checkInDate);
     const checkOut = parseISO(newGuestRef.checkOutDate);
@@ -157,6 +169,7 @@ export function CheckInPanel({ setActiveTab }: { setActiveTab?: (tab: string) =>
       notes: newGuestRef.notes,
       source: 'walk-in' as const,
     });
+    toast.success(`${newGuestRef.firstName} ${newGuestRef.lastName} 已添加到待入住列表`);
     setSelectedGuestId(null);
     setNewGuestRef({
       firstName: '', lastName: '',
@@ -171,6 +184,51 @@ export function CheckInPanel({ setActiveTab }: { setActiveTab?: (tab: string) =>
       notes: '',
     });
   };
+
+  // 收款 + toast
+  const handleCollectPayment = (guestId: string, guestName: string, amount?: number) => {
+    settlePayment(guestId);
+    toast.success(`已收款 ${amount ? formatCurrency(amount, language) : ''} — ${guestName}`);
+  };
+
+  // 退房 + 撤销 toast
+  const handleCheckout = (bedId: string, guestName: string, guestSnapshot: Guest) => {
+    checkoutGuest(bedId);
+    toast(`${guestName} 已退房`, {
+      duration: 6000,
+      action: {
+        label: '撤销',
+        onClick: () => {
+          undoCheckout(bedId, guestSnapshot);
+          toast.success(`已撤销退房 — ${guestName} 已恢复`);
+        },
+      },
+    });
+  };
+
+  // 取消到达 + 撤销 toast
+  const handleCancelArrival = (guestId: string, guestName: string, guestSnapshot: Guest) => {
+    cancelArrival(guestId);
+    toast(`${guestName} 已取消`, {
+      duration: 6000,
+      action: {
+        label: '撤销',
+        onClick: () => {
+          addArrival({ ...guestSnapshot });
+          toast.success(`已恢复 — ${guestName}`);
+        },
+      },
+    });
+  };
+
+  // Notes 防抖更新
+  const handleNotesChange = useCallback((value: string, guestId: string) => {
+    setEditNotes(value);
+    if (notesDebounceRef.current) clearTimeout(notesDebounceRef.current);
+    notesDebounceRef.current = setTimeout(() => {
+      updateArrival(guestId, { notes: value });
+    }, 500);
+  }, [updateArrival]);
 
   // Filter helpers
   const filterList = <T extends { guest: Guest; bed: Bed; room: Room }>(list: T[]): T[] => {
@@ -251,17 +309,34 @@ export function CheckInPanel({ setActiveTab }: { setActiveTab?: (tab: string) =>
                 <span className="font-medium text-xs text-purple-700">{t('checkin.importICal')}</span>
               </button>
               {arrivals.map(guest => (
-                <button key={guest.id} onClick={() => { setSelectedGuestId(guest.id); setSelectedBedId(null); }}
-                  className={cn("w-full text-left p-3 rounded-xl transition-all cursor-pointer",
-                    selectedGuestId === guest.id ? 'bg-zinc-900 text-white shadow-md' : 'bg-white hover:bg-zinc-50 border border-zinc-100')}>
-                  <div className="font-medium text-xs flex items-center justify-between">
-                    {guest.name}
-                    <ChevronRight className={cn("h-3.5 w-3.5", selectedGuestId === guest.id ? 'text-zinc-400' : 'text-zinc-300')} />
-                  </div>
-                  <div className={cn("text-[10px] mt-0.5", selectedGuestId === guest.id ? 'text-zinc-300' : 'text-zinc-500')}>
-                    {guest.countryCode} · {guest.nights}N
-                  </div>
-                </button>
+                <div key={guest.id} className="relative">
+                  <button onClick={() => { setSelectedGuestId(guest.id); setSelectedBedId(null); }}
+                    className={cn("w-full text-left p-3 pr-9 rounded-xl transition-all cursor-pointer",
+                      selectedGuestId === guest.id ? 'bg-zinc-900 text-white shadow-md' : 'bg-white hover:bg-zinc-50 border border-zinc-100')}>
+                    <div className="font-medium text-xs flex items-center justify-between">
+                      {guest.name}
+                      <ChevronRight className={cn("h-3.5 w-3.5", selectedGuestId === guest.id ? 'text-zinc-400' : 'text-zinc-300')} />
+                    </div>
+                    <div className={cn("text-[10px] mt-0.5", selectedGuestId === guest.id ? 'text-zinc-300' : 'text-zinc-500')}>
+                      {guest.countryCode} · {guest.nights}N
+                    </div>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleCancelArrival(guest.id, guest.name, guest);
+                    }}
+                    className={cn("absolute top-1/2 right-2 -translate-y-1/2 p-1.5 rounded-md transition-colors",
+                      selectedGuestId === guest.id
+                        ? 'text-zinc-400 hover:text-red-400 hover:bg-zinc-800'
+                        : 'text-zinc-300 hover:text-red-500 hover:bg-red-100')}
+                    title={t('checkin.cancelArrival') || 'Cancel arrival'}
+                    aria-label={t('checkin.cancelArrival') || 'Cancel arrival'}
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </button>
+                </div>
               ))}
               {arrivals.length === 0 && (
                 <div className="py-8 text-center text-xs text-zinc-400">{t('checkin.noPending') || 'No pending arrivals'}</div>
@@ -564,14 +639,14 @@ export function CheckInPanel({ setActiveTab }: { setActiveTab?: (tab: string) =>
                           </span>
                         </div>
                         {selectedGuest.paymentStatus === 'unpaid' && (
-                          <Button size="sm" variant="destructive" className="h-8 sm:h-7 text-[10px] sm:text-[9px] px-2.5 sm:px-2 min-w-[56px]" onClick={() => { if (window.confirm(t('checkin.confirmCollect') || 'Mark this guest as paid?')) settlePayment(selectedGuest.id); }}>{t('checkin.collect')}</Button>
+                          <Button size="sm" variant="destructive" className="h-8 sm:h-7 text-[10px] sm:text-[9px] px-2.5 sm:px-2 min-w-[56px]" onClick={() => handleCollectPayment(selectedGuest.id, selectedGuest.name, selectedGuest.totalAmount)}>{t('checkin.collect')}</Button>
                         )}
                       </div>
                       {/* Notes */}
                       <div className="flex items-center gap-2 py-2.5">
                         <div className="w-6 h-6 rounded-md bg-amber-50 flex items-center justify-center text-xs text-amber-600">📝</div>
                         <Input className="h-7 bg-zinc-50 border-zinc-200 text-xs flex-1" placeholder="..." value={editNotes}
-                          onChange={e => { setEditNotes(e.target.value); if (selectedGuest) updateArrival(selectedGuest.id, { notes: e.target.value }); }} />
+                          onChange={e => { if (selectedGuest) handleNotesChange(e.target.value, selectedGuest.id); }} />
                       </div>
                     </div>
                   </Card>
@@ -657,10 +732,14 @@ export function CheckInPanel({ setActiveTab }: { setActiveTab?: (tab: string) =>
                     )}
                     <div className="mt-2 pt-2 border-t border-zinc-100 flex justify-end gap-2">
                       <Button size="lg"
-                        disabled={!selectedBedId || !selectedGuest.passportScanned || selectedGuest.paymentStatus === 'unpaid' || selectedGuest.paymentStatus === 'partial'}
+                        disabled={!selectedBedId || !selectedGuest.passportScanned || selectedGuest.paymentStatus === 'unpaid' || selectedGuest.paymentStatus === 'partial' || isProcessing}
                         onClick={handleCheckIn}
                         className="w-full sm:w-auto h-11 sm:h-10 px-5 text-sm shadow-lg disabled:bg-zinc-300 disabled:cursor-not-allowed">
-                        {t('checkin.completeCheckIn')}
+                        {isProcessing ? (
+                          <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> {t('checkin.processing') || 'Processing...'}</>
+                        ) : (
+                          t('checkin.completeCheckIn')
+                        )}
                       </Button>
                     </div>
                   </Card>
@@ -725,7 +804,40 @@ export function CheckInPanel({ setActiveTab }: { setActiveTab?: (tab: string) =>
               ))}
             </div>
           </div>
-          <div className="bg-white rounded-2xl border border-zinc-200 shadow-sm overflow-hidden">
+          {/* 移动端卡片列表 */}
+          <div className="md:hidden space-y-2">
+            {filterList(checkedInGuests).map(({ guest, bed, room }) => (
+              <div key={`${guest.id}-${bed.id}`} className="bg-white rounded-xl border border-zinc-200 p-3 shadow-sm">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2">
+                    <div className="h-8 w-8 rounded-full bg-zinc-100 flex items-center justify-center text-zinc-600 font-bold text-xs">{guest.name.charAt(0)}</div>
+                    <div>
+                      <span className="text-sm font-semibold text-zinc-900">{guest.name}</span>
+                      <span className="text-[10px] text-zinc-500 block">{guest.countryCode}</span>
+                    </div>
+                  </div>
+                  <span className={cn("inline-flex px-2 py-0.5 rounded text-[10px] font-bold uppercase",
+                    guest.paymentStatus === 'paid' ? 'text-emerald-600 bg-emerald-50' :
+                    guest.paymentStatus === 'unpaid' ? 'text-red-600 bg-red-50' : 'text-amber-600 bg-amber-50')}>
+                    {guest.paymentStatus === 'paid' ? t('checkin.paid') : guest.paymentStatus === 'unpaid' ? t('checkin.unpaid') : t('checkin.partial')}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between text-xs text-zinc-600 mb-2">
+                  <span className="font-medium">{format(parseISO(guest.checkInDate), 'MMM d')} – {format(parseISO(guest.checkOutDate), 'MMM d')} · {guest.nights}N</span>
+                  <span className="font-semibold text-zinc-900">{bed.name} · {room.name || room.number}</span>
+                </div>
+                <Button variant="ghost" size="sm" className="w-full h-8 text-xs text-red-500 hover:text-red-700 hover:bg-red-50 gap-1"
+                  onClick={() => handleCheckout(bed.id, guest.name, guest)}>
+                  <LogOut className="h-3 w-3" /> {t('checkin.checkout') || 'Checkout'}
+                </Button>
+              </div>
+            ))}
+            {filterList(checkedInGuests).length === 0 && (
+              <div className="py-8 text-center text-xs text-zinc-400">{t('checkin.noCheckedIn') || 'No checked-in guests'}</div>
+            )}
+          </div>
+          {/* 桌面端表格 */}
+          <div className="hidden md:block bg-white rounded-2xl border border-zinc-200 shadow-sm overflow-hidden">
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="border-b border-zinc-100 bg-zinc-50/50">
@@ -765,7 +877,7 @@ export function CheckInPanel({ setActiveTab }: { setActiveTab?: (tab: string) =>
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap">
                       <Button variant="ghost" size="sm" className="h-7 text-xs text-red-500 hover:text-red-700 hover:bg-red-50 gap-1"
-                        onClick={() => { if (window.confirm(t('guest.checkoutWarning') + guest.name)) checkoutGuest(bed.id); }}>
+                        onClick={() => handleCheckout(bed.id, guest.name, guest)}>
                         <LogOut className="h-3 w-3" /> {t('checkin.checkout') || 'Checkout'}
                       </Button>
                     </td>

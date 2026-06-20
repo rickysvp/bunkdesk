@@ -46,7 +46,7 @@ export function FilterBar({
           className="text-xs font-medium px-2 hover:bg-zinc-100 rounded h-7 min-w-[120px]"
           onClick={onDatePickerToggle}
         >
-          {format(startDate, 'MMM d')} – {format(startDate, 'MMM d')} ({visibleDays}d)
+          {format(startDate, 'MMM d')} – {format(new Date(startDate.getTime() + (visibleDays - 1) * 86400000), 'MMM d')} ({visibleDays}d)
         </button>
         <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={goForward}>
           <ChevronRight className="h-4 w-4" />

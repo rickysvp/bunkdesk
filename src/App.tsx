@@ -15,6 +15,7 @@ import { SettingsPanel, type SettingsSubTab } from './components/SettingsPanel';
 import { LoginScreen } from './components/LoginScreen';
 import { LandingPage } from './components/LandingPage';
 import { StorageErrorBanner } from './components/StorageErrorBanner';
+import { Toaster } from 'sonner';
 import { HostelProvider } from './HostelContext';
 import { I18nProvider, useTranslation } from './i18nContext';
 import { StaffProvider, useStaff } from './StaffContext';
@@ -130,6 +131,7 @@ function AppContent() {
 
       {/* Mobile-only bottom navigation (hidden on >= md screens) */}
       <BottomTabBar activeTab={effectiveTab} setActiveTab={setActiveTab} />
+      <Toaster position="top-center" richColors closeButton duration={4000} />
     </div>
   );
 }

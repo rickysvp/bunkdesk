@@ -427,6 +427,8 @@ export const translations = {
       noPending: "No pending arrivals",
       noCheckedIn: "No checked-in guests",
       noReserved: "No upcoming reservations",
+      cancelArrival: "Cancel arrival",
+      processing: "Processing...",
       // ── v1.6.0 guest info expansion (24 keys) ──
       firstName: "First name",
       lastName: "Last name",
@@ -747,6 +749,7 @@ export const translations = {
       source: "Source",
       createBooking: "Create Booking",
       bookingCreated: "Booking created!",
+      passportRequired: "Passport/ID number is required",
       selectCountry: "Select country",
       selectGender: "Select gender",
       selectSource: "Select source",
@@ -1460,6 +1463,8 @@ export const translations = {
       noPending: "暂无待入住客人",
       noCheckedIn: "暂无在住客人",
       noReserved: "暂无未来预订",
+      cancelArrival: "取消到达",
+      processing: "处理中...",
       // ── v1.6.0 guest info expansion (24 keys) ──
       firstName: "名",
       lastName: "姓",
@@ -1784,6 +1789,7 @@ export const translations = {
       source: "来源",
       createBooking: "创建预订",
       bookingCreated: "预订已创建！",
+      passportRequired: "请填写护照/证件号",
       selectCountry: "选择国家",
       selectGender: "选择性别",
       selectSource: "选择来源",

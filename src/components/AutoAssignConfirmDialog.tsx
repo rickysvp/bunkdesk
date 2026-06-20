@@ -19,9 +19,9 @@
  * - iOS safe area 适配
  */
 
-import React, { useEffect } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
-import { BedDouble, X, Sparkles, ArrowRight, Check } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { motion, AnimatePresence, type PanInfo } from 'motion/react';
+import { BedDouble, X, Sparkles, ArrowRight, Check, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { formatCurrency } from '../i18nContext';
 import { useTranslation } from '../i18nContext';
@@ -48,6 +48,10 @@ export function AutoAssignConfirmDialog({
   AVG_PRICE,
 }: AutoAssignConfirmDialogProps) {
   const { t, language } = useTranslation();
+  const [isConfirming, setIsConfirming] = useState(false);
+  const [isMobile, setIsMobile] = useState(
+    typeof window !== 'undefined' ? window.matchMedia('(max-width: 767px)').matches : false
+  );
   // Lock body scroll when open (mobile UX)
   useEffect(() => {
     if (open) {
@@ -58,6 +62,36 @@ export function AutoAssignConfirmDialog({
       };
     }
   }, [open]);
+
+  // 响应式检测
+  useEffect(() => {
+    const mql = window.matchMedia('(max-width: 767px)');
+    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+    mql.addEventListener('change', handler);
+    return () => mql.removeEventListener('change', handler);
+  }, []);
+
+  // Reset confirming state when dialog closes
+  useEffect(() => {
+    if (!open) setIsConfirming(false);
+  }, [open]);
+
+  // 拖拽关闭处理（移动端）
+  const handleDragEnd = (_event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
+    // 向下拖拽超过 100px 或速度足够快时关闭
+    if (info.offset.y > 100 || info.velocity.y > 500) {
+      onClose();
+    }
+  };
+
+  const handleConfirm = () => {
+    if (isConfirming) return;
+    setIsConfirming(true);
+    // 使用微任务延迟，确保 spinner 能渲染
+    requestAnimationFrame(() => {
+      onConfirm();
+    });
+  };
 
   const roomTypeName =
     recommendedBed.roomType === 'dorm-mixed'
@@ -159,6 +193,10 @@ export function AutoAssignConfirmDialog({
             animate={{ y: 0 }}
             exit={{ y: '100%' }}
             transition={{ type: 'spring', damping: 30, stiffness: 280 }}
+            drag={isMobile ? 'y' : false}
+            dragConstraints={{ top: 0, bottom: 0 }}
+            dragElastic={{ top: 0, bottom: 0.6 }}
+            onDragEnd={handleDragEnd}
             className={cn(
               'absolute bg-white shadow-2xl flex flex-col overflow-hidden',
               // Mobile: bottom sheet
@@ -304,14 +342,15 @@ export function AutoAssignConfirmDialog({
                 {t('common.cancel') || 'Cancel'}
               </button>
               <button
-                onClick={() => {
-                  onConfirm();
-                }}
-                disabled={guest.paymentStatus === 'unpaid' || guest.paymentStatus === 'partial'}
+                onClick={handleConfirm}
+                disabled={guest.paymentStatus === 'unpaid' || guest.paymentStatus === 'partial' || isConfirming}
                 className="flex-[2] h-11 sm:h-10 rounded-xl bg-gradient-to-br from-blue-600 to-blue-700 text-white text-sm font-bold shadow-md hover:shadow-lg active:scale-[0.98] transition-all disabled:from-zinc-300 disabled:to-zinc-300 disabled:cursor-not-allowed disabled:shadow-none flex items-center justify-center gap-1.5"
               >
-                <Check className="w-4 h-4" strokeWidth={2.5} />
-                {t('checkin.confirmAndCheckIn') || 'Confirm & Check-in'}
+                {isConfirming ? (
+                  <><Loader2 className="w-4 h-4 animate-spin" /> {t('checkin.processing') || 'Processing...'}</>
+                ) : (
+                  <><Check className="w-4 h-4" strokeWidth={2.5} /> {t('checkin.confirmAndCheckIn') || 'Confirm & Check-in'}</>
+                )}
               </button>
             </div>
           </motion.div>

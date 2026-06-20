@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode, useMemo, useCallback } from "react";
+import React, { createContext, useContext, useState, useEffect, useRef, ReactNode, useMemo, useCallback } from "react";
 import { Room, Guest, Bed, ShiftNote, ShiftNoteSource, GroupBooking, Referral, HostelPage, Promotion, GuestProfile, GuestTag, OccupancyAction, GuestLogEntry, GuestLogType } from "./types";
 import { INITIAL_ROOMS, ARRIVALS, INITIAL_SHIFT_NOTES, INITIAL_GROUP_BOOKINGS, INITIAL_REFERRALS, INITIAL_HOSTEL_PAGE, INITIAL_PROMOTIONS, INITIAL_GUEST_PROFILES } from "./data";
 import { useStaff } from "./StaffContext";
@@ -97,6 +97,8 @@ interface HostelState {
   addArrival: (guest: Omit<Guest, "id">) => string;
   updateArrival: (guestId: string, updates: Partial<Pick<Guest, 'notes' | 'roomPreference' | 'source' | 'phone' | 'email' | 'totalAmount' | 'paidAmount' | 'gender' | 'passportOrId' | 'checkInDate' | 'checkOutDate' | 'nights' | 'firstName' | 'lastName' | 'idType' | 'arrivalTime' | 'bookingSource' | 'bedPreference'>>) => void;
   importArrivals: (guests: Omit<Guest, "id">[]) => void;
+  cancelArrival: (guestId: string) => void;
+  undoCheckout: (bedId: string, guestSnapshot: Guest) => void;
   addRoom: (room: Omit<Room, "id" | "beds">) => void;
   updateRoom: (roomId: string, name: string, number: string, pricePerNight?: number, bottomBunkPremium?: number) => void;
   deleteRoom: (roomId: string) => void;
@@ -165,6 +167,9 @@ export function HostelProvider({ children }: { children: ReactNode }) {
 
   const [rooms, setRooms] = useState<Room[]>(initial.rooms);
   const [arrivals, setArrivals] = useState<Guest[]>(initial.arrivals);
+  // arrivalsRef 始终保持最新值，避免闭包陈旧问题
+  const arrivalsRef = useRef(arrivals);
+  useEffect(() => { arrivalsRef.current = arrivals; }, [arrivals]);
   const [shiftNotes, setShiftNotes] = useState<ShiftNote[]>(initial.shiftNotes);
   const [groupBookings, setGroupBookings] = useState<GroupBooking[]>(initial.groupBookings);
   const [referrals, setReferrals] = useState<Referral[]>(initial.referrals);
@@ -258,7 +263,8 @@ export function HostelProvider({ children }: { children: ReactNode }) {
     // 优先使用传入的 guest 快照，避免闭包陈旧问题
     let guest: Guest | undefined = opts?.guestSnapshot;
     if (!guest) {
-      guest = arrivals.find((g) => g.id === guestId);
+      // 使用 ref 获取最新的 arrivals，避免闭包陈旧问题
+      guest = arrivalsRef.current.find((g) => g.id === guestId);
     }
     if (!guest) {
       for (const r of rooms) {
@@ -281,7 +287,7 @@ export function HostelProvider({ children }: { children: ReactNode }) {
       amount: opts?.amount,
       meta: opts?.meta,
     });
-  }, [arrivals, rooms, addGuestLog]);
+  }, [rooms, addGuestLog]);
 
   // ── Bed/Guest operations ──────────────────────────────────────
 
@@ -366,7 +372,8 @@ export function HostelProvider({ children }: { children: ReactNode }) {
   }, [getBedStatusFromBookings, rooms, logAction]);
 
   const assignArrival = useCallback((guestId: string, bedId: string) => {
-    const guest = arrivals.find((g) => g.id === guestId);
+    // 使用 ref 获取最新的 arrivals，避免闭包陈旧问题
+    const guest = arrivalsRef.current.find((g) => g.id === guestId);
 
     // Find room/bed to get the actual price for the assigned bed
     const room = rooms.find((r) => r.beds.some((b) => b.id === bedId));
@@ -403,10 +410,11 @@ export function HostelProvider({ children }: { children: ReactNode }) {
       // Audit log
       logAction(guestId, 'check-in', `Checked in → ${room?.name} - ${bed?.name} (${formatCurrency(actualPricePerNight, currentLanguage())}/night × ${guest.nights || 1}n = ${formatCurrency(Math.round(actualPricePerNight * (guest.nights || 1) * 100) / 100, currentLanguage())})`);
     }
-  }, [arrivals, rooms, addAutoNote, logAction]);
+  }, [rooms, addAutoNote, logAction]);
 
   const autoAssignBed = useCallback((guestId: string): BedScore | null => {
-    const guest = arrivals.find((g) => g.id === guestId);
+    // 使用 ref 获取最新的 arrivals，避免闭包陈旧问题
+    const guest = arrivalsRef.current.find((g) => g.id === guestId);
     if (!guest) return null;
 
     const best = pickBestBed(guest, rooms);
@@ -415,7 +423,7 @@ export function HostelProvider({ children }: { children: ReactNode }) {
     // Assign the guest to the best bed
     assignArrival(guestId, best.bedId);
     return best;
-  }, [arrivals, rooms, assignArrival]);
+  }, [rooms, assignArrival]);
 
   const occupyBed = useCallback((bedId: string, guest: Omit<Guest, "id">, guestId?: string): string => {
     const newGuest: Guest = { ...guest, id: guestId ?? `g_${crypto.randomUUID()}` };
@@ -622,6 +630,41 @@ export function HostelProvider({ children }: { children: ReactNode }) {
     }
   }, [logAction]);
 
+  // 取消到达（no-show 或误录），从 arrivals 列表移除并记录审计日志
+  const cancelArrival = useCallback((guestId: string) => {
+    // 使用 ref 获取最新的 arrivals，避免闭包陈旧问题
+    const guest = arrivalsRef.current.find((g) => g.id === guestId);
+    setArrivals((prev) => prev.filter((g) => g.id !== guestId));
+    if (guest) {
+      logAction(guestId, 'note', `Arrival cancelled (no-show): ${guest.name}`, { guestSnapshot: guest });
+    }
+  }, [logAction]);
+
+  // 撤销退房：恢复客人到床位，将床位状态从 cleaning 改回 occupied
+  const undoCheckout = useCallback((bedId: string, guestSnapshot: Guest) => {
+    setArrivals((prev) => {
+      // 如果 arrivals 中没有该客人，重新添加
+      if (!prev.some((g) => g.id === guestSnapshot.id)) {
+        return [...prev, guestSnapshot];
+      }
+      return prev;
+    });
+    setRooms((prevRooms) =>
+      prevRooms.map((r) => ({
+        ...r,
+        beds: r.beds.map((b) => {
+          if (b.id === bedId) {
+            return { ...b, status: "occupied" as const, guest: guestSnapshot };
+          }
+          return b;
+        }),
+      })),
+    );
+    if (guestSnapshot) {
+      logAction(guestSnapshot.id, 'note', `Checkout undone — ${guestSnapshot.name} restored to bed`, { guestSnapshot });
+    }
+  }, [logAction]);
+
   // ── High-level guest actions (state + audit log) ──────────────
   // These all run an `updateArrival`-style sync to beds/reservations AND
   // append an audit log entry in one place so the log stays consistent.
@@ -651,7 +694,8 @@ export function HostelProvider({ children }: { children: ReactNode }) {
 
   const extendStay = useCallback((guestId: string, extraNights: number) => {
     if (!extraNights || extraNights < 1) return;
-    const guest = arrivals.find((g) => g.id === guestId)
+    // 使用 ref 获取最新的 arrivals，避免闭包陈旧问题
+    const guest = arrivalsRef.current.find((g) => g.id === guestId)
       || rooms.flatMap((r) => r.beds).map((b) => b.guest).find((g) => g?.id === guestId);
     if (!guest) return;
     const room = rooms.find((r) => r.beds.some((b) => b.guest?.id === guestId || b.reservations?.some((res) => res.id === guestId)));
@@ -688,7 +732,7 @@ export function HostelProvider({ children }: { children: ReactNode }) {
       `Extended +${extraNights}n → ${newCheckOut} (total now ${formatCurrency(newTotal, currentLanguage())})`,
       { amount: pricePerNight > 0 ? pricePerNight * extraNights : undefined, meta: { extraNights, newNights, newCheckOut, newTotal } },
     );
-  }, [arrivals, rooms, logAction]);
+  }, [rooms, logAction]);
 
   const addPartialPayment = useCallback((guestId: string, amount: number) => {
     if (!amount || amount <= 0) return;
@@ -919,7 +963,7 @@ export function HostelProvider({ children }: { children: ReactNode }) {
   const value = useMemo(() => ({
     rooms, arrivals,
     moveGuest, assignArrival, autoAssignBed, occupyBed, moveReservation, markBedClean, checkoutGuest, settlePayment, scanPassport,
-    addArrival, updateArrival, importArrivals, addRoom, updateRoom, deleteRoom, addBedToRoom, updateBed, deleteBed,
+    addArrival, updateArrival, importArrivals, cancelArrival, undoCheckout, addRoom, updateRoom, deleteRoom, addBedToRoom, updateBed, deleteBed,
     shiftNotes, addShiftNote, resolveShiftNote, unresolveShiftNote, deleteShiftNote,
     groupBookings, addGroupBooking, updateGroupBookingPayment,
     referrals, addReferral, useReferralCode,
@@ -931,7 +975,7 @@ export function HostelProvider({ children }: { children: ReactNode }) {
     addCharge, extendStay, addPartialPayment, addGuestNote, updateGuestField,
   }), [
     rooms, arrivals, moveGuest, assignArrival, autoAssignBed, occupyBed, moveReservation, markBedClean, checkoutGuest, settlePayment, scanPassport,
-    addArrival, updateArrival, importArrivals, addRoom, updateRoom, deleteRoom, addBedToRoom, updateBed, deleteBed,
+    addArrival, updateArrival, importArrivals, cancelArrival, undoCheckout, addRoom, updateRoom, deleteRoom, addBedToRoom, updateBed, deleteBed,
     shiftNotes, addShiftNote, resolveShiftNote, unresolveShiftNote, deleteShiftNote,
     groupBookings, addGroupBooking, updateGroupBookingPayment,
     referrals, addReferral, useReferralCode,

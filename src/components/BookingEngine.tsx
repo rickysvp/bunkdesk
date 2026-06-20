@@ -20,6 +20,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { differenceInDays, parseISO, format } from 'date-fns';
+import { toast } from 'sonner';
 
 const GROUP_DISCOUNT_THRESHOLD = 5;
 const GROUP_DISCOUNT_RATE = 0.1;
@@ -160,15 +161,24 @@ export function BookingEngine() {
       roomPreference: selectedRoom?.name,
     });
 
-    // Auto-assign guests to empty beds in the selected room
+    // 智能排房：优先下铺、同房间、保持团队在一起
     if (selectedRoomId) {
       const room = rooms.find(r => r.id === selectedRoomId);
       if (room) {
         const emptyBeds = room.beds.filter(b => b.status === 'empty');
-        const guestsToAssign = Math.min(guests, emptyBeds.length);
+        // 智能排序：下铺优先，然后按床名排序保持相邻
+        const sortedBeds = [...emptyBeds].sort((a, b) => {
+          // 下铺优先
+          if (a.bedType === 'bottom' && b.bedType !== 'bottom') return -1;
+          if (a.bedType !== 'bottom' && b.bedType === 'bottom') return 1;
+          // 同类型按名称排序
+          return a.name.localeCompare(b.name);
+        });
+        const guestsToAssign = Math.min(guests, sortedBeds.length);
+        const perGuestPrice = totalPrice / guests;
         for (let i = 0; i < guestsToAssign; i++) {
           const guestName = guests === 1 ? name.trim() : `${name.trim()} ${i + 1}`;
-          occupyBed(emptyBeds[i].id, {
+          occupyBed(sortedBeds[i].id, {
             name: guestName,
             country,
             countryCode: country,
@@ -177,7 +187,7 @@ export function BookingEngine() {
             checkOutDate: checkOut,
             nights,
             paymentStatus: 'unpaid',
-            totalAmount: totalPrice / guests,
+            totalAmount: perGuestPrice,
             paidAmount: 0,
             phone,
             email,
@@ -185,6 +195,13 @@ export function BookingEngine() {
             source: referralApplied ? 'referral' : 'direct',
             roomPreference: selectedRoom?.name,
           });
+        }
+        // 反馈排房结果
+        const bottomCount = sortedBeds.slice(0, guestsToAssign).filter(b => b.bedType === 'bottom').length;
+        if (guests > 1) {
+          toast.success(`团队 ${guests} 人已排房 — ${room.name}（${bottomCount} 个下铺）`);
+        } else {
+          toast.success(`${name.trim()} 已预订 — ${sortedBeds[0]?.name}（${sortedBeds[0]?.bedType === 'bottom' ? '下铺' : '上铺'}）`);
         }
       }
     }
