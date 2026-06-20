@@ -88,7 +88,7 @@ export function AssistantPanelGrowth({
       <Card className="border-emerald-200 shadow-sm bg-gradient-to-br from-emerald-50/50 to-white">
         <CardContent className="p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div>
-            <p className="text-[10px] font-semibold tracking-widest text-emerald-700 uppercase">
+            <p className="text-xs font-semibold tracking-widest text-emerald-700 uppercase">
               {t('assistant.growthOverview.title')}
             </p>
             <p className="mt-1.5 text-2xl font-bold text-zinc-900 flex items-baseline gap-2">
@@ -110,19 +110,19 @@ export function AssistantPanelGrowth({
           <div className="flex gap-5 text-sm">
             <div>
               <p className="text-2xl font-bold text-zinc-900">5</p>
-              <p className="text-[10px] text-zinc-500 uppercase tracking-wider">
+              <p className="text-xs text-zinc-500 uppercase tracking-wider">
                 {t('assistant.growthOverview.tools')}
               </p>
             </div>
             <div>
               <p className="text-2xl font-bold text-zinc-900">{recallCount}</p>
-              <p className="text-[10px] text-zinc-500 uppercase tracking-wider">
+              <p className="text-xs text-zinc-500 uppercase tracking-wider">
                 {t('assistant.growthOverview.recallable')}
               </p>
             </div>
             <div>
               <p className="text-2xl font-bold text-zinc-900">{occupancyActions.length}</p>
-              <p className="text-[10px] text-zinc-500 uppercase tracking-wider">
+              <p className="text-xs text-zinc-500 uppercase tracking-wider">
                 {t('assistant.needsAttention')}
               </p>
             </div>

@@ -189,7 +189,7 @@ export function AssistantPanelToday({ setActiveTab, onSwitchToGrowth }: Assistan
           <div className="flex gap-6 text-right">
             <div>
               <p className="text-2xl font-bold text-zinc-900">{recallCount}</p>
-              <p className="text-[10px] text-zinc-500 uppercase tracking-wider">
+              <p className="text-xs text-zinc-500 uppercase tracking-wider">
                 {t('assistant.growthOverview.recallable')}
               </p>
             </div>
@@ -197,7 +197,7 @@ export function AssistantPanelToday({ setActiveTab, onSwitchToGrowth }: Assistan
               <p className="text-2xl font-bold text-emerald-700">
                 {formatCurrency(totalPotentialRevenue, language)}
               </p>
-              <p className="text-[10px] text-zinc-500 uppercase tracking-wider">
+              <p className="text-xs text-zinc-500 uppercase tracking-wider">
                 {t('assistant.growthOverview.potential7d')}
               </p>
             </div>
@@ -308,14 +308,14 @@ export function AssistantPanelToday({ setActiveTab, onSwitchToGrowth }: Assistan
                       style={{ height: `${Math.max(occupancyRate, 5)}%` }}
                     />
                   </div>
-                  <span className="text-[10px] text-zinc-400">
+                  <span className="text-xs text-zinc-400">
                     {format(dayDate, 'EEE')}
                   </span>
                 </div>
               );
             })}
           </div>
-          <div className="flex items-center justify-between text-[11px] text-zinc-500 pt-2 mt-2 border-t border-zinc-100">
+          <div className="flex items-center justify-between text-xs text-zinc-500 pt-2 mt-2 border-t border-zinc-100">
             <span>
               {t('assistant.todaySummary.peak')}: {format(parseISO(weekForecast.peakDay.date), 'EEE')} ({weekForecast.peakDay.rate}%)
             </span>
@@ -389,7 +389,7 @@ function StatCard({
           <p className={cn('text-2xl font-semibold leading-none', valueColor[color])}>
             {value}
           </p>
-          {subValue && <p className="text-[10px] text-zinc-500 mt-0.5">{subValue}</p>}
+          {subValue && <p className="text-xs text-zinc-500 mt-0.5">{subValue}</p>}
           <p className="text-xs text-zinc-500 mt-1 truncate">{label}</p>
         </div>
       </CardContent>
@@ -425,7 +425,7 @@ function ThreeDayCard({
           <span className="text-xs font-medium text-zinc-500 uppercase tracking-wider">
             {label}
           </span>
-          <span className="text-[10px] text-zinc-400">{format(dayDate, 'MMM d')}</span>
+          <span className="text-xs text-zinc-400">{format(dayDate, 'MMM d')}</span>
         </div>
         <div className="flex items-baseline gap-1.5">
           <span className={cn('text-3xl font-bold leading-none', rateColor)}>

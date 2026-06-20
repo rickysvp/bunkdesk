@@ -176,7 +176,7 @@ export function BedRow({
               width: `${Math.max(1, (activeGuest.nights || 1)) * (100 / visibleDays)}%`,
             }}
           >
-            <div className="px-2 py-1 text-[10px] font-semibold text-zinc-700 truncate">
+            <div className="px-2 py-1 text-xs font-semibold text-zinc-700 truncate">
               {!isDropValid
                 ? t('calendarview.dateOverlapBlocked') || 'Dates overlap'
                 : `${activeGuest.name} · ${activeGuest.nights || '?'}n`}

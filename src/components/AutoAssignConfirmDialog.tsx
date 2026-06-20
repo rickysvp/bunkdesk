@@ -198,7 +198,7 @@ export function AutoAssignConfirmDialog({
             dragElastic={{ top: 0, bottom: 0.6 }}
             onDragEnd={handleDragEnd}
             className={cn(
-              'absolute bg-white shadow-2xl flex flex-col overflow-hidden',
+              'absolute bg-card shadow-modal flex flex-col overflow-hidden ring-1 ring-border/50',
               // Mobile: bottom sheet
               'inset-x-0 bottom-0 rounded-t-3xl max-h-[90vh] pb-[env(safe-area-inset-bottom,0px)]',
               // Desktop: centered modal
@@ -230,7 +230,7 @@ export function AutoAssignConfirmDialog({
                 </div>
                 <button
                   onClick={onClose}
-                  className="md:flex hidden p-1.5 rounded-lg hover:bg-zinc-100 text-zinc-400 hover:text-zinc-700 transition-colors"
+                  className="md:flex hidden p-1.5 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
                   aria-label="Close"
                 >
                   <X className="w-4 h-4" />
@@ -248,13 +248,13 @@ export function AutoAssignConfirmDialog({
                 <div className="flex-1 min-w-0">
                   <div className="font-bold text-sm text-zinc-900 truncate">{guestName}</div>
                   <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
-                    <span className="text-[11px] text-zinc-500">{guest.countryCode}</span>
+                    <span className="text-xs text-zinc-500">{guest.countryCode}</span>
                     {genderChip && (
-                      <span className={cn('inline-flex items-center gap-0.5 text-[10px] font-bold px-1.5 py-0.5 rounded', genderChip.bg)}>
+                      <span className={cn('inline-flex items-center gap-0.5 text-xs font-bold px-1.5 py-0.5 rounded', genderChip.bg)}>
                         {genderChip.icon} {t(`guest.${guest.gender}`) || guest.gender}
                       </span>
                     )}
-                    <span className="text-[11px] text-zinc-500">{guest.nights} {t('dashboard.nights')}</span>
+                    <span className="text-xs text-zinc-500">{guest.nights} {t('dashboard.nights')}</span>
                   </div>
                 </div>
                 <ArrowRight className="w-4 h-4 text-zinc-400 shrink-0" />
@@ -262,7 +262,7 @@ export function AutoAssignConfirmDialog({
 
               {/* Recommended bed card */}
               <div className="relative border-2 border-emerald-300 bg-gradient-to-br from-emerald-50/60 to-white rounded-xl p-4 shadow-sm">
-                <div className="absolute -top-2.5 left-3 text-[10px] font-extrabold bg-emerald-500 text-white px-2.5 py-0.5 rounded-full shadow-md ring-2 ring-white flex items-center gap-1">
+                <div className="absolute -top-2.5 left-3 text-xs font-extrabold bg-emerald-500 text-white px-2.5 py-0.5 rounded-full shadow-md ring-2 ring-white flex items-center gap-1">
                   <Sparkles className="w-2.5 h-2.5" />
                   {t('checkin.bestMatch') || 'BEST MATCH'}
                 </div>
@@ -274,7 +274,7 @@ export function AutoAssignConfirmDialog({
                         {roomTypeName}
                       </span>
                     </div>
-                    <div className="text-[11px] text-zinc-500 mt-0.5 ml-5">
+                    <div className="text-xs text-zinc-500 mt-0.5 ml-5">
                       {recommendedBed.bedName} · {bedTypeName} · R{recommendedBed.roomNumber}
                     </div>
                   </div>
@@ -285,23 +285,23 @@ export function AutoAssignConfirmDialog({
                   <span className="text-xl font-extrabold text-zinc-900">
                     {formatCurrency(recommendedBed.pricePerNight, language)}
                   </span>
-                  <span className="text-[10px] text-zinc-500 font-medium">/night</span>
-                  <span className="text-[11px] text-zinc-400 ml-1">×</span>
-                  <span className="text-[11px] text-zinc-600 font-semibold">{guest.nights} {t('dashboard.nights')}</span>
-                  <span className="text-[11px] text-zinc-400 ml-1">=</span>
+                  <span className="text-xs text-zinc-500 font-medium">/night</span>
+                  <span className="text-xs text-zinc-400 ml-1">×</span>
+                  <span className="text-xs text-zinc-600 font-semibold">{guest.nights} {t('dashboard.nights')}</span>
+                  <span className="text-xs text-zinc-400 ml-1">=</span>
                   <span className="text-base font-extrabold text-emerald-700 ml-auto">
                     {formatCurrency(totalForStay, language)}
                   </span>
                 </div>
                 {priceDiff !== 0 && (
-                  <div className={cn('text-[10px] mt-1.5 px-3', priceDiff > 0 ? 'text-amber-600' : 'text-emerald-600')}>
+                  <div className={cn('text-xs mt-1.5 px-3', priceDiff > 0 ? 'text-amber-600' : 'text-emerald-600')}>
                     {priceDiff > 0 ? '+' : ''}{formatCurrency(priceDiff, language)} {t('checkin.vsAvg') || 'vs avg'}
                   </div>
                 )}
 
                 {/* Reasons */}
                 <div className="mt-3 pt-3 border-t border-emerald-200/60">
-                  <div className="text-[10px] font-bold text-emerald-700 uppercase tracking-wider mb-1.5">
+                  <div className="text-xs font-bold text-emerald-700 uppercase tracking-wider mb-1.5">
                     {t('checkin.whyThisBed') || 'Why this bed'}
                   </div>
                   <div className="flex flex-wrap gap-1.5">
@@ -309,7 +309,7 @@ export function AutoAssignConfirmDialog({
                       <span
                         key={r.key}
                         className={cn(
-                          'inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-md ring-1',
+                          'inline-flex items-center gap-1 text-xs font-bold px-2 py-0.5 rounded-md ring-1',
                           r.bg,
                         )}
                       >
@@ -334,7 +334,7 @@ export function AutoAssignConfirmDialog({
             </div>
 
             {/* Footer (sticky, mobile-first) */}
-            <div className="border-t border-zinc-100 px-4 pt-3 pb-4 md:pb-3 flex gap-2 shrink-0 bg-white">
+            <div className="border-t border-border px-4 pt-3 pb-4 md:pb-3 flex gap-2 shrink-0 bg-card">
               <button
                 onClick={onClose}
                 className="flex-1 h-11 sm:h-10 rounded-xl border border-zinc-200 text-sm font-semibold text-zinc-700 hover:bg-zinc-50 active:scale-[0.98] transition-all"

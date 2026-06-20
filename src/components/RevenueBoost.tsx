@@ -218,11 +218,11 @@ export function RevenueBoost({ autoOpenPromo, onAutoOpenPromoConsumed }: { autoO
                   transition={{ duration: 0.5, delay: i * 0.05 }}
                 />
               </div>
-              <span className="text-[10px] font-medium text-zinc-500">
+              <span className="text-xs font-medium text-zinc-500">
                 {day.dayName}
               </span>
               <span
-                className={`text-[10px] font-bold ${
+                className={`text-xs font-bold ${
                   day.occupancy > 70
                     ? "text-emerald-600"
                     : day.occupancy >= 40
@@ -380,7 +380,7 @@ export function RevenueBoost({ autoOpenPromo, onAutoOpenPromoConsumed }: { autoO
                         {promo.name}
                       </span>
                       <span
-                        className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${
+                        className={`text-xs font-medium px-2 py-0.5 rounded-full ${
                           PROMO_TYPE_BADGE_COLORS[promo.type]
                         }`}
                       >

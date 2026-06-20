@@ -17,6 +17,7 @@ import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { getSourceConfig, getPaymentStatusClass } from '../utils/guestDisplay';
 import { scoreBeds, getRoomSummaries, type BedScore } from '../utils/bedAllocator';
+import { EmptyState } from './EmptyState';
 
 const COUNTRY_MAP: Record<string, string> = {
   US: 'USA', GBR: 'United Kingdom', AU: 'Australia',
@@ -29,14 +30,14 @@ function FieldRow({ icon, iconBg, label, value, placeholder, children }: {
 }) {
   const hasValue = !!value && value.length > 0;
   return (
-    <div className="flex items-center gap-2 py-2 border-b border-zinc-50 last:border-b-0">
+    <div className="flex items-center gap-2 py-2 border-b border-border last:border-b-0">
       <div className={cn("w-7 h-7 rounded-md flex items-center justify-center text-xs shrink-0", iconBg)}>
         {icon}
       </div>
       <div className="min-w-0 flex-1">
-        <div className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider">{label}</div>
+        <div className="text-xs font-bold text-muted-foreground uppercase tracking-wider">{label}</div>
         {children ? children : (
-          <div className={cn("truncate text-sm", hasValue ? "text-zinc-900 font-semibold" : "text-zinc-300 italic font-normal")}>
+          <div className={cn("truncate text-sm", hasValue ? "text-foreground font-semibold" : "text-muted-foreground italic font-normal")}>
             {hasValue ? value : placeholder}
           </div>
         )}
@@ -245,14 +246,21 @@ export function CheckInPanel({ setActiveTab }: { setActiveTab?: (tab: string) =>
       <AnimatePresence>
         {checkInSuccess && (
           <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            className="fixed top-4 left-1/2 -translate-x-1/2 z-50 bg-emerald-600 text-white px-4 sm:px-5 py-3 rounded-xl shadow-lg flex items-center gap-3 max-w-[calc(100vw-2rem)]"
+            initial={{ opacity: 0, y: -20, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -20, scale: 0.9 }}
+            transition={{ type: 'spring', damping: 18, stiffness: 280 }}
+            className="fixed top-4 left-1/2 -translate-x-1/2 z-50 bg-success text-success-foreground px-4 sm:px-5 py-3 rounded-xl shadow-modal flex items-center gap-3 max-w-[calc(100vw-2rem)]"
           >
-            <CheckCircle2 className="h-5 w-5 shrink-0" />
+            <motion.div
+              initial={{ scale: 0, rotate: -30 }}
+              animate={{ scale: 1, rotate: 0 }}
+              transition={{ delay: 0.1, type: 'spring', damping: 12, stiffness: 200 }}
+            >
+              <CheckCircle2 className="h-5 w-5 shrink-0" />
+            </motion.div>
             <span className="text-sm font-medium">{checkInSuccess} {t('checkin.checkedInSuccess') || 'checked in successfully!'}</span>
-            <Button variant="ghost" size="sm" className="h-7 text-xs text-white hover:bg-emerald-700 gap-1 ml-2"
+            <Button variant="ghost" size="sm" className="h-7 text-xs text-success-foreground hover:bg-success/80 gap-1 ml-2"
               onClick={() => { setCheckInSuccess(null); setActiveTab?.('bedboard'); }}>
               {t('checkin.viewOnBoard') || 'View on Board'} <ArrowRight className="h-3 w-3" />
             </Button>
@@ -262,24 +270,24 @@ export function CheckInPanel({ setActiveTab }: { setActiveTab?: (tab: string) =>
 
       {/* Sub Tab Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4">
-        <div className="flex gap-1 bg-zinc-100 rounded-xl p-1 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden max-w-full">
+        <div className="flex gap-1 bg-muted rounded-xl p-1 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden max-w-full">
           {([
-            { id: 'pending' as SubTab, label: t('checkin.pending') || 'Pending', count: pendingCount, color: 'text-amber-600' },
-            { id: 'checked-in' as SubTab, label: t('checkin.checkedIn') || 'Checked In', count: checkedInCount, color: 'text-emerald-600' },
-            { id: 'reserved' as SubTab, label: t('checkin.reserved') || 'Reserved', count: reservedCount, color: 'text-blue-600' },
+            { id: 'pending' as SubTab, label: t('checkin.pending') || 'Pending', count: pendingCount, color: 'text-warning' },
+            { id: 'checked-in' as SubTab, label: t('checkin.checkedIn') || 'Checked In', count: checkedInCount, color: 'text-success' },
+            { id: 'reserved' as SubTab, label: t('checkin.reserved') || 'Reserved', count: reservedCount, color: 'text-info' },
           ]).map(tab => (
             <button key={tab.id} onClick={() => setSubTab(tab.id)}
               className={cn(
                 "px-3 sm:px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-1.5 whitespace-nowrap shrink-0",
-                subTab === tab.id ? 'bg-white shadow-sm text-zinc-900' : 'text-zinc-500 hover:text-zinc-700'
+                subTab === tab.id ? 'bg-card shadow-card text-foreground' : 'text-muted-foreground hover:text-foreground'
               )}>
               {tab.label}
-              <span className={cn("text-xs font-bold", subTab === tab.id ? tab.color : "text-zinc-400")}>{tab.count}</span>
+              <span className={cn("text-xs font-bold", subTab === tab.id ? tab.color : "text-muted-foreground/70")}>{tab.count}</span>
             </button>
           ))}
         </div>
         <div className="relative w-full sm:w-64">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input className="pl-9 h-9" placeholder={t('reservations.searchBookings') || 'Search guests...'}
             value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
         </div>
@@ -289,16 +297,16 @@ export function CheckInPanel({ setActiveTab }: { setActiveTab?: (tab: string) =>
       {subTab === 'pending' && (
         <div className="flex-1 flex flex-col md:flex-row gap-4 min-h-0">
           {/* Arrivals List */}
-          <div className="w-full md:w-72 flex-shrink-0 flex flex-col bg-white border border-zinc-200 rounded-2xl overflow-hidden shadow-sm max-h-[260px] md:max-h-none">
-            <div className="p-3 border-b border-zinc-100 bg-zinc-50 flex items-center justify-between">
-              <span className="text-xs font-semibold text-zinc-500 uppercase">{t('checkin.pending')}</span>
-              <span className="bg-zinc-200 text-zinc-700 px-2 py-0.5 rounded-full text-xs font-bold">{pendingCount}</span>
+          <div className="w-full md:w-72 flex-shrink-0 flex flex-col bg-card border border-border rounded-2xl overflow-hidden shadow-card max-h-[260px] md:max-h-none">
+            <div className="p-3 border-b border-border bg-muted/40 flex items-center justify-between">
+              <span className="text-xs font-semibold text-muted-foreground uppercase">{t('checkin.pending')}</span>
+              <span className="bg-muted text-foreground px-2 py-0.5 rounded-full text-xs font-bold">{pendingCount}</span>
             </div>
             <div className="flex-1 overflow-y-auto p-2 space-y-1.5">
               <button onClick={() => { setSelectedGuestId('NEW'); setSelectedBedId(null); }}
                 className={cn("w-full text-left p-3 rounded-xl border border-dashed transition-all cursor-pointer flex items-center gap-2.5",
-                  selectedGuestId === 'NEW' ? 'border-zinc-900 bg-zinc-900 text-white shadow-md' : 'border-zinc-300 bg-white hover:bg-zinc-50 text-zinc-700')}>
-                <div className={cn("p-1 rounded-lg", selectedGuestId === 'NEW' ? 'bg-zinc-800' : 'bg-zinc-100 text-zinc-500')}>
+                  selectedGuestId === 'NEW' ? 'border-primary bg-primary text-primary-foreground shadow-pop' : 'border-border bg-card hover:bg-accent/50 hover:border-primary/40 text-foreground')}>
+                <div className={cn("p-1 rounded-lg transition-colors", selectedGuestId === 'NEW' ? 'bg-primary/80 text-primary-foreground' : 'bg-muted text-muted-foreground')}>
                   <Plus className="w-4 h-4" />
                 </div>
                 <span className="font-semibold text-xs">{t('checkin.newWalkIn')}</span>
@@ -312,12 +320,12 @@ export function CheckInPanel({ setActiveTab }: { setActiveTab?: (tab: string) =>
                 <div key={guest.id} className="relative">
                   <button onClick={() => { setSelectedGuestId(guest.id); setSelectedBedId(null); }}
                     className={cn("w-full text-left p-3 pr-9 rounded-xl transition-all cursor-pointer",
-                      selectedGuestId === guest.id ? 'bg-zinc-900 text-white shadow-md' : 'bg-white hover:bg-zinc-50 border border-zinc-100')}>
+                      selectedGuestId === guest.id ? 'bg-primary text-primary-foreground shadow-pop' : 'bg-card hover:bg-accent/50 hover:-translate-y-0.5 hover:shadow-card border border-border')}>
                     <div className="font-medium text-xs flex items-center justify-between">
                       {guest.name}
-                      <ChevronRight className={cn("h-3.5 w-3.5", selectedGuestId === guest.id ? 'text-zinc-400' : 'text-zinc-300')} />
+                      <ChevronRight className={cn("h-3.5 w-3.5 transition-transform", selectedGuestId === guest.id ? 'text-primary-foreground/60' : 'text-muted-foreground group-hover:translate-x-0.5')} />
                     </div>
-                    <div className={cn("text-[10px] mt-0.5", selectedGuestId === guest.id ? 'text-zinc-300' : 'text-zinc-500')}>
+                    <div className={cn("text-xs mt-0.5", selectedGuestId === guest.id ? 'text-primary-foreground/70' : 'text-muted-foreground')}>
                       {guest.countryCode} · {guest.nights}N
                     </div>
                   </button>
@@ -327,10 +335,10 @@ export function CheckInPanel({ setActiveTab }: { setActiveTab?: (tab: string) =>
                       e.stopPropagation();
                       handleCancelArrival(guest.id, guest.name, guest);
                     }}
-                    className={cn("absolute top-1/2 right-2 -translate-y-1/2 p-1.5 rounded-md transition-colors",
+                    className={cn("absolute top-1/2 right-2 -translate-y-1/2 p-1.5 rounded-md transition-colors min-h-[28px] min-w-[28px] flex items-center justify-center",
                       selectedGuestId === guest.id
-                        ? 'text-zinc-400 hover:text-red-400 hover:bg-zinc-800'
-                        : 'text-zinc-300 hover:text-red-500 hover:bg-red-100')}
+                        ? 'text-primary-foreground/60 hover:text-destructive hover:bg-primary-foreground/10'
+                        : 'text-muted-foreground hover:text-destructive hover:bg-destructive/10')}
                     title={t('checkin.cancelArrival') || 'Cancel arrival'}
                     aria-label={t('checkin.cancelArrival') || 'Cancel arrival'}
                   >
@@ -339,7 +347,14 @@ export function CheckInPanel({ setActiveTab }: { setActiveTab?: (tab: string) =>
                 </div>
               ))}
               {arrivals.length === 0 && (
-                <div className="py-8 text-center text-xs text-zinc-400">{t('checkin.noPending') || 'No pending arrivals'}</div>
+                <EmptyState
+                  emoji="🧳"
+                  title={t('checkin.noPending') || 'No pending arrivals'}
+                  description={t('checkin.noPendingDesc') || 'Add a walk-in guest or import from iCal to get started'}
+                  actionLabel={t('checkin.newWalkIn')}
+                  onAction={() => { setSelectedGuestId('NEW'); setSelectedBedId(null); }}
+                  compact
+                />
               )}
             </div>
           </div>
@@ -347,25 +362,25 @@ export function CheckInPanel({ setActiveTab }: { setActiveTab?: (tab: string) =>
           {/* Check-in Details */}
           <div className="flex-1 min-w-0 overflow-y-auto">
             {selectedGuestId === 'NEW' ? (
-              <div className="bg-white p-5 rounded-2xl border border-zinc-200 shadow-sm">
-                <h2 className="text-lg font-semibold text-zinc-900 tracking-tight mb-4 flex items-center gap-2">
-                  <UserIcon className="w-5 h-5 text-zinc-400" />{t('checkin.walkInRegistration') || t('checkin.newWalkIn')}
+              <div className="bg-card p-5 rounded-2xl border border-border shadow-card">
+                <h2 className="text-lg font-semibold text-foreground tracking-tight mb-4 flex items-center gap-2">
+                  <UserIcon className="w-5 h-5 text-muted-foreground" />{t('checkin.walkInRegistration') || t('checkin.newWalkIn')}
                 </h2>
                 <form onSubmit={handleCreateArrival} className="space-y-4">
                   {/* ── Section 1: Personal Info ── */}
                   <div className="space-y-3">
-                    <div className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">Personal Info</div>
+                    <div className="text-xs font-bold text-zinc-500 uppercase tracking-wider">Personal Info</div>
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                       <div className="space-y-1.5">
-                        <Label className="text-[10px] font-semibold text-zinc-500 uppercase">{t('checkin.firstName')}<span className="text-red-500">*</span></Label>
+                        <Label className="text-xs font-semibold text-zinc-500 uppercase">{t('checkin.firstName')}<span className="text-red-500">*</span></Label>
                         <Input required value={newGuestRef.firstName} onChange={e => setNewGuestRef({...newGuestRef, firstName: e.target.value})} className="h-10 bg-zinc-50 border-zinc-200" />
                       </div>
                       <div className="space-y-1.5">
-                        <Label className="text-[10px] font-semibold text-zinc-500 uppercase">{t('checkin.lastName')}<span className="text-red-500">*</span></Label>
+                        <Label className="text-xs font-semibold text-zinc-500 uppercase">{t('checkin.lastName')}<span className="text-red-500">*</span></Label>
                         <Input required value={newGuestRef.lastName} onChange={e => setNewGuestRef({...newGuestRef, lastName: e.target.value})} className="h-10 bg-zinc-50 border-zinc-200" />
                       </div>
                       <div className="space-y-1.5">
-                        <Label className="text-[10px] font-semibold text-zinc-500 uppercase">{t('checkin.country')}<span className="text-red-500">*</span></Label>
+                        <Label className="text-xs font-semibold text-zinc-500 uppercase">{t('checkin.country')}<span className="text-red-500">*</span></Label>
                         <div className="relative">
                           <Globe className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-400" />
                           <Input required maxLength={3} className="pl-8 h-10 bg-zinc-50 border-zinc-200 uppercase" placeholder="US" value={newGuestRef.countryCode} onChange={e => setNewGuestRef({...newGuestRef, countryCode: e.target.value.toUpperCase()})} />
@@ -374,15 +389,15 @@ export function CheckInPanel({ setActiveTab }: { setActiveTab?: (tab: string) =>
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                       <div className="space-y-1.5">
-                        <Label className="text-[10px] font-semibold text-zinc-500 uppercase">{t('checkin.phone')}<span className="text-red-500">*</span></Label>
+                        <Label className="text-xs font-semibold text-zinc-500 uppercase">{t('checkin.phone')}<span className="text-red-500">*</span></Label>
                         <Input required type="tel" value={newGuestRef.phone} onChange={e => setNewGuestRef({...newGuestRef, phone: e.target.value})} placeholder="+1-555-0100" className="h-10 bg-zinc-50 border-zinc-200" />
                       </div>
                       <div className="space-y-1.5">
-                        <Label className="text-[10px] font-semibold text-zinc-500 uppercase">{t('checkin.email')}<span className="text-red-500">*</span></Label>
+                        <Label className="text-xs font-semibold text-zinc-500 uppercase">{t('checkin.email')}<span className="text-red-500">*</span></Label>
                         <Input required type="email" value={newGuestRef.email} onChange={e => setNewGuestRef({...newGuestRef, email: e.target.value})} placeholder="john@mail.com" className="h-10 bg-zinc-50 border-zinc-200" />
                       </div>
                       <div className="space-y-1.5">
-                        <Label className="text-[10px] font-semibold text-zinc-500 uppercase">{t('guest.gender') || 'Gender'}<span className="text-red-500">*</span></Label>
+                        <Label className="text-xs font-semibold text-zinc-500 uppercase">{t('guest.gender') || 'Gender'}<span className="text-red-500">*</span></Label>
                         <Select required value={newGuestRef.gender} onValueChange={(val: string) => {
                           // If changing to male and roomPreference is female-only, reset it
                           const updates: Partial<typeof newGuestRef> = { gender: val as "male" | "female" | "other" };
@@ -404,18 +419,18 @@ export function CheckInPanel({ setActiveTab }: { setActiveTab?: (tab: string) =>
 
                   {/* ── Section 2: Stay ── */}
                   <div className="space-y-3 pt-3 border-t border-zinc-100">
-                    <div className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">Stay</div>
+                    <div className="text-xs font-bold text-zinc-500 uppercase tracking-wider">Stay</div>
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                       <div className="space-y-1.5">
-                        <Label className="text-[10px] font-semibold text-zinc-500 uppercase">{t('checkin.checkInDate')}<span className="text-red-500">*</span></Label>
+                        <Label className="text-xs font-semibold text-zinc-500 uppercase">{t('checkin.checkInDate')}<span className="text-red-500">*</span></Label>
                         <Input type="date" required className="h-10 bg-zinc-50 border-zinc-200" value={newGuestRef.checkInDate} onChange={e => setNewGuestRef({...newGuestRef, checkInDate: e.target.value})} />
                       </div>
                       <div className="space-y-1.5">
-                        <Label className="text-[10px] font-semibold text-zinc-500 uppercase">{t('checkin.checkOutDate')}<span className="text-red-500">*</span></Label>
+                        <Label className="text-xs font-semibold text-zinc-500 uppercase">{t('checkin.checkOutDate')}<span className="text-red-500">*</span></Label>
                         <Input type="date" required className="h-10 bg-zinc-50 border-zinc-200" value={newGuestRef.checkOutDate} onChange={e => setNewGuestRef({...newGuestRef, checkOutDate: e.target.value})} />
                       </div>
                       <div className="space-y-1.5">
-                        <Label className="text-[10px] font-semibold text-zinc-500 uppercase">{t('checkin.arrivalTime.label')}</Label>
+                        <Label className="text-xs font-semibold text-zinc-500 uppercase">{t('checkin.arrivalTime.label')}</Label>
                         <Select value={newGuestRef.arrivalTime} onValueChange={(val: string) => setNewGuestRef({...newGuestRef, arrivalTime: val as "morning" | "afternoon" | "evening" | "late"})}>
                           <SelectTrigger className="h-10 bg-zinc-50 border-zinc-200"><SelectValue placeholder="—" /></SelectTrigger>
                           <SelectContent>
@@ -427,7 +442,7 @@ export function CheckInPanel({ setActiveTab }: { setActiveTab?: (tab: string) =>
                         </Select>
                       </div>
                       <div className="space-y-1.5">
-                        <Label className="text-[10px] font-semibold text-zinc-500 uppercase">{t('checkin.roomPreference')}</Label>
+                        <Label className="text-xs font-semibold text-zinc-500 uppercase">{t('checkin.roomPreference')}</Label>
                         <Select value={newGuestRef.roomPreference} onValueChange={(val: string) => setNewGuestRef({...newGuestRef, roomPreference: val as '' | 'dorm-mixed' | 'dorm-female' | 'private'})}>
                           <SelectTrigger className="h-10 bg-zinc-50 border-zinc-200"><SelectValue placeholder="—" /></SelectTrigger>
                           <SelectContent>
@@ -440,7 +455,7 @@ export function CheckInPanel({ setActiveTab }: { setActiveTab?: (tab: string) =>
                         </Select>
                       </div>
                       <div className="space-y-1.5 sm:w-1/3">
-                        <Label className="text-[10px] font-semibold text-zinc-500 uppercase">{t('checkin.bedPreference') || 'Bed Preference'}</Label>
+                        <Label className="text-xs font-semibold text-zinc-500 uppercase">{t('checkin.bedPreference') || 'Bed Preference'}</Label>
                         <Select value={newGuestRef.bedPreference} onValueChange={(val: string) => setNewGuestRef({...newGuestRef, bedPreference: val as '' | 'top' | 'bottom' | 'any'})}>
                           <SelectTrigger className="h-10 bg-zinc-50 border-zinc-200"><SelectValue placeholder="—" /></SelectTrigger>
                           <SelectContent>
@@ -455,10 +470,10 @@ export function CheckInPanel({ setActiveTab }: { setActiveTab?: (tab: string) =>
 
                   {/* ── Section 3: ID & Source ── */}
                   <div className="space-y-3 pt-3 border-t border-zinc-100">
-                    <div className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">ID &amp; Source</div>
+                    <div className="text-xs font-bold text-zinc-500 uppercase tracking-wider">ID &amp; Source</div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <div className="space-y-1.5">
-                        <Label className="text-[10px] font-semibold text-zinc-500 uppercase">{t('checkin.idType.label')}<span className="text-red-500">*</span></Label>
+                        <Label className="text-xs font-semibold text-zinc-500 uppercase">{t('checkin.idType.label')}<span className="text-red-500">*</span></Label>
                         <Select required value={newGuestRef.idType} onValueChange={(val: string) => setNewGuestRef({...newGuestRef, idType: val as "passport" | "idCard" | "driverLicense"})}>
                           <SelectTrigger className="h-10 bg-zinc-50 border-zinc-200"><SelectValue /></SelectTrigger>
                           <SelectContent>
@@ -469,7 +484,7 @@ export function CheckInPanel({ setActiveTab }: { setActiveTab?: (tab: string) =>
                         </Select>
                       </div>
                       <div className="space-y-1.5">
-                        <Label className="text-[10px] font-semibold text-zinc-500 uppercase">{t('checkin.passportOrId')}<span className="text-red-500">*</span></Label>
+                        <Label className="text-xs font-semibold text-zinc-500 uppercase">{t('checkin.passportOrId')}<span className="text-red-500">*</span></Label>
                         <div className="relative">
                           <IdCard className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-400" />
                           <Input required className="pl-8 h-10 bg-zinc-50 border-zinc-200" value={newGuestRef.passportOrId} onChange={e => setNewGuestRef({...newGuestRef, passportOrId: e.target.value})} />
@@ -478,7 +493,7 @@ export function CheckInPanel({ setActiveTab }: { setActiveTab?: (tab: string) =>
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <div className="space-y-1.5">
-                        <Label className="text-[10px] font-semibold text-zinc-500 uppercase">{t('checkin.source.label')}</Label>
+                        <Label className="text-xs font-semibold text-zinc-500 uppercase">{t('checkin.source.label')}</Label>
                         <Select value={newGuestRef.bookingSource} onValueChange={(val: string) => setNewGuestRef({...newGuestRef, bookingSource: val as "walk-in" | "hostelworld" | "booking-com" | "airbnb" | "google" | "other-ota"})}>
                           <SelectTrigger className="h-10 bg-zinc-50 border-zinc-200"><SelectValue /></SelectTrigger>
                           <SelectContent>
@@ -493,7 +508,7 @@ export function CheckInPanel({ setActiveTab }: { setActiveTab?: (tab: string) =>
                       </div>
                     </div>
                     <div className="space-y-1.5">
-                      <Label className="text-[10px] font-semibold text-zinc-500 uppercase flex items-center gap-1.5"><FileText className="w-3 h-3" />{t('checkin.notes')}</Label>
+                      <Label className="text-xs font-semibold text-zinc-500 uppercase flex items-center gap-1.5"><FileText className="w-3 h-3" />{t('checkin.notes')}</Label>
                       <Input className="h-10 bg-zinc-50 border-zinc-200" placeholder="E.g., Prefers bottom bunk" value={newGuestRef.notes} onChange={e => setNewGuestRef({...newGuestRef, notes: e.target.value})} />
                     </div>
                   </div>
@@ -508,14 +523,14 @@ export function CheckInPanel({ setActiveTab }: { setActiveTab?: (tab: string) =>
                 {/* ── Left 60%: Info Card ── */}
                 <div className="lg:col-span-3 space-y-4">
                   {/* Header Card */}
-                  <div className="bg-white p-5 rounded-2xl border border-zinc-200 shadow-sm">
+                  <div className="bg-card p-5 rounded-2xl border border-border shadow-card">
                     <div className="flex items-start justify-between gap-2">
                       <div className="min-w-0">
-                        <h2 className="text-xl font-extrabold text-zinc-900 truncate">
+                        <h2 className="text-xl font-extrabold text-foreground truncate">
                           {[selectedGuest.firstName, selectedGuest.lastName].filter(Boolean).join(' ') || selectedGuest.name}
                         </h2>
                         <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
-                          <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-blue-50 text-blue-700 text-xs font-bold">
+                          <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-info/10 text-info text-xs font-bold">
                             {selectedGuest.countryCode || selectedGuest.country}
                           </span>
                           {selectedGuest.gender && (
@@ -523,31 +538,30 @@ export function CheckInPanel({ setActiveTab }: { setActiveTab?: (tab: string) =>
                               "inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-xs font-bold",
                               selectedGuest.gender === 'female' ? 'bg-pink-50 text-pink-700' :
                               selectedGuest.gender === 'male' ? 'bg-sky-50 text-sky-700' :
-                              'bg-zinc-100 text-zinc-600'
-                            )}>
+                              'bg-muted text-muted-foreground')}>
                               {selectedGuest.gender === 'female' ? '♀' : selectedGuest.gender === 'male' ? '♂' : '○'} {t(`guest.${selectedGuest.gender}`) || selectedGuest.gender}
                             </span>
                           )}
-                          <span className="text-xs text-zinc-400">{selectedGuest.nights} {t('dashboard.nights')} · {t('checkin.checkout')} {selectedGuest.checkOutDate}</span>
+                          <span className="text-xs text-muted-foreground">{selectedGuest.nights} {t('dashboard.nights')} · {t('checkin.checkout')} {selectedGuest.checkOutDate}</span>
                         </div>
                       </div>
-                      <Button variant="outline" size="sm" className="h-7 text-xs shrink-0" onClick={() => setEditInfoOpen(true)}>
+                      <Button variant="outline" size="sm" className="h-9 text-xs shrink-0" onClick={() => setEditInfoOpen(true)}>
                         ✎ {t('checkin.editInfo')}
                       </Button>
                     </div>
                     <div className="flex items-center gap-1.5 mt-2 flex-wrap">
                       {selectedGuest.paymentStatus === 'unpaid' && (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-50 text-amber-700 text-xs font-bold">
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-warning/10 text-warning text-xs font-bold">
                           ⚠ {t('checkin.paymentDue')} {formatCurrency(selectedGuest.totalAmount ?? (selectedGuest.nights * AVG_PRICE), language)}
                         </span>
                       )}
                       {selectedGuest.paymentStatus === 'paid' && (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 text-xs font-bold">
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-success/10 text-success text-xs font-bold">
                           ✓ {t('checkin.paid')}
                         </span>
                       )}
                       {selectedGuest.arrivalTime && (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-blue-50 text-blue-700 text-xs font-bold">
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-info/10 text-info text-xs font-bold">
                           🕒 {t(`checkin.arrivalTime.${selectedGuest.arrivalTime}`)}
                         </span>
                       )}
@@ -555,11 +569,11 @@ export function CheckInPanel({ setActiveTab }: { setActiveTab?: (tab: string) =>
                   </div>
 
                   {/* Contact + ID Card */}
-                  <div className="bg-white p-5 rounded-2xl border border-zinc-200 shadow-sm">
+                  <div className="bg-card p-5 rounded-2xl border border-border shadow-card">
                     {/* Contact Section */}
                     <div className="flex items-center gap-1.5 mb-2">
                       <div className="w-1.5 h-1.5 rounded-full bg-blue-500" />
-                      <div className="text-[11px] font-extrabold text-blue-500 uppercase tracking-wider">{t('checkin.contactSection')}</div>
+                      <div className="text-xs font-extrabold text-blue-500 uppercase tracking-wider">{t('checkin.contactSection')}</div>
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-5 gap-y-1">
                       <FieldRow icon="📧" iconBg="bg-blue-50" label={t('checkin.email')} value={selectedGuest.email} placeholder={t('checkin.notProvided')} />
@@ -588,7 +602,7 @@ export function CheckInPanel({ setActiveTab }: { setActiveTab?: (tab: string) =>
                     <div className="border-t border-zinc-100 mt-2 pt-2">
                       <div className="flex items-center gap-1.5 mb-2">
                         <div className="w-1.5 h-1.5 rounded-full bg-violet-500" />
-                        <div className="text-[11px] font-extrabold text-violet-500 uppercase tracking-wider">{t('checkin.idSection')}</div>
+                        <div className="text-xs font-extrabold text-violet-500 uppercase tracking-wider">{t('checkin.idSection')}</div>
                       </div>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-5 gap-y-1">
                         <FieldRow icon="🛂" iconBg="bg-violet-50" label={t('checkin.idType.label')} value={selectedGuest.idType ? t(`checkin.idType.${selectedGuest.idType}`) : undefined} placeholder={t('checkin.notProvided')}>
@@ -608,61 +622,61 @@ export function CheckInPanel({ setActiveTab }: { setActiveTab?: (tab: string) =>
 
                 {/* ── Right 40%: Actions Stack ── */}
                 <div className="lg:col-span-2 space-y-4">
-                  <Card className="p-3 border-zinc-200 bg-white shadow-none">
+                  <Card className="p-3 border-border bg-card shadow-card">
                     <div className="flex flex-col gap-0">
                       {/* Verification */}
-                      <div className="flex items-center justify-between py-2.5 border-b border-zinc-50">
+                      <div className="flex items-center justify-between py-2.5 border-b border-border">
                         <div className="flex items-center gap-2">
                           <div className={cn("w-6 h-6 rounded-md flex items-center justify-center text-xs",
-                            selectedGuest.passportScanned ? 'bg-emerald-50 text-emerald-600' : 'bg-zinc-100 text-zinc-400')}>
+                            selectedGuest.passportScanned ? 'bg-success/15 text-success' : 'bg-muted text-muted-foreground')}>
                             {selectedGuest.passportScanned ? '✓' : '○'}
                           </div>
-                          <span className={cn("text-sm font-semibold", selectedGuest.passportScanned ? 'text-emerald-600' : 'text-zinc-500')}>
+                          <span className={cn("text-sm font-semibold", selectedGuest.passportScanned ? 'text-success' : 'text-muted-foreground')}>
                             {selectedGuest.passportScanned ? t('checkin.verified') : t('checkin.scanPassport')}
                           </span>
                         </div>
                         {!selectedGuest.passportScanned && (
-                          <Button variant="outline" size="sm" className="h-5 text-[9px] px-2" onClick={() => scanPassport(selectedGuest.id)}>{t('checkin.scanPassport')}</Button>
+                          <Button variant="outline" size="sm" className="h-9 text-xs px-3" onClick={() => scanPassport(selectedGuest.id)}>{t('checkin.scanPassport')}</Button>
                         )}
                       </div>
                       {/* Payment */}
-                      <div className="flex items-center justify-between py-2.5 border-b border-zinc-50">
+                      <div className="flex items-center justify-between py-2.5 border-b border-border">
                         <div className="flex items-center gap-2">
                           <div className={cn("w-6 h-6 rounded-md flex items-center justify-center text-xs",
-                            selectedGuest.paymentStatus === 'unpaid' ? 'bg-red-50 text-red-500' : 'bg-emerald-50 text-emerald-500')}>
+                            selectedGuest.paymentStatus === 'unpaid' ? 'bg-destructive/15 text-destructive' : 'bg-success/15 text-success')}>
                             {selectedGuest.paymentStatus === 'unpaid' ? '⚠' : '✓'}
                           </div>
-                          <span className={cn("text-sm font-semibold", selectedGuest.paymentStatus === 'unpaid' ? 'text-red-600' : 'text-emerald-600')}>
+                          <span className={cn("text-sm font-semibold", selectedGuest.paymentStatus === 'unpaid' ? 'text-destructive' : 'text-success')}>
                             {selectedGuest.paymentStatus === 'unpaid'
                               ? `${formatCurrency(selectedGuest.totalAmount ?? (selectedGuest.nights * AVG_PRICE), language)} ${t('checkin.unpaid')}`
                               : t('checkin.allSettled')}
                           </span>
                         </div>
                         {selectedGuest.paymentStatus === 'unpaid' && (
-                          <Button size="sm" variant="destructive" className="h-8 sm:h-7 text-[10px] sm:text-[9px] px-2.5 sm:px-2 min-w-[56px]" onClick={() => handleCollectPayment(selectedGuest.id, selectedGuest.name, selectedGuest.totalAmount)}>{t('checkin.collect')}</Button>
+                          <Button size="sm" variant="destructive" className="h-9 text-xs px-3 min-w-[64px]" onClick={() => handleCollectPayment(selectedGuest.id, selectedGuest.name, selectedGuest.totalAmount)}>{t('checkin.collect')}</Button>
                         )}
                       </div>
                       {/* Notes */}
                       <div className="flex items-center gap-2 py-2.5">
-                        <div className="w-6 h-6 rounded-md bg-amber-50 flex items-center justify-center text-xs text-amber-600">📝</div>
-                        <Input className="h-7 bg-zinc-50 border-zinc-200 text-xs flex-1" placeholder="..." value={editNotes}
+                        <div className="w-6 h-6 rounded-md bg-warning/15 flex items-center justify-center text-xs text-warning">📝</div>
+                        <Input className="h-9 bg-muted border-border text-xs flex-1" placeholder="..." value={editNotes}
                           onChange={e => { if (selectedGuest) handleNotesChange(e.target.value, selectedGuest.id); }} />
                       </div>
                     </div>
                   </Card>
 
-                  <Card className="p-4 border-emerald-200 shadow-none">
-                    <Label className="text-xs text-emerald-600 font-extrabold uppercase tracking-wider mb-1 flex items-center gap-1.5">
+                  <Card className="p-4 border-success/30 shadow-card">
+                    <Label className="text-xs text-success font-extrabold uppercase tracking-wider mb-1 flex items-center gap-1.5">
                       <BedDouble className="h-3.5 w-3.5" />{t('checkin.assignBed')}
                     </Label>
-                    <div className="text-[11px] text-zinc-500 mb-2">
+                    <div className="text-xs text-muted-foreground mb-2">
                       {t('checkin.recommendationFor') || 'For'}
                       <span className="font-bold text-pink-600">{selectedGuest.gender === 'female' ? ' ♀ Female' : selectedGuest.gender === 'male' ? ' ♂ Male' : ''}</span>
                       {selectedGuest.roomPreference && (
-                        <> · <span className="font-bold text-indigo-600">{t('checkin.prefers') || 'prefers'} {selectedGuest.roomPreference}</span></>
+                        <> · <span className="font-bold text-info">{t('checkin.prefers') || 'prefers'} {selectedGuest.roomPreference}</span></>
                       )}
                     </div>
-                    <Button size="lg" className="w-full h-11 sm:h-10 text-sm mb-2 bg-blue-600 hover:bg-blue-700 text-white shadow-md disabled:bg-zinc-300 disabled:cursor-not-allowed"
+                    <Button size="lg" className="w-full h-11 sm:h-10 text-sm mb-2 bg-primary hover:bg-primary/90 text-primary-foreground shadow-pop disabled:bg-muted disabled:text-muted-foreground disabled:cursor-not-allowed"
                       disabled={!scoredBeds.length || selectedGuest.paymentStatus === 'unpaid' || selectedGuest.paymentStatus === 'partial'}
                       onClick={() => {
                         if (!scoredBeds.length) return;
@@ -674,7 +688,7 @@ export function CheckInPanel({ setActiveTab }: { setActiveTab?: (tab: string) =>
                       {t('checkin.autoAssign') || 'Auto Assign & Check-in'}
                     </Button>
                     {(selectedGuest.paymentStatus === 'unpaid' || selectedGuest.paymentStatus === 'partial') && (
-                      <p className="text-xs text-amber-600 mb-2 -mt-1 font-medium">⚠ {t('checkin.collectBeforeAssign') || 'Please collect payment first before assigning a bed'}</p>
+                      <p className="text-xs text-warning mb-2 -mt-1 font-medium">⚠ {t('checkin.collectBeforeAssign') || 'Please collect payment first before assigning a bed'}</p>
                     )}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-[420px] overflow-y-auto pr-1">
                       {scoredBeds.map((score, idx) => {
@@ -687,54 +701,54 @@ export function CheckInPanel({ setActiveTab }: { setActiveTab?: (tab: string) =>
                         const bedTypeName = score.bedType === 'bottom' ? t('checkin.bottomBunk') : t('checkin.topBunk');
                         return (
                           <button key={score.bedId} onClick={() => setSelectedBedId(score.bedId)}
-                            className={cn("p-3 sm:p-3.5 rounded-xl border-2 text-left transition-all cursor-pointer relative min-h-[140px] sm:min-h-[150px] flex flex-col",
-                              isSelected ? 'border-blue-600 bg-blue-50 ring-4 ring-blue-200 shadow-lg scale-[1.02]' :
-                              isTop ? 'border-emerald-400 bg-emerald-50/40 hover:border-emerald-500 shadow-sm' :
-                              'border-zinc-200 bg-white hover:border-zinc-400 hover:shadow-sm')}>
-                            {showBestTag && <span className="absolute -top-2.5 left-3 text-[10px] font-extrabold bg-emerald-500 text-white px-2.5 py-0.5 rounded-full shadow-md ring-2 ring-white">★ BEST MATCH</span>}
+                            className={cn("p-3 sm:p-3.5 rounded-xl border-2 text-left transition-all cursor-pointer relative min-h-[140px] sm:min-h-[150px] flex flex-col hover:-translate-y-0.5",
+                              isSelected ? 'border-primary bg-primary/5 ring-4 ring-primary/20 shadow-pop scale-[1.02]' :
+                              isTop ? 'border-success/60 bg-success/5 hover:border-success hover:shadow-pop' :
+                              'border-border bg-card hover:border-primary/40 hover:shadow-pop')}>
+                            {showBestTag && <span className="absolute -top-2.5 left-3 text-xs font-extrabold bg-success text-success-foreground px-2.5 py-0.5 rounded-full shadow-pop ring-2 ring-card">★ BEST MATCH</span>}
                             <div className="flex items-center justify-between gap-1 mb-1">
-                              <span className="font-bold text-sm text-zinc-900 truncate">{roomTypeName}</span>
-                              <span className="text-[10px] text-zinc-400 shrink-0">R{score.roomNumber}</span>
+                              <span className="font-bold text-sm text-foreground truncate">{roomTypeName}</span>
+                              <span className="text-xs text-muted-foreground shrink-0">R{score.roomNumber}</span>
                             </div>
-                            <div className="text-[11px] text-zinc-500 mb-2">
+                            <div className="text-xs text-muted-foreground mb-2">
                               {score.bedName} · {bedTypeName}
                             </div>
                             <div className="flex items-baseline gap-1 mb-1.5">
-                              <span className="text-xl font-extrabold text-zinc-900">
+                              <span className="text-xl font-extrabold text-foreground">
                                 {formatCurrency(score.pricePerNight, language)}
                               </span>
-                              <span className="text-[10px] text-zinc-500">/night</span>
+                              <span className="text-xs text-muted-foreground">/night</span>
                             </div>
-                            <div className="text-[11px] text-zinc-600 mb-2 px-2 py-1 bg-white/70 rounded">
-                              × {selectedGuest.nights} {t('dashboard.nights')} = <span className="font-bold text-zinc-900">{formatCurrency(totalForStay, language)}</span>
+                            <div className="text-xs text-foreground mb-2 px-2 py-1 bg-muted/50 rounded">
+                              × {selectedGuest.nights} {t('dashboard.nights')} = <span className="font-bold text-foreground">{formatCurrency(totalForStay, language)}</span>
                               {priceDiff !== 0 && (
-                                <span className={cn("ml-1 text-[10px]", priceDiff > 0 ? 'text-amber-600' : 'text-emerald-600')}>
+                                <span className={cn("ml-1 text-xs", priceDiff > 0 ? 'text-warning' : 'text-success')}>
                                   ({priceDiff > 0 ? '+' : ''}{formatCurrency(priceDiff, language)} vs avg)
                                 </span>
                               )}
                             </div>
                             <div className="flex flex-wrap gap-1 mt-auto">
-                              {score.bedTierMatch && <span className="text-[10px] font-bold bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded">💰 {t('checkin.tagTierMatch')}</span>}
-                              {score.genderMatch && <span className="text-[10px] font-bold bg-pink-100 text-pink-700 px-1.5 py-0.5 rounded">♀ {t('checkin.tagGender')}</span>}
-                              {score.preferenceMatch && <span className="text-[10px] font-bold bg-violet-100 text-violet-700 px-1.5 py-0.5 rounded">✓ {t('checkin.tagPref')}</span>}
-                              {score.fillExisting && <span className="text-[10px] font-bold bg-zinc-100 text-zinc-700 px-1.5 py-0.5 rounded">▣ {t('checkin.tagFill')}</span>}
-                              {score.fragmentationScore >= 7 && <span className="text-[10px] font-bold bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded">◇ {t('checkin.tagLowFrag')}</span>}
+                              {score.bedTierMatch && <span className="text-xs font-bold bg-warning/15 text-warning px-1.5 py-0.5 rounded">💰 {t('checkin.tagTierMatch')}</span>}
+                              {score.genderMatch && <span className="text-xs font-bold bg-pink-100 text-pink-700 px-1.5 py-0.5 rounded">♀ {t('checkin.tagGender')}</span>}
+                              {score.preferenceMatch && <span className="text-xs font-bold bg-violet-100 text-violet-700 px-1.5 py-0.5 rounded">✓ {t('checkin.tagPref')}</span>}
+                              {score.fillExisting && <span className="text-xs font-bold bg-muted text-muted-foreground px-1.5 py-0.5 rounded">▣ {t('checkin.tagFill')}</span>}
+                              {score.fragmentationScore >= 7 && <span className="text-xs font-bold bg-success/15 text-success px-1.5 py-0.5 rounded">◇ {t('checkin.tagLowFrag')}</span>}
                             </div>
                           </button>
                         );
                       })}
                       {scoredBeds.length === 0 && (
-                        <div className="col-span-full py-3 text-center text-xs text-red-500">{t('checkin.noAvailableBeds') || 'No suitable beds available'}</div>
+                        <div className="col-span-full py-3 text-center text-xs text-destructive">{t('checkin.noAvailableBeds') || 'No suitable beds available'}</div>
                       )}
                     </div>
                     {(selectedGuest.paymentStatus === 'unpaid' || selectedGuest.paymentStatus === 'partial') && (
-                      <p className="text-[11px] font-medium text-amber-600 mt-1.5">⚠️ {t('checkin.unpaidWarning')}</p>
+                      <p className="text-xs font-medium text-warning mt-1.5">⚠️ {t('checkin.unpaidWarning')}</p>
                     )}
-                    <div className="mt-2 pt-2 border-t border-zinc-100 flex justify-end gap-2">
+                    <div className="mt-2 pt-2 border-t border-border flex justify-end gap-2">
                       <Button size="lg"
                         disabled={!selectedBedId || !selectedGuest.passportScanned || selectedGuest.paymentStatus === 'unpaid' || selectedGuest.paymentStatus === 'partial' || isProcessing}
                         onClick={handleCheckIn}
-                        className="w-full sm:w-auto h-11 sm:h-10 px-5 text-sm shadow-lg disabled:bg-zinc-300 disabled:cursor-not-allowed">
+                        className="w-full sm:w-auto h-11 sm:h-10 px-5 text-sm shadow-pop bg-primary hover:bg-primary/90 text-primary-foreground disabled:bg-muted disabled:text-muted-foreground disabled:cursor-not-allowed">
                         {isProcessing ? (
                           <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> {t('checkin.processing') || 'Processing...'}</>
                         ) : (
@@ -775,8 +789,12 @@ export function CheckInPanel({ setActiveTab }: { setActiveTab?: (tab: string) =>
                 )}
               </div>
             ) : (
-              <div className="h-full border-2 border-dashed border-zinc-200 rounded-2xl flex items-center justify-center text-zinc-400 bg-zinc-50/50 text-sm">
-                {t('checkin.selectGuestToBegin')}
+              <div className="h-full border-2 border-dashed border-border rounded-2xl flex items-center justify-center bg-muted/30">
+                <EmptyState
+                  emoji="👋"
+                  title={t('checkin.selectGuestToBegin')}
+                  description={t('checkin.selectGuestDesc') || 'Pick a guest from the left or create a new walk-in'}
+                />
               </div>
             )}
           </div>
@@ -787,17 +805,17 @@ export function CheckInPanel({ setActiveTab }: { setActiveTab?: (tab: string) =>
       {subTab === 'checked-in' && (
         <div className="flex-1 overflow-auto">
           {/* Room Summaries */}
-          <div className="mb-3 p-3 bg-white rounded-xl border border-zinc-200 shadow-sm">
-            <h4 className="text-[10px] font-semibold text-zinc-500 uppercase mb-2">{t('checkin.roomStatus') || 'Room Status'}</h4>
+          <div className="mb-3 p-3 bg-card rounded-xl border border-border shadow-card">
+            <h4 className="text-xs font-semibold text-muted-foreground uppercase mb-2">{t('checkin.roomStatus') || 'Room Status'}</h4>
             <div className="space-y-1">
               {roomSummaries.map(s => (
-                <div key={s.roomId} className="flex items-center justify-between text-xs px-2 py-1.5 rounded-lg bg-zinc-50">
-                  <span className="text-zinc-600 font-medium">
+                <div key={s.roomId} className="flex items-center justify-between text-xs px-2 py-1.5 rounded-lg bg-muted/60">
+                  <span className="text-muted-foreground font-medium">
                     {s.roomType === 'dorm-mixed' ? t('bedboard.mixedDorm') : s.roomType === 'dorm-female' ? t('bedboard.femaleDorm') : t('bedboard.private')} R{s.roomNumber}
                   </span>
-                  <span className={cn("text-[11px] font-bold",
-                    s.occupiedBeds === s.totalBeds ? "text-red-600" :
-                    s.occupiedBeds > 0 ? "text-amber-600" : "text-emerald-600")}>
+                  <span className={cn("text-xs font-bold",
+                    s.occupiedBeds === s.totalBeds ? "text-destructive" :
+                    s.occupiedBeds > 0 ? "text-warning" : "text-success")}>
                     {s.occupiedBeds}/{s.totalBeds}
                   </span>
                 </div>
@@ -807,76 +825,85 @@ export function CheckInPanel({ setActiveTab }: { setActiveTab?: (tab: string) =>
           {/* 移动端卡片列表 */}
           <div className="md:hidden space-y-2">
             {filterList(checkedInGuests).map(({ guest, bed, room }) => (
-              <div key={`${guest.id}-${bed.id}`} className="bg-white rounded-xl border border-zinc-200 p-3 shadow-sm">
+              <motion.div
+                key={`${guest.id}-${bed.id}`}
+                whileTap={{ scale: 0.98 }}
+                className="bg-card rounded-xl border border-border p-3 shadow-card"
+              >
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-2">
-                    <div className="h-8 w-8 rounded-full bg-zinc-100 flex items-center justify-center text-zinc-600 font-bold text-xs">{guest.name.charAt(0)}</div>
+                    <div className="h-8 w-8 rounded-full bg-accent flex items-center justify-center text-accent-foreground font-bold text-xs">{guest.name.charAt(0)}</div>
                     <div>
-                      <span className="text-sm font-semibold text-zinc-900">{guest.name}</span>
-                      <span className="text-[10px] text-zinc-500 block">{guest.countryCode}</span>
+                      <span className="text-sm font-semibold text-foreground">{guest.name}</span>
+                      <span className="text-xs text-muted-foreground block">{guest.countryCode}</span>
                     </div>
                   </div>
-                  <span className={cn("inline-flex px-2 py-0.5 rounded text-[10px] font-bold uppercase",
-                    guest.paymentStatus === 'paid' ? 'text-emerald-600 bg-emerald-50' :
-                    guest.paymentStatus === 'unpaid' ? 'text-red-600 bg-red-50' : 'text-amber-600 bg-amber-50')}>
+                  <span className={cn("inline-flex px-2 py-0.5 rounded text-xs font-bold uppercase",
+                    guest.paymentStatus === 'paid' ? 'text-success bg-success/10' :
+                    guest.paymentStatus === 'unpaid' ? 'text-destructive bg-destructive/10' : 'text-warning bg-warning/10')}>
                     {guest.paymentStatus === 'paid' ? t('checkin.paid') : guest.paymentStatus === 'unpaid' ? t('checkin.unpaid') : t('checkin.partial')}
                   </span>
                 </div>
-                <div className="flex items-center justify-between text-xs text-zinc-600 mb-2">
+                <div className="flex items-center justify-between text-xs text-muted-foreground mb-2">
                   <span className="font-medium">{format(parseISO(guest.checkInDate), 'MMM d')} – {format(parseISO(guest.checkOutDate), 'MMM d')} · {guest.nights}N</span>
-                  <span className="font-semibold text-zinc-900">{bed.name} · {room.name || room.number}</span>
+                  <span className="font-semibold text-foreground">{bed.name} · {room.name || room.number}</span>
                 </div>
-                <Button variant="ghost" size="sm" className="w-full h-8 text-xs text-red-500 hover:text-red-700 hover:bg-red-50 gap-1"
+                <Button variant="ghost" size="sm" className="w-full h-9 text-xs text-destructive hover:text-destructive hover:bg-destructive/10 gap-1"
                   onClick={() => handleCheckout(bed.id, guest.name, guest)}>
                   <LogOut className="h-3 w-3" /> {t('checkin.checkout') || 'Checkout'}
                 </Button>
-              </div>
+              </motion.div>
             ))}
             {filterList(checkedInGuests).length === 0 && (
-              <div className="py-8 text-center text-xs text-zinc-400">{t('checkin.noCheckedIn') || 'No checked-in guests'}</div>
+              <EmptyState
+                emoji="🛏️"
+                title={t('checkin.noCheckedIn') || 'No checked-in guests'}
+                description={t('checkin.noCheckedInDesc') || 'Guests will appear here once they check in'}
+                compact
+              />
             )}
           </div>
           {/* 桌面端表格 */}
-          <div className="hidden md:block bg-white rounded-2xl border border-zinc-200 shadow-sm overflow-hidden">
+          <div className="hidden md:block bg-card rounded-2xl border border-border shadow-card overflow-hidden">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="border-b border-zinc-100 bg-zinc-50/50">
-                  <th className="px-4 py-3 text-[10px] font-bold text-zinc-500 uppercase tracking-wider">{t('reservations.guest')}</th>
-                  <th className="px-4 py-3 text-[10px] font-bold text-zinc-500 uppercase tracking-wider">{t('reservations.dates')}</th>
-                  <th className="px-4 py-3 text-[10px] font-bold text-zinc-500 uppercase tracking-wider">{t('reservations.bed')}</th>
-                  <th className="px-4 py-3 text-[10px] font-bold text-zinc-500 uppercase tracking-wider">{t('reservations.payment')}</th>
-                  <th className="px-4 py-3 text-[10px] font-bold text-zinc-500 uppercase tracking-wider w-20"></th>
+                <tr className="border-b border-border bg-muted/40">
+                  <th className="px-4 py-3 text-xs font-bold text-muted-foreground uppercase tracking-wider">{t('reservations.guest')}</th>
+                  <th className="px-4 py-3 text-xs font-bold text-muted-foreground uppercase tracking-wider">{t('reservations.dates')}</th>
+                  <th className="px-4 py-3 text-xs font-bold text-muted-foreground uppercase tracking-wider">{t('reservations.bed')}</th>
+                  <th className="px-4 py-3 text-xs font-bold text-muted-foreground uppercase tracking-wider">{t('reservations.payment')}</th>
+                  <th className="px-4 py-3 text-xs font-bold text-muted-foreground uppercase tracking-wider w-20"></th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-zinc-100">
+              <tbody className="divide-y divide-border">
                 {filterList(checkedInGuests).map(({ guest, bed, room }) => (
-                  <tr key={`${guest.id}-${bed.id}`} className="hover:bg-zinc-50/50 transition-colors">
+                  <tr key={`${guest.id}-${bed.id}`} className="hover:bg-accent/30 transition-colors">
                     <td className="px-4 py-3 whitespace-nowrap">
                       <div className="flex items-center gap-2.5">
-                        <div className="h-8 w-8 rounded-full bg-zinc-100 flex items-center justify-center text-zinc-600 font-bold text-xs">{guest.name.charAt(0)}</div>
+                        <div className="h-8 w-8 rounded-full bg-accent flex items-center justify-center text-accent-foreground font-bold text-xs">{guest.name.charAt(0)}</div>
                         <div>
-                          <span className="text-xs font-semibold text-zinc-900">{guest.name}</span>
-                          <span className="text-[10px] text-zinc-500 block">{guest.countryCode}</span>
+                          <span className="text-xs font-semibold text-foreground">{guest.name}</span>
+                          <span className="text-xs text-muted-foreground block">{guest.countryCode}</span>
                         </div>
                       </div>
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap">
-                      <span className="text-xs text-zinc-700 font-medium">{format(parseISO(guest.checkInDate), 'MMM d')} – {format(parseISO(guest.checkOutDate), 'MMM d')}</span>
-                      <span className="text-[10px] text-zinc-500 block">{guest.nights}N</span>
+                      <span className="text-xs text-foreground font-medium">{format(parseISO(guest.checkInDate), 'MMM d')} – {format(parseISO(guest.checkOutDate), 'MMM d')}</span>
+                      <span className="text-xs text-muted-foreground block">{guest.nights}N</span>
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap">
-                      <span className="text-xs font-semibold text-zinc-900">{bed.name}</span>
-                      <span className="text-[10px] text-zinc-500 block">{room.name || room.number}</span>
+                      <span className="text-xs font-semibold text-foreground">{bed.name}</span>
+                      <span className="text-xs text-muted-foreground block">{room.name || room.number}</span>
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap">
-                      <span className={cn("inline-flex px-2 py-0.5 rounded text-[10px] font-bold uppercase",
-                        guest.paymentStatus === 'paid' ? 'text-emerald-600 bg-emerald-50' :
-                        guest.paymentStatus === 'unpaid' ? 'text-red-600 bg-red-50' : 'text-amber-600 bg-amber-50')}>
+                      <span className={cn("inline-flex px-2 py-0.5 rounded text-xs font-bold uppercase",
+                        guest.paymentStatus === 'paid' ? 'text-success bg-success/10' :
+                        guest.paymentStatus === 'unpaid' ? 'text-destructive bg-destructive/10' : 'text-warning bg-warning/10')}>
                         {guest.paymentStatus === 'paid' ? t('checkin.paid') : guest.paymentStatus === 'unpaid' ? t('checkin.unpaid') : t('checkin.partial')}
                       </span>
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap">
-                      <Button variant="ghost" size="sm" className="h-7 text-xs text-red-500 hover:text-red-700 hover:bg-red-50 gap-1"
+                      <Button variant="ghost" size="sm" className="h-9 text-xs text-destructive hover:text-destructive hover:bg-destructive/10 gap-1"
                         onClick={() => handleCheckout(bed.id, guest.name, guest)}>
                         <LogOut className="h-3 w-3" /> {t('checkin.checkout') || 'Checkout'}
                       </Button>
@@ -886,7 +913,12 @@ export function CheckInPanel({ setActiveTab }: { setActiveTab?: (tab: string) =>
               </tbody>
             </table>
             {filterList(checkedInGuests).length === 0 && (
-              <div className="py-8 text-center text-xs text-zinc-400">{t('checkin.noCheckedIn') || 'No checked-in guests'}</div>
+              <EmptyState
+                emoji="🛏️"
+                title={t('checkin.noCheckedIn') || 'No checked-in guests'}
+                description={t('checkin.noCheckedInDesc') || 'Guests will appear here once they check in'}
+                compact
+              />
             )}
           </div>
         </div>
@@ -895,48 +927,48 @@ export function CheckInPanel({ setActiveTab }: { setActiveTab?: (tab: string) =>
       {/* ── Reserved Tab ── */}
       {subTab === 'reserved' && (
         <div className="flex-1 overflow-auto">
-          <div className="bg-white rounded-2xl border border-zinc-200 shadow-sm overflow-hidden">
+          <div className="bg-card rounded-2xl border border-border shadow-card overflow-hidden">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="border-b border-zinc-100 bg-zinc-50/50">
-                  <th className="px-4 py-3 text-[10px] font-bold text-zinc-500 uppercase tracking-wider">{t('reservations.guest')}</th>
-                  <th className="px-4 py-3 text-[10px] font-bold text-zinc-500 uppercase tracking-wider">{t('reservations.dates')}</th>
-                  <th className="px-4 py-3 text-[10px] font-bold text-zinc-500 uppercase tracking-wider">{t('reservations.bed')}</th>
-                  <th className="px-4 py-3 text-[10px] font-bold text-zinc-500 uppercase tracking-wider">{t('reservations.payment')}</th>
-                  <th className="px-4 py-3 text-[10px] font-bold text-zinc-500 uppercase tracking-wider">Source</th>
+                <tr className="border-b border-border bg-muted/40">
+                  <th className="px-4 py-3 text-xs font-bold text-muted-foreground uppercase tracking-wider">{t('reservations.guest')}</th>
+                  <th className="px-4 py-3 text-xs font-bold text-muted-foreground uppercase tracking-wider">{t('reservations.dates')}</th>
+                  <th className="px-4 py-3 text-xs font-bold text-muted-foreground uppercase tracking-wider">{t('reservations.bed')}</th>
+                  <th className="px-4 py-3 text-xs font-bold text-muted-foreground uppercase tracking-wider">{t('reservations.payment')}</th>
+                  <th className="px-4 py-3 text-xs font-bold text-muted-foreground uppercase tracking-wider">Source</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-zinc-100">
+              <tbody className="divide-y divide-border">
                 {filterList(reservedGuests).map(({ guest, bed, room }) => {
                   const src = getSourceConfig(guest.source);
                   return (
-                    <tr key={`${guest.id}-${bed.id}`} className="hover:bg-zinc-50/50 transition-colors">
+                    <tr key={`${guest.id}-${bed.id}`} className="hover:bg-accent/30 transition-colors">
                       <td className="px-4 py-3 whitespace-nowrap">
                         <div className="flex items-center gap-2.5">
-                          <div className="h-8 w-8 rounded-full bg-zinc-100 flex items-center justify-center text-zinc-600 font-bold text-xs">{guest.name.charAt(0)}</div>
+                          <div className="h-8 w-8 rounded-full bg-accent flex items-center justify-center text-accent-foreground font-bold text-xs">{guest.name.charAt(0)}</div>
                           <div>
-                            <span className="text-xs font-semibold text-zinc-900">{guest.name}</span>
-                            <span className="text-[10px] text-zinc-500 block">{guest.countryCode}</span>
+                            <span className="text-xs font-semibold text-foreground">{guest.name}</span>
+                            <span className="text-xs text-muted-foreground block">{guest.countryCode}</span>
                           </div>
                         </div>
                       </td>
                       <td className="px-4 py-3 whitespace-nowrap">
-                        <span className="text-xs text-zinc-700 font-medium">{format(parseISO(guest.checkInDate), 'MMM d')} – {format(parseISO(guest.checkOutDate), 'MMM d')}</span>
-                        <span className="text-[10px] text-zinc-500 block">{guest.nights}N</span>
+                        <span className="text-xs text-foreground font-medium">{format(parseISO(guest.checkInDate), 'MMM d')} – {format(parseISO(guest.checkOutDate), 'MMM d')}</span>
+                        <span className="text-xs text-muted-foreground block">{guest.nights}N</span>
                       </td>
                       <td className="px-4 py-3 whitespace-nowrap">
-                        <span className="text-xs font-semibold text-zinc-900">{bed.name}</span>
-                        <span className="text-[10px] text-zinc-500 block">{room.name || room.number}</span>
+                        <span className="text-xs font-semibold text-foreground">{bed.name}</span>
+                        <span className="text-xs text-muted-foreground block">{room.name || room.number}</span>
                       </td>
                       <td className="px-4 py-3 whitespace-nowrap">
-                        <span className={cn("inline-flex px-2 py-0.5 rounded text-[10px] font-bold uppercase",
-                          guest.paymentStatus === 'paid' ? 'text-emerald-600 bg-emerald-50' :
-                          guest.paymentStatus === 'unpaid' ? 'text-red-600 bg-red-50' : 'text-amber-600 bg-amber-50')}>
+                        <span className={cn("inline-flex px-2 py-0.5 rounded text-xs font-bold uppercase",
+                          guest.paymentStatus === 'paid' ? 'text-success bg-success/10' :
+                          guest.paymentStatus === 'unpaid' ? 'text-destructive bg-destructive/10' : 'text-warning bg-warning/10')}>
                           {guest.paymentStatus === 'paid' ? t('checkin.paid') : guest.paymentStatus === 'unpaid' ? t('checkin.unpaid') : t('checkin.partial')}
                         </span>
                       </td>
                       <td className="px-4 py-3 whitespace-nowrap">
-                        <span className={cn("text-[10px] font-medium px-1.5 py-0.5 rounded", src.cls)}>{t(src.labelKey)}</span>
+                        <span className={cn("text-xs font-medium px-1.5 py-0.5 rounded", src.cls)}>{t(src.labelKey)}</span>
                       </td>
                     </tr>
                   );
@@ -944,7 +976,12 @@ export function CheckInPanel({ setActiveTab }: { setActiveTab?: (tab: string) =>
               </tbody>
             </table>
             {filterList(reservedGuests).length === 0 && (
-              <div className="py-8 text-center text-xs text-zinc-400">{t('checkin.noReserved') || 'No upcoming reservations'}</div>
+              <EmptyState
+                emoji="📅"
+                title={t('checkin.noReserved') || 'No upcoming reservations'}
+                description={t('checkin.noReservedDesc') || 'Future reservations from iCal or manual bookings will show here'}
+                compact
+              />
             )}
           </div>
         </div>

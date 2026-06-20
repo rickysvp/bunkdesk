@@ -74,44 +74,44 @@ export function EditGuestInfoModal({ open, onClose, guest, onSave }: Props) {
       {open && (
         <motion.div
           initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-          className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4"
+          className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4"
           onClick={onClose}
         >
           <motion.div
             initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 20, opacity: 0 }}
-            className="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto"
+            className="bg-card rounded-2xl shadow-modal w-full max-w-2xl max-h-[90vh] overflow-y-auto ring-1 ring-border/50"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center justify-between p-4 border-b border-zinc-100 sticky top-0 bg-white z-10">
-              <h3 className="text-base font-semibold text-zinc-900">{t('checkin.editInfo')}</h3>
-              <button onClick={onClose} className="p-1 hover:bg-zinc-100 rounded-lg">
-                <X className="h-4 w-4 text-zinc-500" />
+            <div className="flex items-center justify-between p-4 border-b border-border sticky top-0 bg-card z-10">
+              <h3 className="text-base font-semibold text-foreground">{t('checkin.editInfo')}</h3>
+              <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-colors" aria-label="Close">
+                <X className="h-4 w-4" />
               </button>
             </div>
             <form onSubmit={handleSubmit} className="p-4 space-y-3">
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1.5">
-                  <Label className="text-[10px] font-semibold text-zinc-500 uppercase">{t('checkin.firstName')}</Label>
+                  <Label className="text-xs font-semibold text-zinc-500 uppercase">{t('checkin.firstName')}</Label>
                   <Input value={draft.firstName ?? ''} onChange={e => setDraft({...draft, firstName: e.target.value})} className="h-9 bg-zinc-50 border-zinc-200" />
                 </div>
                 <div className="space-y-1.5">
-                  <Label className="text-[10px] font-semibold text-zinc-500 uppercase">{t('checkin.lastName')}</Label>
+                  <Label className="text-xs font-semibold text-zinc-500 uppercase">{t('checkin.lastName')}</Label>
                   <Input value={draft.lastName ?? ''} onChange={e => setDraft({...draft, lastName: e.target.value})} className="h-9 bg-zinc-50 border-zinc-200" />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1.5">
-                  <Label className="text-[10px] font-semibold text-zinc-500 uppercase">{t('checkin.phone')}</Label>
+                  <Label className="text-xs font-semibold text-zinc-500 uppercase">{t('checkin.phone')}</Label>
                   <Input type="tel" value={draft.phone ?? ''} onChange={e => setDraft({...draft, phone: e.target.value})} className="h-9 bg-zinc-50 border-zinc-200" />
                 </div>
                 <div className="space-y-1.5">
-                  <Label className="text-[10px] font-semibold text-zinc-500 uppercase">{t('checkin.email')}</Label>
+                  <Label className="text-xs font-semibold text-zinc-500 uppercase">{t('checkin.email')}</Label>
                   <Input type="email" value={draft.email ?? ''} onChange={e => setDraft({...draft, email: e.target.value})} className="h-9 bg-zinc-50 border-zinc-200" />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1.5">
-                  <Label className="text-[10px] font-semibold text-zinc-500 uppercase">{t('checkin.idType.label')}</Label>
+                  <Label className="text-xs font-semibold text-zinc-500 uppercase">{t('checkin.idType.label')}</Label>
                   <Select value={draft.idType ?? 'passport'} onValueChange={(val: string) => setDraft({...draft, idType: val as Guest['idType']})}>
                     <SelectTrigger className="h-9 bg-zinc-50 border-zinc-200"><SelectValue /></SelectTrigger>
                     <SelectContent>
@@ -122,13 +122,13 @@ export function EditGuestInfoModal({ open, onClose, guest, onSave }: Props) {
                   </Select>
                 </div>
                 <div className="space-y-1.5">
-                  <Label className="text-[10px] font-semibold text-zinc-500 uppercase">{t('checkin.passportOrId')}</Label>
+                  <Label className="text-xs font-semibold text-zinc-500 uppercase">{t('checkin.passportOrId')}</Label>
                   <Input value={draft.passportOrId ?? ''} onChange={e => setDraft({...draft, passportOrId: e.target.value})} className="h-9 bg-zinc-50 border-zinc-200" />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1.5">
-                  <Label className="text-[10px] font-semibold text-zinc-500 uppercase">{t('checkin.arrivalTime.label')}</Label>
+                  <Label className="text-xs font-semibold text-zinc-500 uppercase">{t('checkin.arrivalTime.label')}</Label>
                   <Select value={draft.arrivalTime ?? ''} onValueChange={(val: string) => setDraft({...draft, arrivalTime: val as Guest['arrivalTime']})}>
                     <SelectTrigger className="h-9 bg-zinc-50 border-zinc-200"><SelectValue placeholder="—" /></SelectTrigger>
                     <SelectContent>
@@ -140,7 +140,7 @@ export function EditGuestInfoModal({ open, onClose, guest, onSave }: Props) {
                   </Select>
                 </div>
                 <div className="space-y-1.5">
-                  <Label className="text-[10px] font-semibold text-zinc-500 uppercase">{t('checkin.source.label')}</Label>
+                  <Label className="text-xs font-semibold text-zinc-500 uppercase">{t('checkin.source.label')}</Label>
                   <Select value={draft.bookingSource ?? 'walk-in'} onValueChange={(val: string) => setDraft({...draft, bookingSource: val as Guest['bookingSource']})}>
                     <SelectTrigger className="h-9 bg-zinc-50 border-zinc-200"><SelectValue /></SelectTrigger>
                     <SelectContent>
@@ -156,7 +156,7 @@ export function EditGuestInfoModal({ open, onClose, guest, onSave }: Props) {
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1.5">
-                  <Label className="text-[10px] font-semibold text-zinc-500 uppercase">{t('checkin.bedPreference') || 'Bed Preference'}</Label>
+                  <Label className="text-xs font-semibold text-zinc-500 uppercase">{t('checkin.bedPreference') || 'Bed Preference'}</Label>
                   <Select value={draft.bedPreference ?? ''} onValueChange={(val: string) => setDraft({...draft, bedPreference: val as Guest['bedPreference']})}>
                     <SelectTrigger className="h-9 bg-zinc-50 border-zinc-200"><SelectValue placeholder="—" /></SelectTrigger>
                     <SelectContent>
@@ -167,7 +167,7 @@ export function EditGuestInfoModal({ open, onClose, guest, onSave }: Props) {
                   </Select>
                 </div>
                 <div className="space-y-1.5">
-                  <Label className="text-[10px] font-semibold text-zinc-500 uppercase">{t('guest.gender') || 'Gender'}</Label>
+                  <Label className="text-xs font-semibold text-zinc-500 uppercase">{t('guest.gender') || 'Gender'}</Label>
                   <Select value={draft.gender ?? ''} onValueChange={(val: string) => setDraft({...draft, gender: val as Guest['gender']})}>
                     <SelectTrigger className="h-9 bg-zinc-50 border-zinc-200"><SelectValue placeholder="—" /></SelectTrigger>
                     <SelectContent>
@@ -179,7 +179,7 @@ export function EditGuestInfoModal({ open, onClose, guest, onSave }: Props) {
                 </div>
               </div>
               <div className="space-y-1.5">
-                <Label className="text-[10px] font-semibold text-zinc-500 uppercase">{t('checkin.notes')}</Label>
+                <Label className="text-xs font-semibold text-zinc-500 uppercase">{t('checkin.notes')}</Label>
                 <Input value={draft.notes ?? ''} onChange={e => setDraft({...draft, notes: e.target.value})} className="h-9 bg-zinc-50 border-zinc-200" />
               </div>
               <div className="pt-3 border-t border-zinc-100 flex justify-end gap-2">

@@ -38,20 +38,20 @@ export function FilterBar({
     <div className="flex items-center gap-3 flex-wrap">
       {/* Date navigation */}
       <div className="flex items-center gap-1 bg-white border rounded-lg p-0.5">
-        <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={goBack}>
+        <Button variant="ghost" size="sm" className="h-9 w-9 p-0" onClick={goBack}>
           <ChevronLeft className="h-4 w-4" />
         </Button>
         <button
           data-date-picker
-          className="text-xs font-medium px-2 hover:bg-zinc-100 rounded h-7 min-w-[120px]"
+          className="text-xs font-medium px-2 hover:bg-zinc-100 rounded h-9 min-w-[120px]"
           onClick={onDatePickerToggle}
         >
           {format(startDate, 'MMM d')} – {format(new Date(startDate.getTime() + (visibleDays - 1) * 86400000), 'MMM d')} ({visibleDays}d)
         </button>
-        <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={goForward}>
+        <Button variant="ghost" size="sm" className="h-9 w-9 p-0" onClick={goForward}>
           <ChevronRight className="h-4 w-4" />
         </Button>
-        <Button variant="outline" size="sm" className="h-7 text-xs px-2" onClick={goToday}>
+        <Button variant="outline" size="sm" className="h-9 text-xs px-3" onClick={goToday}>
           {t('calendarview.today') || 'Today'}
         </Button>
       </div>

@@ -132,7 +132,7 @@ export function QuickBookingModal({ isOpen, onClose, bed, room, initialDate }: Q
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm p-4"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4"
           onClick={onClose}
         >
           <motion.div
@@ -140,16 +140,16 @@ export function QuickBookingModal({ isOpen, onClose, bed, room, initialDate }: Q
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 10 }}
             transition={{ duration: 0.15 }}
-            className="bg-white rounded-2xl shadow-xl max-w-sm w-full overflow-hidden"
+            className="bg-card rounded-2xl shadow-modal max-w-sm w-full overflow-hidden ring-1 ring-border/50"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="p-5 border-b border-zinc-100 flex items-center justify-between">
+            <div className="p-5 border-b border-border flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <UserPlus className="w-4 h-4 text-emerald-600" />
-                <h3 className="font-semibold text-zinc-900">{t('calendarview.quickBooking')}</h3>
+                <UserPlus className="w-4 h-4 text-success" />
+                <h3 className="font-semibold text-foreground">{t('calendarview.quickBooking')}</h3>
               </div>
-              <button onClick={onClose} className="p-1 hover:bg-zinc-100 rounded-lg transition-colors">
-                <X className="w-4 h-4 text-zinc-400" />
+              <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-colors" aria-label="Close">
+                <X className="w-4 h-4" />
               </button>
             </div>
 
@@ -159,27 +159,32 @@ export function QuickBookingModal({ isOpen, onClose, bed, room, initialDate }: Q
                 animate={{ opacity: 1, scale: 1 }}
                 className="p-8 flex flex-col items-center gap-3"
               >
-                <div className="w-12 h-12 rounded-full bg-emerald-100 flex items-center justify-center">
-                  <svg className="w-6 h-6 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
-                </div>
-                <p className="font-semibold text-emerald-700">{t('calendarview.bookingCreated')}</p>
-                <p className="text-xs text-zinc-500">{bed.name} · {nights}N · {formatCurrency(totalAmount, language)}</p>
+                <motion.div
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ type: 'spring', damping: 12, stiffness: 200 }}
+                  className="w-12 h-12 rounded-full bg-success/15 flex items-center justify-center"
+                >
+                  <svg className="w-6 h-6 text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" /></svg>
+                </motion.div>
+                <p className="font-semibold text-success">{t('calendarview.bookingCreated')}</p>
+                <p className="text-xs text-muted-foreground">{bed.name} · {nights}N · {formatCurrency(totalAmount, language)}</p>
               </motion.div>
             ) : (
               <form onSubmit={handleSubmit} className="p-5 space-y-4">
-                <div className="bg-zinc-50 rounded-lg p-3 flex items-center justify-between">
-                  <span className="text-xs font-medium text-zinc-600">{bed.name}</span>
-                  <span className="text-xs font-semibold text-emerald-600">${pricePerNight}/N</span>
+                <div className="bg-muted rounded-lg p-3 flex items-center justify-between">
+                  <span className="text-xs font-medium text-muted-foreground">{bed.name}</span>
+                  <span className="text-xs font-semibold text-success">${pricePerNight}/N</span>
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label className="text-[10px] font-semibold text-zinc-500 uppercase">{t('calendarview.guestName')}</Label>
+                  <Label className="text-xs font-semibold text-zinc-500 uppercase">{t('calendarview.guestName')}</Label>
                   <Input required placeholder={t('calendarview.namePlaceholder')} value={name} onChange={(e) => setName(e.target.value)} className="h-9 text-sm" autoFocus />
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1.5">
-                    <Label className="text-[10px] font-semibold text-zinc-500 uppercase">{t('calendarview.country')}</Label>
+                    <Label className="text-xs font-semibold text-zinc-500 uppercase">{t('calendarview.country')}</Label>
                     <Select value={countryCode} onValueChange={setCountryCode}>
                       <SelectTrigger className="h-9 text-sm"><SelectValue placeholder={t('calendarview.selectCountry')} /></SelectTrigger>
                       <SelectContent>
@@ -188,7 +193,7 @@ export function QuickBookingModal({ isOpen, onClose, bed, room, initialDate }: Q
                     </Select>
                   </div>
                   <div className="space-y-1.5">
-                    <Label className="text-[10px] font-semibold text-zinc-500 uppercase">{t('calendarview.gender')}</Label>
+                    <Label className="text-xs font-semibold text-zinc-500 uppercase">{t('calendarview.gender')}</Label>
                     <Select value={gender} onValueChange={(v: string) => setGender(v as 'male' | 'female' | 'other')}>
                       <SelectTrigger className="h-9 text-sm"><SelectValue placeholder={t('calendarview.selectGender')} /></SelectTrigger>
                       <SelectContent>
@@ -202,11 +207,11 @@ export function QuickBookingModal({ isOpen, onClose, bed, room, initialDate }: Q
 
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1.5">
-                    <Label className="text-[10px] font-semibold text-zinc-500 uppercase">{t('calendarview.checkIn')}</Label>
+                    <Label className="text-xs font-semibold text-zinc-500 uppercase">{t('calendarview.checkIn')}</Label>
                     <Input type="date" required value={checkInDate} onChange={(e) => setCheckInDate(e.target.value)} className="h-9 text-sm" />
                   </div>
                   <div className="space-y-1.5">
-                    <Label className="text-[10px] font-semibold text-zinc-500 uppercase">{t('calendarview.checkOut')}</Label>
+                    <Label className="text-xs font-semibold text-zinc-500 uppercase">{t('calendarview.checkOut')}</Label>
                     <Input type="date" required value={checkOutDate} onChange={(e) => setCheckOutDate(e.target.value)} className="h-9 text-sm" min={checkInDate} />
                   </div>
                 </div>
@@ -214,7 +219,7 @@ export function QuickBookingModal({ isOpen, onClose, bed, room, initialDate }: Q
                 {/* 护照/证件 — 必填 */}
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1.5">
-                    <Label className="text-[10px] font-semibold text-zinc-500 uppercase">{t('checkin.idType.label')}<span className="text-red-500">*</span></Label>
+                    <Label className="text-xs font-semibold text-zinc-500 uppercase">{t('checkin.idType.label')}<span className="text-red-500">*</span></Label>
                     <Select value={idType} onValueChange={(v: string) => setIdType(v as 'passport' | 'idCard' | 'driverLicense')}>
                       <SelectTrigger className="h-9 text-sm"><SelectValue /></SelectTrigger>
                       <SelectContent>
@@ -225,7 +230,7 @@ export function QuickBookingModal({ isOpen, onClose, bed, room, initialDate }: Q
                     </Select>
                   </div>
                   <div className="space-y-1.5">
-                    <Label className="text-[10px] font-semibold text-zinc-500 uppercase">{t('checkin.passportOrId')}<span className="text-red-500">*</span></Label>
+                    <Label className="text-xs font-semibold text-zinc-500 uppercase">{t('checkin.passportOrId')}<span className="text-red-500">*</span></Label>
                     <div className="relative">
                       <IdCard className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-400" />
                       <Input required className="pl-8 h-9 text-sm" value={passportOrId} onChange={(e) => setPassportOrId(e.target.value)} placeholder="AB1234567" />
@@ -234,7 +239,7 @@ export function QuickBookingModal({ isOpen, onClose, bed, room, initialDate }: Q
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label className="text-[10px] font-semibold text-zinc-500 uppercase">{t('calendarview.source')}</Label>
+                  <Label className="text-xs font-semibold text-zinc-500 uppercase">{t('calendarview.source')}</Label>
                   <Select value={source} onValueChange={(v: string) => setSource(v as 'walk-in' | 'manual')}>
                     <SelectTrigger className="h-9 text-sm"><SelectValue placeholder={t('calendarview.selectSource')} /></SelectTrigger>
                     <SelectContent>
@@ -244,9 +249,9 @@ export function QuickBookingModal({ isOpen, onClose, bed, room, initialDate }: Q
                   </Select>
                 </div>
 
-                <div className="bg-zinc-50 rounded-lg p-3 flex items-center justify-between text-xs">
-                  <span className="text-zinc-500">{nights} {t('dashboard.nights')} × ${pricePerNight}</span>
-                  <span className="font-bold text-zinc-900">${totalAmount}</span>
+                <div className="bg-muted rounded-lg p-3 flex items-center justify-between text-xs">
+                  <span className="text-muted-foreground">{nights} {t('dashboard.nights')} × ${pricePerNight}</span>
+                  <span className="font-bold text-foreground">${totalAmount}</span>
                 </div>
 
                 <Button type="submit" className="w-full h-9 text-sm" disabled={!name.trim() || !countryCode || !passportOrId.trim()}>

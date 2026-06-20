@@ -353,7 +353,7 @@ export function HostelPage() {
                     {hostelPage.facilities.map((f) => (
                       <span
                         key={f}
-                        className="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-medium bg-emerald-50 text-emerald-700 border border-emerald-100"
+                        className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-100"
                       >
                         {f}
                       </span>

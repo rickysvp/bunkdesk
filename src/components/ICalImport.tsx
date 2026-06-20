@@ -82,7 +82,7 @@ export function ICalImport({ open, onClose, onImport }: ICalImportProps) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4"
       onClick={handleClose}
     >
       <motion.div
@@ -90,14 +90,14 @@ export function ICalImport({ open, onClose, onImport }: ICalImportProps) {
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 10 }}
         transition={{ duration: 0.15 }}
-        className="bg-white rounded-2xl shadow-xl max-w-md w-full overflow-hidden"
+        className="bg-card rounded-2xl shadow-modal max-w-md w-full overflow-hidden ring-1 ring-border/50"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="p-5 border-b border-zinc-100 flex items-center justify-between">
-          <h3 className="font-semibold text-zinc-900">{t('checkin.importICal')}</h3>
-          <button onClick={handleClose} className="p-1 hover:bg-zinc-100 rounded-lg transition-colors">
-            <X className="w-4 h-4 text-zinc-400" />
+        <div className="p-5 border-b border-border flex items-center justify-between">
+          <h3 className="font-semibold text-foreground">{t('checkin.importICal')}</h3>
+          <button onClick={handleClose} className="p-1.5 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-colors" aria-label="Close">
+            <X className="w-4 h-4" />
           </button>
         </div>
 

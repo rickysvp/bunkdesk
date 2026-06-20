@@ -505,7 +505,7 @@ export function BedBoard({ navigateToGrow, setActiveTab }: BedBoardProps) {
             <div className="text-xs font-semibold truncate">
               {activeGuest.name}
             </div>
-            <div className="text-[10px] opacity-75 mt-0.5 flex items-center gap-1">
+            <div className="text-xs opacity-75 mt-0.5 flex items-center gap-1">
               <span>{activeGuest.countryCode}</span>
               <span>·</span>
               <span>{activeGuest.nights || '?'}n</span>

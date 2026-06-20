@@ -60,7 +60,7 @@ export function TopBar({ activeTab, setActiveTab }: TopBarProps) {
 
   return (
     <header
-      className="hidden md:flex h-14 flex-shrink-0 border-b border-[#EBEBEB] bg-white/80 backdrop-blur-md items-center px-3 md:px-6 sticky top-0 z-30 gap-2"
+      className="hidden md:flex h-14 flex-shrink-0 border-b border-border bg-card/80 backdrop-blur-md items-center px-3 md:px-6 sticky top-0 z-30 gap-2"
       data-topbar
     >
       {/* Logo — kept on the left so the brand is always anchored */}
@@ -71,7 +71,7 @@ export function TopBar({ activeTab, setActiveTab }: TopBarProps) {
         <span className="font-semibold text-zinc-900 tracking-tight text-sm hidden sm:inline">
           {t('sidebar.hostelDesk')}
         </span>
-        <span className="text-[10px] text-zinc-400 hidden md:inline ml-1">v{APP_VERSION}</span>
+        <span className="text-xs text-zinc-400 hidden md:inline ml-1">v{APP_VERSION}</span>
       </div>
 
       {/* Primary tabs — horizontal scroll on narrow screens */}
@@ -116,7 +116,7 @@ export function TopBar({ activeTab, setActiveTab }: TopBarProps) {
           <div className="flex items-center gap-1.5 bg-zinc-50 border border-zinc-200 rounded-lg px-2.5 py-1.5">
             <span className="text-xs font-medium text-zinc-700">{currentStaff.name}</span>
             {RoleIcon && roleBadge && (
-              <span className={`inline-flex items-center gap-0.5 text-[10px] font-medium px-1.5 py-0.5 rounded ${roleBadge.className}`}>
+              <span className={`inline-flex items-center gap-0.5 text-xs font-medium px-1.5 py-0.5 rounded ${roleBadge.className}`}>
                 <RoleIcon className="h-3 w-3" />
                 {t(`staff.${currentStaff.role}`)}
               </span>

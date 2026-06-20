@@ -62,7 +62,7 @@ export function OccupancyActions() {
                     style={{ height: `${day.occupancyRate}%` }}
                   />
                 </div>
-                <span className="text-[10px] text-zinc-400">
+                <span className="text-xs text-zinc-400">
                   {format(addDays(new Date(), i), 'EEE')}
                 </span>
               </div>
@@ -82,7 +82,7 @@ export function OccupancyActions() {
           <h3 className="text-sm font-semibold text-zinc-900 flex items-center gap-2">
             <Zap className="h-4 w-4 text-amber-500" />
             {t('occupancy.suggestedActions')}
-            <Badge variant="secondary" className="text-[10px]">{activeActions.length}</Badge>
+            <Badge variant="secondary" className="text-xs">{activeActions.length}</Badge>
           </h3>
         </div>
 
@@ -105,7 +105,7 @@ export function OccupancyActions() {
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 mb-1">
                             <h4 className="text-sm font-semibold text-zinc-900">{action.title}</h4>
-                            <span className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-amber-50 text-amber-700">
+                            <span className="text-xs font-medium px-1.5 py-0.5 rounded bg-amber-50 text-amber-700">
                               {language === 'zh' ? typeLabel.zh : typeLabel.en}
                             </span>
                           </div>

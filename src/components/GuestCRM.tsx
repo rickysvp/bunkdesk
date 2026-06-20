@@ -186,7 +186,7 @@ export function GuestCRM() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
                       <span className="text-sm font-medium text-zinc-900 truncate">{profile.name}</span>
-                      <span className="text-[10px] text-zinc-400 shrink-0">{profile.countryCode}</span>
+                      <span className="text-xs text-zinc-400 shrink-0">{profile.countryCode}</span>
                     </div>
                     <div className="flex items-center gap-2 sm:gap-3 mt-1 flex-wrap">
                       <span className="text-xs text-zinc-500">{profile.totalStays}x {t('crm.stays')}</span>
@@ -198,13 +198,13 @@ export function GuestCRM() {
                     {profile.tags.slice(0, 3).map(tag => {
                       const label = getTagLabel(tag);
                       return (
-                        <span key={tag} className={cn("text-[10px] font-medium px-1.5 py-0.5 rounded", label.color)}>
+                        <span key={tag} className={cn("text-xs font-medium px-1.5 py-0.5 rounded", label.color)}>
                           {language === 'zh' ? label.zh : label.en}
                         </span>
                       );
                     })}
                     {profile.tags.length > 3 && (
-                      <span className="text-[10px] text-zinc-400">+{profile.tags.length - 3}</span>
+                      <span className="text-xs text-zinc-400">+{profile.tags.length - 3}</span>
                     )}
                   </div>
                   <div className="hidden sm:flex items-center gap-1.5 shrink-0">
@@ -218,13 +218,13 @@ export function GuestCRM() {
                   {profile.tags.slice(0, 3).map(tag => {
                     const label = getTagLabel(tag);
                     return (
-                      <span key={tag} className={cn("text-[10px] font-medium px-1.5 py-0.5 rounded", label.color)}>
+                      <span key={tag} className={cn("text-xs font-medium px-1.5 py-0.5 rounded", label.color)}>
                         {language === 'zh' ? label.zh : label.en}
                       </span>
                     );
                   })}
                   {profile.tags.length > 3 && (
-                    <span className="text-[10px] text-zinc-400">+{profile.tags.length - 3}</span>
+                    <span className="text-xs text-zinc-400">+{profile.tags.length - 3}</span>
                   )}
                 </div>
               </Card>
@@ -276,19 +276,19 @@ export function GuestCRM() {
               <div className="p-5 grid grid-cols-3 gap-3">
                 <div className="bg-zinc-50 rounded-lg p-3 text-center">
                   <p className="text-lg font-semibold text-zinc-900">{selectedProfile.totalStays}</p>
-                  <p className="text-[10px] text-zinc-500 uppercase">{t('crm.stays')}</p>
+                  <p className="text-xs text-zinc-500 uppercase">{t('crm.stays')}</p>
                 </div>
                 <div className="bg-zinc-50 rounded-lg p-3 text-center">
                   <p className="text-lg font-semibold text-zinc-900">{selectedProfile.totalNights}</p>
-                  <p className="text-[10px] text-zinc-500 uppercase">{t('crm.nights')}</p>
+                  <p className="text-xs text-zinc-500 uppercase">{t('crm.nights')}</p>
                 </div>
                 <div className="bg-zinc-50 rounded-lg p-3 text-center">
                   <p className="text-lg font-semibold text-emerald-600">{formatCurrency(selectedProfile.totalSpent, language)}</p>
-                  <p className="text-[10px] text-zinc-500 uppercase">{t('crm.spent')}</p>
+                  <p className="text-xs text-zinc-500 uppercase">{t('crm.spent')}</p>
                 </div>
               </div>
               <div className="px-5 pb-4">
-                <p className="text-[10px] font-semibold text-zinc-400 uppercase mb-2">{t('crm.tags')}</p>
+                <p className="text-xs font-semibold text-zinc-400 uppercase mb-2">{t('crm.tags')}</p>
                 <div className="flex flex-wrap gap-1.5">
                   {selectedProfile.tags.map(tag => {
                     const label = getTagLabel(tag);
@@ -304,7 +304,7 @@ export function GuestCRM() {
                 </div>
               </div>
               <div className="px-5 pb-4 space-y-2">
-                <p className="text-[10px] font-semibold text-zinc-400 uppercase mb-2">{t('crm.contact')}</p>
+                <p className="text-xs font-semibold text-zinc-400 uppercase mb-2">{t('crm.contact')}</p>
                 {selectedProfile.email && (
                   <div className="flex items-center gap-2 text-xs text-zinc-600">
                     <Mail className="h-3.5 w-3.5 text-zinc-400" /> {selectedProfile.email}
@@ -325,7 +325,7 @@ export function GuestCRM() {
                 )}
               </div>
               <div className="px-5 pb-5">
-                <p className="text-[10px] font-semibold text-zinc-400 uppercase mb-2">{t('crm.stayHistory')}</p>
+                <p className="text-xs font-semibold text-zinc-400 uppercase mb-2">{t('crm.stayHistory')}</p>
                 <div className="text-xs text-zinc-500">
                   {t('crm.firstStay')}: {format(parseISO(selectedProfile.firstStayDate), 'MMM d, yyyy')}
                 </div>

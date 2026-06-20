@@ -76,7 +76,7 @@ export function BottomTabBar({ activeTab, setActiveTab }: BottomTabBarProps) {
                 />
               )}
               <Icon className="h-5 w-5" strokeWidth={isActive ? 2.25 : 2} />
-              <span className="text-[10px] font-semibold tracking-tight leading-none">
+              <span className="text-xs font-semibold tracking-tight leading-none">
                 {t(tab.i18nKey)}
               </span>
             </button>

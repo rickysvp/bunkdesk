@@ -429,6 +429,10 @@ export const translations = {
       noReserved: "No upcoming reservations",
       cancelArrival: "Cancel arrival",
       processing: "Processing...",
+      noPendingDesc: "Add a walk-in guest or import from iCal to get started",
+      noCheckedInDesc: "Guests will appear here once they check in",
+      noReservedDesc: "Future reservations from iCal or manual bookings will show here",
+      selectGuestDesc: "Pick a guest from the left or create a new walk-in",
       // ── v1.6.0 guest info expansion (24 keys) ──
       firstName: "First name",
       lastName: "Last name",
@@ -1465,6 +1469,10 @@ export const translations = {
       noReserved: "暂无未来预订",
       cancelArrival: "取消到达",
       processing: "处理中...",
+      noPendingDesc: "添加 walk-in 客人或从 iCal 导入开始",
+      noCheckedInDesc: "客人入住后将显示在这里",
+      noReservedDesc: "来自 iCal 或手动预订的未来预订将显示在这里",
+      selectGuestDesc: "从左侧选择客人或创建新的 walk-in",
       // ── v1.6.0 guest info expansion (24 keys) ──
       firstName: "名",
       lastName: "姓",

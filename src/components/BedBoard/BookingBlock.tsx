@@ -266,7 +266,7 @@ export function BookingBlock({
           {isContinuation && <span className="text-zinc-500 mr-0.5">←</span>}
           {booking.name}
         </div>
-        <div className="truncate text-[10px] leading-tight opacity-75 mt-0.5">
+        <div className="truncate text-xs leading-tight opacity-75 mt-0.5">
           {booking.countryCode}
           {typeof booking.nights === 'number' && booking.nights > 0 && (
             <>

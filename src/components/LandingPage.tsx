@@ -411,7 +411,7 @@ export function LandingPage({ onEnterApp }: LandingPageProps) {
                   <h3 className="text-sm font-semibold text-zinc-500">
                     {t('landing.bedGapOther') || 'Traditional PMS'}
                   </h3>
-                  <span className="text-[10px] font-mono uppercase tracking-wider text-red-600 bg-red-50 px-2 py-0.5 rounded">
+                  <span className="text-xs font-mono uppercase tracking-wider text-red-600 bg-red-50 px-2 py-0.5 rounded">
                     {t('landing.bedGapOtherTag') || 'Whole-room inventory'}
                   </span>
                 </div>
@@ -429,7 +429,7 @@ export function LandingPage({ onEnterApp }: LandingPageProps) {
                   <h3 className="text-sm font-semibold text-zinc-900">
                     BunkDesk
                   </h3>
-                  <span className="text-[10px] font-mono uppercase tracking-wider text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded">
+                  <span className="text-xs font-mono uppercase tracking-wider text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded">
                     {t('landing.bedGapOurTag') || 'Bed-level inventory'}
                   </span>
                 </div>
@@ -568,7 +568,7 @@ export function LandingPage({ onEnterApp }: LandingPageProps) {
 
             {/* Standard (highlighted, $19) */}
             <Card className="border-blue-600 shadow-xl shadow-blue-600/10 bg-gradient-to-br from-blue-50/30 to-white relative">
-              <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 bg-blue-600 text-white text-[10px] font-semibold uppercase tracking-wider px-2.5 py-0.5 rounded-full">
+              <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 bg-blue-600 text-white text-xs font-semibold uppercase tracking-wider px-2.5 py-0.5 rounded-full">
                 {t('landing.pricingProBadge') || 'Most popular'}
               </span>
               <CardContent className="p-5 sm:p-7 space-y-5">
@@ -647,7 +647,7 @@ export function LandingPage({ onEnterApp }: LandingPageProps) {
         <div className="max-w-6xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
             <div className="w-7 h-7 bg-zinc-900 rounded-md flex items-center justify-center">
-              <span className="text-white font-bold text-[10px]">B</span>
+              <span className="text-white font-bold text-xs">B</span>
             </div>
             <span className="text-sm text-zinc-500">{t('landing.footerTagline') || 'BunkDesk · Bed-level hostel management'}</span>
           </div>
@@ -670,7 +670,7 @@ function HeroMockup() {
           <div className="w-2.5 h-2.5 rounded-full bg-red-400/80" />
           <div className="w-2.5 h-2.5 rounded-full bg-amber-400/80" />
           <div className="w-2.5 h-2.5 rounded-full bg-emerald-400/80" />
-          <div className="ml-3 text-[10px] text-zinc-500 font-mono">bunkdesk.app</div>
+          <div className="ml-3 text-xs text-zinc-500 font-mono">bunkdesk.app</div>
         </div>
         {/* Mockup content */}
         <div className="p-5 space-y-3">
@@ -682,13 +682,13 @@ function HeroMockup() {
               { label: 'To clean', val: '4', color: 'purple' },
             ].map((c) => (
               <div key={c.label} className="bg-white/5 rounded-lg p-3 border border-white/5">
-                <div className="text-[10px] text-zinc-500">{c.label}</div>
+                <div className="text-xs text-zinc-500">{c.label}</div>
                 <div className="text-xl font-bold text-white mt-0.5">{c.val}</div>
               </div>
             ))}
           </div>
           <div className="bg-white/5 rounded-lg p-3 border border-white/5">
-            <div className="flex items-center gap-2 text-[10px] text-zinc-400">
+            <div className="flex items-center gap-2 text-xs text-zinc-400">
               <Zap className="h-3 w-3 text-amber-400" />
               7-day occupancy forecast
             </div>
@@ -703,7 +703,7 @@ function HeroMockup() {
             </div>
           </div>
           <div className="bg-amber-500/10 border border-amber-500/20 rounded-lg p-3">
-            <div className="text-[10px] text-amber-300 font-medium">Heads up</div>
+            <div className="text-xs text-amber-300 font-medium">Heads up</div>
             <div className="text-xs text-zinc-300 mt-0.5">Wed occupancy at 28% \u2014 consider a last-minute promo</div>
           </div>
         </div>
@@ -725,7 +725,7 @@ function BedGridOccupied({ layout }: { layout: 'full' | 'split' }) {
           'bg-rose-500',
           'bg-rose-300/40',
         ].map((c, i) => (
-          <div key={i} className={cn('aspect-square rounded text-white text-[10px] flex items-center justify-center font-mono', c)}>
+          <div key={i} className={cn('aspect-square rounded text-white text-xs flex items-center justify-center font-mono', c)}>
             {i + 1}
           </div>
         ))}
@@ -746,7 +746,7 @@ function BedGridOccupied({ layout }: { layout: 'full' | 'split' }) {
         <div
           key={i}
           className={cn(
-            'aspect-square rounded text-white text-[10px] flex items-center justify-center font-mono',
+            'aspect-square rounded text-white text-xs flex items-center justify-center font-mono',
             c === 'bg-emerald-500' && 'ring-2 ring-emerald-300 ring-offset-2 ring-offset-blue-50/30 animate-pulse',
             c,
           )}

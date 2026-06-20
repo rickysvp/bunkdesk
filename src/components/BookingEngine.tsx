@@ -286,7 +286,7 @@ export function BookingEngine() {
               >
                 {s < step ? <CheckCircle2 className="size-3.5 sm:size-4" /> : s}
               </div>
-              <span className={`text-[9px] sm:text-[10px] font-medium ${s === step ? 'text-emerald-700' : 'text-zinc-400'}`}>
+              <span className={`text-xs sm:text-xs font-medium ${s === step ? 'text-emerald-700' : 'text-zinc-400'}`}>
                 {stepLabels[i]}
               </span>
             </div>
@@ -413,15 +413,15 @@ export function BookingEngine() {
                           ? formatCurrency(room.priceRange.min, language)
                           : `${formatCurrency(room.priceRange.min, language)}–${formatCurrency(room.priceRange.max, language)}`}
                       </p>
-                      <p className="text-[10px] text-zinc-400">{t('booking.perBedNight')}</p>
+                      <p className="text-xs text-zinc-400">{t('booking.perBedNight')}</p>
                     </div>
                   </div>
                   <div className="mt-2 flex items-center gap-2">
-                    <Badge variant="outline" className="text-[10px]">
+                    <Badge variant="outline" className="text-xs">
                       {room.availableBeds} {t('booking.bedsAvailable')}
                     </Badge>
                     {!hasEnoughBeds && (
-                      <Badge variant="destructive" className="text-[10px]">
+                      <Badge variant="destructive" className="text-xs">
                         {t('booking.notEnoughBeds')}
                       </Badge>
                     )}
@@ -631,7 +631,7 @@ export function BookingEngine() {
             <div className="mx-auto mt-6 max-w-xs rounded-xl border-2 border-dashed border-emerald-300 bg-emerald-50 p-4">
               <p className="text-xs font-medium text-emerald-600">{t('booking.yourReferralCode')}</p>
               <p className="mt-1 text-xl font-bold tracking-wider text-emerald-800">{generatedCode}</p>
-              <p className="mt-1 text-[10px] text-emerald-500">{t('booking.referralCodeDesc')}</p>
+              <p className="mt-1 text-xs text-emerald-500">{t('booking.referralCodeDesc')}</p>
             </div>
 
             <div className="mx-auto mt-6 max-w-xs space-y-2">

@@ -59,7 +59,7 @@ export function TimelineGrid({
           className="shrink-0 border-r border-zinc-100 px-3 py-2 flex items-end"
           style={{ width: labelWidth }}
         >
-          <span className="text-[10px] text-zinc-400 font-medium uppercase tracking-wider">
+          <span className="text-xs text-zinc-400 font-medium uppercase tracking-wider">
             {t('bedboard.beds') || 'Beds'}
           </span>
         </div>
@@ -69,7 +69,7 @@ export function TimelineGrid({
               key={i}
               className="flex-1 min-w-0 text-center py-2 border-r border-zinc-50"
             >
-              <div className="text-[10px] text-zinc-400">{format(date, 'EEE')}</div>
+              <div className="text-xs text-zinc-400">{format(date, 'EEE')}</div>
               <div className="text-xs font-medium text-zinc-600">{format(date, 'd')}</div>
             </div>
           ))}
@@ -100,10 +100,10 @@ export function TimelineGrid({
                 <span className="text-xs font-semibold text-zinc-700 truncate">
                   {room.name || roomTypeLabels[room.type] || room.number}
                 </span>
-                <span className="text-[10px] text-zinc-400 bg-zinc-200 px-1 rounded">
+                <span className="text-xs text-zinc-400 bg-zinc-200 px-1 rounded">
                   {roomTypeLabels[room.type] || room.type}
                 </span>
-                <span className="text-[10px] text-zinc-400 ml-auto">
+                <span className="text-xs text-zinc-400 ml-auto">
                   {priceRange.min === priceRange.max
                     ? formatCurrency(priceRange.min, language)
                     : `${formatCurrency(priceRange.min, language)}-${formatCurrency(priceRange.max, language)}`}
@@ -112,7 +112,7 @@ export function TimelineGrid({
               <div className="flex flex-1">
                 {dailyFree.map((free, i) => (
                   <div key={i} className="flex-1 text-center py-1.5 border-r border-zinc-100">
-                    <span className={`text-[10px] font-medium ${
+                    <span className={`text-xs font-medium ${
                       free === 0 ? 'text-red-500' : free <= 2 ? 'text-amber-500' : 'text-emerald-600'
                     }`}>
                       {free}

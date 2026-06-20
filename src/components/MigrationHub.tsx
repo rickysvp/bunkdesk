@@ -518,7 +518,7 @@ export function MigrationHub() {
                   </span>
                 </div>
                 {s.popular && (
-                  <Badge className="absolute top-2 right-2 text-[10px] px-1.5 py-0">
+                  <Badge className="absolute top-2 right-2 text-xs px-1.5 py-0">
                     {t('migration.popular')}
                   </Badge>
                 )}

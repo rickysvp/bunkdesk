@@ -86,9 +86,9 @@ export function RoomsSection() {
                         <span className="text-zinc-400 font-normal"> · {room.name}</span>
                       )}
                     </h3>
-                    <p className="text-[11px] text-zinc-500 mt-0.5">{typeLabel(room.type)}</p>
+                    <p className="text-xs text-zinc-500 mt-0.5">{typeLabel(room.type)}</p>
                   </div>
-                  <span className="text-[10px] font-mono text-zinc-400 px-1.5 py-0.5 bg-zinc-50 rounded">
+                  <span className="text-xs font-mono text-zinc-400 px-1.5 py-0.5 bg-zinc-50 rounded">
                     {formatCurrency(room.pricePerNight, language)}
                   </span>
                 </div>
@@ -104,7 +104,7 @@ export function RoomsSection() {
                   </span>
                   <span
                     className={cn(
-                      'ml-auto text-[10px] font-medium px-1.5 py-0.5 rounded',
+                      'ml-auto text-xs font-medium px-1.5 py-0.5 rounded',
                       occRate >= 80
                         ? 'bg-emerald-50 text-emerald-700'
                         : occRate >= 40

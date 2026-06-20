@@ -92,7 +92,7 @@ function AppContent() {
   const effectiveTab = visibleTabs.includes(activeTab) ? activeTab : (visibleTabs[0] || 'assistant');
 
   return (
-    <div className="flex flex-col h-screen bg-[#F7F7F7] font-sans overflow-hidden">
+    <div className="flex flex-col h-screen bg-background font-sans overflow-hidden">
       <StorageErrorBanner />
       <TopBar activeTab={effectiveTab} setActiveTab={setActiveTab} />
 
