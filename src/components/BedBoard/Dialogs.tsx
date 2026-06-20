@@ -614,7 +614,17 @@ export function RoomSettingsDialog({ room, onClose }: RoomSettingsDialogProps) {
                   <span className="text-[10px] text-zinc-400 w-12 text-right">{formatCurrency(getBedPrice(room, bed), language)}</span>
                   <button
                     className="p-1 hover:bg-red-100 rounded text-red-400"
-                    onClick={() => deleteBed(room.id, bed.id)}
+                    onClick={() => {
+                      const hasGuest = !!bed.guest;
+                      const hasReservations = bed.reservations && bed.reservations.length > 0;
+                      if (hasGuest || hasReservations) {
+                        const parts: string[] = [];
+                        if (hasGuest) parts.push('入住客人');
+                        if (hasReservations) parts.push(`${bed.reservations!.length} 个预订`);
+                        if (!confirm(`该床位有${parts.join('和')}，删除后数据将丢失，确认删除？`)) return;
+                      }
+                      deleteBed(room.id, bed.id);
+                    }}
                   >
                     <X className="h-3.5 w-3.5" />
                   </button>

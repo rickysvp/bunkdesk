@@ -14,6 +14,7 @@ import { AssistantPanel } from './components/AssistantPanel';
 import { SettingsPanel, type SettingsSubTab } from './components/SettingsPanel';
 import { LoginScreen } from './components/LoginScreen';
 import { LandingPage } from './components/LandingPage';
+import { StorageErrorBanner } from './components/StorageErrorBanner';
 import { HostelProvider } from './HostelContext';
 import { I18nProvider, useTranslation } from './i18nContext';
 import { StaffProvider, useStaff } from './StaffContext';
@@ -91,6 +92,7 @@ function AppContent() {
 
   return (
     <div className="flex flex-col h-screen bg-[#F7F7F7] font-sans overflow-hidden">
+      <StorageErrorBanner />
       <TopBar activeTab={effectiveTab} setActiveTab={setActiveTab} />
 
       <main className="flex-1 h-full overflow-hidden flex flex-col relative w-full">

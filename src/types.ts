@@ -33,6 +33,7 @@ export interface Guest {
   firstName?: string;
   lastName?: string;
   idType?: IdDocumentType;
+  dob?: string;
   arrivalTime?: ArrivalSlot;
   bookingSource?: BookingSource;
   source: GuestSource;

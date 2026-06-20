@@ -38,8 +38,7 @@ export function migrateGuest(g: Guest): Guest {
     result.bookingSource = oldSourceMap[result.bookingSource];
   }
 
-  // Remove obsolete fields
-  delete (result as any).dob;
+  // dob 字段在 v1.8.3 重新启用，不再删除
   delete (result as any).policeConsent;
   delete (result as any).referral;
 

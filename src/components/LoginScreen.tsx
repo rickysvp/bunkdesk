@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useStaff } from "../StaffContext";
 import { useTranslation } from "../i18nContext";
 import { motion } from "motion/react";
@@ -31,20 +31,39 @@ export function LoginScreen() {
   const [selectedStaffId, setSelectedStaffId] = useState<string | null>(null);
   const [pin, setPin] = useState("");
   const [error, setError] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
+  const [lockedRemaining, setLockedRemaining] = useState(0);
 
   const selectedStaff = activeStaffList.find((s) => s.id === selectedStaffId);
+
+  // 锁定倒计时
+  useEffect(() => {
+    if (lockedRemaining <= 0) return;
+    const timer = setTimeout(() => setLockedRemaining((v) => Math.max(0, v - 1000)), 1000);
+    return () => clearTimeout(timer);
+  }, [lockedRemaining]);
 
   const handleSelectStaff = (id: string) => {
     setSelectedStaffId(id);
     setPin("");
     setError(false);
+    setErrorMsg("");
+    setLockedRemaining(0);
   };
 
   const handleSubmit = () => {
     if (!selectedStaffId || pin.length === 0) return;
-    const ok = login(selectedStaffId, pin);
-    if (!ok) {
+    const result = login(selectedStaffId, pin);
+    if (result.locked && result.remainingMs) {
+      setLockedRemaining(result.remainingMs);
       setError(true);
+      setErrorMsg(`尝试次数过多，已锁定 ${Math.ceil(result.remainingMs / 1000)} 秒`);
+      setPin("");
+      return;
+    }
+    if (!result.ok) {
+      setError(true);
+      setErrorMsg("");
       setPin("");
     }
   };
@@ -164,16 +183,16 @@ export function LoginScreen() {
             {error && (
               <div className="flex items-center gap-2 text-red-500 text-xs">
                 <AlertCircle className="w-3.5 h-3.5 shrink-0" />
-                <span>{t("login.wrongPin")}</span>
+                <span>{errorMsg || t("login.wrongPin")}</span>
               </div>
             )}
 
             <button
               onClick={handleSubmit}
-              disabled={pin.length === 0}
+              disabled={pin.length === 0 || lockedRemaining > 0}
               className="w-full py-2.5 rounded-xl bg-zinc-900 text-white text-sm font-medium hover:bg-zinc-800 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
             >
-              {t("login.login")}
+              {lockedRemaining > 0 ? `已锁定 ${Math.ceil(lockedRemaining / 1000)}s` : t("login.login")}
             </button>
           </div>
         )}

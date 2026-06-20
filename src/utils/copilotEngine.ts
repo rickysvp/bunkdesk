@@ -27,7 +27,10 @@ export type TranslateFn = (
   params?: Record<string, string | number>,
 ) => string;
 
-const TODAY = new Date();
+// 用函数替代模块级常量，避免应用长时间运行后 TODAY 过期导致洞察数据错乱
+function getToday(): Date {
+  return new Date();
+}
 
 /* --------------------- 今日小结 --------------------- */
 export function generateTodaySummary(
@@ -53,7 +56,7 @@ export function generateTodaySummary(
   );
 
   // 今日 check-in = 入住日期 = 今天的 guest
-  const todayStr = TODAY.toISOString().slice(0, 10);
+  const todayStr = getToday().toISOString().slice(0, 10);
   const checkIns = arrivals.filter((g) => g.checkInDate?.slice(0, 10) === todayStr).length;
   const checkOuts = arrivals.filter((g) => g.checkOutDate?.slice(0, 10) === todayStr).length;
 
@@ -94,7 +97,7 @@ export function generateWeekForecast(
   // 7 天日期 + 占用率预测（演示用：基于当前数据 + 简单 forward projection）
   const daily: { date: string; occupancyRate: number }[] = [];
   for (let i = 0; i < 7; i++) {
-    const d = new Date(TODAY);
+    const d = new Date(getToday());
     d.setDate(d.getDate() + i);
     const dateStr = d.toISOString().slice(0, 10);
     const dayGuests = arrivals.filter((g) => {
@@ -229,7 +232,7 @@ export function generateRisks(
 
   // 1. 超售
   const totalBeds = rooms.reduce((s, r) => s + r.beds.length, 0);
-  const tomorrow = new Date(TODAY);
+  const tomorrow = new Date(getToday());
   tomorrow.setDate(tomorrow.getDate() + 1);
   const tomorrowStr = tomorrow.toISOString().slice(0, 10);
   const tomorrowArrivals = arrivals.filter((g) => {
@@ -281,6 +284,6 @@ export function generateRisks(
 /* --------------------- helper --------------------- */
 function daysSince(dateStr: string): number {
   const d = new Date(dateStr);
-  const diff = TODAY.getTime() - d.getTime();
+  const diff = getToday().getTime() - d.getTime();
   return Math.floor(diff / (1000 * 60 * 60 * 24));
 }

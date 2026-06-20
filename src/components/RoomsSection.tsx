@@ -132,9 +132,21 @@ export function RoomsSection() {
                     className="h-7 text-xs gap-1 text-red-500 hover:text-red-600 hover:bg-red-50"
                     disabled={occ > 0}
                     onClick={() => {
-                      if (confirm(t('rooms.confirmDelete') || 'Delete this room?')) {
-                        deleteRoom(room.id);
+                      // 检查是否有未来预订
+                      const reservationCount = room.beds.reduce(
+                        (sum, b) => sum + (b.reservations?.length || 0), 0,
+                      );
+                      const hasOccupied = occ > 0;
+                      const hasReservations = reservationCount > 0;
+                      if (hasOccupied || hasReservations) {
+                        const parts: string[] = [];
+                        if (hasOccupied) parts.push(`${occ} 个入住床位`);
+                        if (hasReservations) parts.push(`${reservationCount} 个预订`);
+                        if (!confirm(`该房间有${parts.join('和')}，删除后数据将丢失，确认删除？`)) return;
+                      } else {
+                        if (!confirm(t('rooms.confirmDelete') || 'Delete this room?')) return;
                       }
+                      deleteRoom(room.id);
                     }}
                     title={occ > 0 ? (t('rooms.cannotDeleteOccupied') || 'Cannot delete occupied room') : ''}
                   >

@@ -48,9 +48,19 @@ function loadPersistedState(fallback: HostelPersisted): HostelPersisted {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) {
-      const parsed = JSON.parse(raw);
-      if (parsed && parsed.__v === STORAGE_VERSION && parsed.data) {
-        return { ...fallback, ...parsed.data };
+      try {
+        const parsed = JSON.parse(raw);
+        if (parsed && parsed.__v === STORAGE_VERSION && parsed.data) {
+          return { ...fallback, ...parsed.data };
+        }
+      } catch (parseErr) {
+        // JSON parse 失败 — 保留损坏数据作为备份，避免静默丢失
+        console.error('[bunkdesk] State data corrupted, backing up:', parseErr);
+        try {
+          localStorage.setItem(`${STORAGE_KEY}_corrupted_backup`, raw);
+        } catch {}
+        // 通知用户数据损坏
+        console.warn('[bunkdesk] Data corrupted — backed up to corrupted_backup key, falling back to initial data');
       }
     }
   } catch {
@@ -139,7 +149,8 @@ const HostelContext = createContext<HostelState | undefined>(undefined);
 
 export function HostelProvider({ children }: { children: ReactNode }) {
   // Load all slices atomically from the versioned key (with legacy fallback).
-  const initial = loadPersistedState({
+  // migrateGuestsDeep 确保 pre-v1.7.0 客人数据被迁移到新 schema。
+  const initial = migrateGuestsDeep(loadPersistedState({
     rooms: INITIAL_ROOMS,
     arrivals: ARRIVALS,
     shiftNotes: INITIAL_SHIFT_NOTES,
@@ -150,7 +161,7 @@ export function HostelProvider({ children }: { children: ReactNode }) {
     guestProfiles: INITIAL_GUEST_PROFILES,
     occupancyActions: [],
     guestLogs: [],
-  });
+  }));
 
   const [rooms, setRooms] = useState<Room[]>(initial.rooms);
   const [arrivals, setArrivals] = useState<Guest[]>(initial.arrivals);
@@ -175,13 +186,26 @@ export function HostelProvider({ children }: { children: ReactNode }) {
         };
         localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
       } catch (e) {
-        // QuotaExceededError, circular refs, etc. — log and let the app keep running.
-        // eslint-disable-next-line no-console
+        // QuotaExceededError, circular refs, etc. — 通知 UI 层显示提示
         console.warn('[bunkdesk] localStorage persist failed:', e);
+        window.dispatchEvent(new CustomEvent('bunkdesk:storage-error', {
+          detail: { error: e instanceof Error ? e.message : String(e) },
+        }));
       }
     }, 300);
     return () => clearTimeout(timer);
   }, [rooms, arrivals, shiftNotes, groupBookings, referrals, hostelPage, promotions, guestProfiles, occupancyActions, guestLogs]);
+
+  // 多标签页同步：检测其他标签页修改了主 state，通知用户刷新避免 last-write-wins 丢数据
+  useEffect(() => {
+    const onStorage = (e: StorageEvent) => {
+      if (e.key === STORAGE_KEY && e.newValue) {
+        window.dispatchEvent(new CustomEvent('bunkdesk:state-updated-elsewhere'));
+      }
+    };
+    window.addEventListener('storage', onStorage);
+    return () => window.removeEventListener('storage', onStorage);
+  }, []);
 
   const { currentStaff } = useStaff();
 
@@ -670,7 +694,10 @@ export function HostelProvider({ children }: { children: ReactNode }) {
     if (!amount || amount <= 0) return;
     setArrivals((prev) => prev.map((g) => {
       if (g.id !== guestId) return g;
-      const newPaid = Math.round(((g.paidAmount || 0) + amount) * 100) / 100;
+      // 拦截超额支付：paidAmount 不超过 totalAmount
+      const capped = Math.min(amount, (g.totalAmount || 0) - (g.paidAmount || 0));
+      if (capped <= 0) return g;
+      const newPaid = Math.round(((g.paidAmount || 0) + capped) * 100) / 100;
       return { ...g, paidAmount: newPaid, paymentStatus: newPaid >= (g.totalAmount || 0) ? 'paid' : 'partial' };
     }));
     setRooms((prev) => prev.map((r) => ({
@@ -678,7 +705,9 @@ export function HostelProvider({ children }: { children: ReactNode }) {
       beds: r.beds.map((b) => {
         const u = { ...b };
         if (b.guest?.id === guestId) {
-          const newPaid = Math.round(((b.guest.paidAmount || 0) + amount) * 100) / 100;
+          const capped = Math.min(amount, (b.guest.totalAmount || 0) - (b.guest.paidAmount || 0));
+          if (capped <= 0) return u;
+          const newPaid = Math.round(((b.guest.paidAmount || 0) + capped) * 100) / 100;
           u.guest = { ...b.guest, paidAmount: newPaid, paymentStatus: newPaid >= (b.guest.totalAmount || 0) ? 'paid' : 'partial' };
         }
         return u;
@@ -703,7 +732,7 @@ export function HostelProvider({ children }: { children: ReactNode }) {
 
   const updateGuestField = useCallback((
     guestId: string,
-    field: 'phone' | 'email' | 'passportOrId' | 'gender' | 'source' | 'roomPreference',
+    field: 'phone' | 'email' | 'passportOrId' | 'dob' | 'gender' | 'source' | 'roomPreference',
     value: string,
   ) => {
     setArrivals((prev) => prev.map((g) => g.id === guestId ? { ...g, [field]: value } : g));
