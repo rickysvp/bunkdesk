@@ -46,7 +46,7 @@ export function RoomsSection() {
           <h2 className="text-base font-semibold text-zinc-900">
             {t('rooms.manageRooms') || 'Rooms & Beds'}
           </h2>
-          <p className="text-xs text-zinc-500 mt-0.5">
+          <p className="text-xs text-muted-foreground mt-0.5">
             {t('rooms.subtitle') || '添加、编辑房间和床位。所有更改实时同步到床位看板。'}
           </p>
         </div>
@@ -60,8 +60,8 @@ export function RoomsSection() {
         {rooms.length === 0 && (
           <Card className="col-span-full border-dashed shadow-none">
             <CardContent className="p-8 text-center">
-              <BedDouble className="h-8 w-8 text-zinc-300 mx-auto mb-2" />
-              <p className="text-sm text-zinc-500">
+              <BedDouble className="h-8 w-8 text-muted-foreground/70 mx-auto mb-2" />
+              <p className="text-sm text-muted-foreground">
                 {t('rooms.empty') || '还没有房间。点击右上角「添加房间」开始。'}
               </p>
             </CardContent>
@@ -83,23 +83,23 @@ export function RoomsSection() {
                     <h3 className="text-sm font-semibold text-zinc-900 truncate">
                       {t('rooms.roomNumber') || 'Room'} {room.number}
                       {room.name && (
-                        <span className="text-zinc-400 font-normal"> · {room.name}</span>
+                        <span className="text-muted-foreground font-normal"> · {room.name}</span>
                       )}
                     </h3>
-                    <p className="text-xs text-zinc-500 mt-0.5">{typeLabel(room.type)}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">{typeLabel(room.type)}</p>
                   </div>
-                  <span className="text-xs font-mono text-zinc-400 px-1.5 py-0.5 bg-zinc-50 rounded">
+                  <span className="text-xs font-mono text-muted-foreground px-1.5 py-0.5 bg-zinc-50 rounded">
                     {formatCurrency(room.pricePerNight, language)}
                   </span>
                 </div>
 
                 <div className="flex items-center gap-3 text-xs text-zinc-600">
                   <span className="flex items-center gap-1">
-                    <BedDouble className="h-3.5 w-3.5 text-zinc-400" />
+                    <BedDouble className="h-3.5 w-3.5 text-muted-foreground" />
                     {total} {t('rooms.bedsCount') || 'beds'}
                   </span>
                   <span className="flex items-center gap-1">
-                    <Users className="h-3.5 w-3.5 text-zinc-400" />
+                    <Users className="h-3.5 w-3.5 text-muted-foreground" />
                     {occ} {t('rooms.occupied') || 'occupied'}
                   </span>
                   <span
@@ -109,7 +109,7 @@ export function RoomsSection() {
                         ? 'bg-emerald-50 text-emerald-700'
                         : occRate >= 40
                           ? 'bg-amber-50 text-amber-700'
-                          : 'bg-zinc-50 text-zinc-500',
+                          : 'bg-zinc-50 text-muted-foreground',
                     )}
                   >
                     {occRate}%

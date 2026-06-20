@@ -7,6 +7,7 @@ import {
   useSensors,
   PointerSensor,
   TouchSensor,
+  KeyboardSensor,
 } from '@dnd-kit/core';
 import type { DragStartEvent, DragEndEvent, DragOverEvent } from '@dnd-kit/core';
 import { useHostel } from '../../HostelContext';
@@ -135,6 +136,8 @@ export function BedBoard({ navigateToGrow, setActiveTab }: BedBoardProps) {
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
     useSensor(TouchSensor, { activationConstraint: { delay: 200, tolerance: 5 } }),
+    // 键盘拖拽 — 运动障碍用户可用 Tab 聚焦 + 空格/回车拾取 + 方向键移动 + 空格/回车放下
+    useSensor(KeyboardSensor),
   );
 
   // ── Drop validity computation ──────────────────────────────────
@@ -457,7 +460,7 @@ export function BedBoard({ navigateToGrow, setActiveTab }: BedBoardProps) {
         {/* Timeline Grid */}
         <div ref={containerRef} className="flex-1 overflow-auto border border-zinc-200 rounded-xl bg-white">
           {filteredRooms.length === 0 ? (
-            <div className="flex items-center justify-center h-full text-zinc-400 text-sm">
+            <div className="flex items-center justify-center h-full text-muted-foreground text-sm">
               {t('bedboard.noBedsFound') || 'No beds found matching filters.'}
             </div>
           ) : (

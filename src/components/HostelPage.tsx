@@ -93,7 +93,7 @@ export function HostelPage() {
           <Globe className="h-6 w-6 text-emerald-500" />
           {t('hostelPage.title')}
         </h1>
-        <p className="text-sm text-zinc-500 mt-1">
+        <p className="text-sm text-muted-foreground mt-1">
           {t('hostelPage.subtitle')}
         </p>
       </div>
@@ -102,7 +102,7 @@ export function HostelPage() {
         {/* ── Template Selector ──────────────────────────────── */}
         <motion.div variants={item}>
           <h2 className="text-sm font-semibold text-zinc-900 flex items-center gap-2 mb-3">
-            <Palette className="h-4 w-4 text-zinc-400" />
+            <Palette className="h-4 w-4 text-muted-foreground" />
             {t('hostelPage.templateSelector')}
           </h2>
           <div className="grid grid-cols-3 gap-3">
@@ -140,7 +140,7 @@ export function HostelPage() {
           {/* Editor */}
           <motion.div variants={item} className="space-y-4">
             <h2 className="text-sm font-semibold text-zinc-900 flex items-center gap-2">
-              <Pencil className="h-4 w-4 text-zinc-400" />
+              <Pencil className="h-4 w-4 text-muted-foreground" />
               {t('hostelPage.editor')}
             </h2>
 
@@ -154,7 +154,7 @@ export function HostelPage() {
                   type="text"
                   value={hostelPage.hostelName}
                   onChange={(e) => updateHostelPage({ hostelName: e.target.value })}
-                  className="w-full rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-400 transition"
+                  className="w-full rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm text-zinc-900 placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-400 transition"
                 />
               </div>
 
@@ -167,7 +167,7 @@ export function HostelPage() {
                   value={hostelPage.description}
                   onChange={(e) => updateHostelPage({ description: e.target.value })}
                   rows={3}
-                  className="w-full rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-400 transition resize-none"
+                  className="w-full rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm text-zinc-900 placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-400 transition resize-none"
                 />
               </div>
 
@@ -182,7 +182,7 @@ export function HostelPage() {
                     value={hostelPage.coverImage}
                     onChange={(e) => updateHostelPage({ coverImage: e.target.value })}
                     placeholder="https://..."
-                    className="flex-1 rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-400 transition"
+                    className="flex-1 rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm text-zinc-900 placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-400 transition"
                   />
                   {hostelPage.coverImage && (
                     <img
@@ -230,7 +230,7 @@ export function HostelPage() {
                     type="email"
                     value={hostelPage.contactEmail}
                     onChange={(e) => updateHostelPage({ contactEmail: e.target.value })}
-                    className="w-full rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-400 transition"
+                    className="w-full rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm text-zinc-900 placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-400 transition"
                   />
                 </div>
                 <div>
@@ -241,7 +241,7 @@ export function HostelPage() {
                     type="tel"
                     value={hostelPage.contactPhone}
                     onChange={(e) => updateHostelPage({ contactPhone: e.target.value })}
-                    className="w-full rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-400 transition"
+                    className="w-full rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm text-zinc-900 placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-400 transition"
                   />
                 </div>
               </div>
@@ -254,7 +254,7 @@ export function HostelPage() {
                   type="text"
                   value={hostelPage.address}
                   onChange={(e) => updateHostelPage({ address: e.target.value })}
-                  className="w-full rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-400 transition"
+                  className="w-full rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm text-zinc-900 placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-400 transition"
                 />
               </div>
 
@@ -264,7 +264,7 @@ export function HostelPage() {
                   <span className="text-sm font-medium text-zinc-800">
                     {t('hostelPage.published')}
                   </span>
-                  <p className="text-xs text-zinc-500">
+                  <p className="text-xs text-muted-foreground">
                     {hostelPage.published
                       ? t('hostelPage.publishedDesc')
                       : t('hostelPage.unpublishedDesc')}
@@ -289,7 +289,7 @@ export function HostelPage() {
           {/* Preview Panel */}
           <motion.div variants={item}>
             <h2 className="text-sm font-semibold text-zinc-900 flex items-center gap-2 mb-3">
-              <Eye className="h-4 w-4 text-zinc-400" />
+              <Eye className="h-4 w-4 text-muted-foreground" />
               {showBooking
                 ? t('hostelPage.directBooking')
                 : t('hostelPage.preview')}
@@ -328,7 +328,7 @@ export function HostelPage() {
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center">
-                    <Image className="h-8 w-8 text-zinc-300" />
+                    <Image className="h-8 w-8 text-muted-foreground/70" />
                   </div>
                 )}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
@@ -362,22 +362,22 @@ export function HostelPage() {
                 )}
 
                 {/* Contact Info */}
-                <div className="space-y-1.5 text-xs text-zinc-500">
+                <div className="space-y-1.5 text-xs text-muted-foreground">
                   {hostelPage.contactEmail && (
                     <div className="flex items-center gap-1.5">
-                      <Mail className="h-3 w-3 text-zinc-400" />
+                      <Mail className="h-3 w-3 text-muted-foreground" />
                       <span>{hostelPage.contactEmail}</span>
                     </div>
                   )}
                   {hostelPage.contactPhone && (
                     <div className="flex items-center gap-1.5">
-                      <Phone className="h-3 w-3 text-zinc-400" />
+                      <Phone className="h-3 w-3 text-muted-foreground" />
                       <span>{hostelPage.contactPhone}</span>
                     </div>
                   )}
                   {hostelPage.address && (
                     <div className="flex items-center gap-1.5">
-                      <MapPin className="h-3 w-3 text-zinc-400" />
+                      <MapPin className="h-3 w-3 text-muted-foreground" />
                       <span>{hostelPage.address}</span>
                     </div>
                   )}
@@ -400,7 +400,7 @@ export function HostelPage() {
         {/* ── Share Section ──────────────────────────────────── */}
         <motion.div variants={item}>
           <h2 className="text-sm font-semibold text-zinc-900 flex items-center gap-2 mb-3">
-            <Share2 className="h-4 w-4 text-zinc-400" />
+            <Share2 className="h-4 w-4 text-muted-foreground" />
             {t('hostelPage.share')}
           </h2>
 
@@ -457,8 +457,8 @@ export function HostelPage() {
                   {t('hostelPage.qrCode')}
                 </label>
                 <div className="bg-zinc-50 border border-zinc-200 rounded-xl h-40 flex flex-col items-center justify-center gap-2">
-                  <QrCode className="h-10 w-10 text-zinc-300" />
-                  <span className="text-xs text-zinc-400 font-medium">
+                  <QrCode className="h-10 w-10 text-muted-foreground/70" />
+                  <span className="text-xs text-muted-foreground font-medium">
                     {t('hostelPage.qrCodePlaceholder')}
                   </span>
                 </div>

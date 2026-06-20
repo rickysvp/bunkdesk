@@ -369,35 +369,35 @@ export function CheckInPanel({ setActiveTab }: { setActiveTab?: (tab: string) =>
                 <form onSubmit={handleCreateArrival} className="space-y-4">
                   {/* ── Section 1: Personal Info ── */}
                   <div className="space-y-3">
-                    <div className="text-xs font-bold text-zinc-500 uppercase tracking-wider">Personal Info</div>
+                    <div className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Personal Info</div>
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                       <div className="space-y-1.5">
-                        <Label className="text-xs font-semibold text-zinc-500 uppercase">{t('checkin.firstName')}<span className="text-red-500">*</span></Label>
-                        <Input required value={newGuestRef.firstName} onChange={e => setNewGuestRef({...newGuestRef, firstName: e.target.value})} className="h-10 bg-zinc-50 border-zinc-200" />
+                        <Label className="text-xs font-semibold text-muted-foreground uppercase">{t('checkin.firstName')}<span className="text-red-500">*</span></Label>
+                        <Input required autoComplete="given-name" value={newGuestRef.firstName} onChange={e => setNewGuestRef({...newGuestRef, firstName: e.target.value})} className="h-10 bg-zinc-50 border-zinc-200" />
                       </div>
                       <div className="space-y-1.5">
-                        <Label className="text-xs font-semibold text-zinc-500 uppercase">{t('checkin.lastName')}<span className="text-red-500">*</span></Label>
-                        <Input required value={newGuestRef.lastName} onChange={e => setNewGuestRef({...newGuestRef, lastName: e.target.value})} className="h-10 bg-zinc-50 border-zinc-200" />
+                        <Label className="text-xs font-semibold text-muted-foreground uppercase">{t('checkin.lastName')}<span className="text-red-500">*</span></Label>
+                        <Input required autoComplete="family-name" value={newGuestRef.lastName} onChange={e => setNewGuestRef({...newGuestRef, lastName: e.target.value})} className="h-10 bg-zinc-50 border-zinc-200" />
                       </div>
                       <div className="space-y-1.5">
-                        <Label className="text-xs font-semibold text-zinc-500 uppercase">{t('checkin.country')}<span className="text-red-500">*</span></Label>
+                        <Label className="text-xs font-semibold text-muted-foreground uppercase">{t('checkin.country')}<span className="text-red-500">*</span></Label>
                         <div className="relative">
-                          <Globe className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-400" />
-                          <Input required maxLength={3} className="pl-8 h-10 bg-zinc-50 border-zinc-200 uppercase" placeholder="US" value={newGuestRef.countryCode} onChange={e => setNewGuestRef({...newGuestRef, countryCode: e.target.value.toUpperCase()})} />
+                          <Globe className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+                          <Input required maxLength={3} inputMode="text" autoComplete="country-code" className="pl-8 h-10 bg-zinc-50 border-zinc-200 uppercase" placeholder="US" value={newGuestRef.countryCode} onChange={e => setNewGuestRef({...newGuestRef, countryCode: e.target.value.toUpperCase()})} />
                         </div>
                       </div>
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                       <div className="space-y-1.5">
-                        <Label className="text-xs font-semibold text-zinc-500 uppercase">{t('checkin.phone')}<span className="text-red-500">*</span></Label>
-                        <Input required type="tel" value={newGuestRef.phone} onChange={e => setNewGuestRef({...newGuestRef, phone: e.target.value})} placeholder="+1-555-0100" className="h-10 bg-zinc-50 border-zinc-200" />
+                        <Label className="text-xs font-semibold text-muted-foreground uppercase">{t('checkin.phone')}<span className="text-red-500">*</span></Label>
+                        <Input required type="tel" inputMode="tel" autoComplete="tel" value={newGuestRef.phone} onChange={e => setNewGuestRef({...newGuestRef, phone: e.target.value})} placeholder="+1-555-0100" className="h-10 bg-zinc-50 border-zinc-200" />
                       </div>
                       <div className="space-y-1.5">
-                        <Label className="text-xs font-semibold text-zinc-500 uppercase">{t('checkin.email')}<span className="text-red-500">*</span></Label>
-                        <Input required type="email" value={newGuestRef.email} onChange={e => setNewGuestRef({...newGuestRef, email: e.target.value})} placeholder="john@mail.com" className="h-10 bg-zinc-50 border-zinc-200" />
+                        <Label className="text-xs font-semibold text-muted-foreground uppercase">{t('checkin.email')}<span className="text-red-500">*</span></Label>
+                        <Input required type="email" inputMode="email" autoComplete="email" value={newGuestRef.email} onChange={e => setNewGuestRef({...newGuestRef, email: e.target.value})} placeholder="john@mail.com" className="h-10 bg-zinc-50 border-zinc-200" />
                       </div>
                       <div className="space-y-1.5">
-                        <Label className="text-xs font-semibold text-zinc-500 uppercase">{t('guest.gender') || 'Gender'}<span className="text-red-500">*</span></Label>
+                        <Label className="text-xs font-semibold text-muted-foreground uppercase">{t('guest.gender') || 'Gender'}<span className="text-red-500">*</span></Label>
                         <Select required value={newGuestRef.gender} onValueChange={(val: string) => {
                           // If changing to male and roomPreference is female-only, reset it
                           const updates: Partial<typeof newGuestRef> = { gender: val as "male" | "female" | "other" };
@@ -419,18 +419,18 @@ export function CheckInPanel({ setActiveTab }: { setActiveTab?: (tab: string) =>
 
                   {/* ── Section 2: Stay ── */}
                   <div className="space-y-3 pt-3 border-t border-zinc-100">
-                    <div className="text-xs font-bold text-zinc-500 uppercase tracking-wider">Stay</div>
+                    <div className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Stay</div>
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                       <div className="space-y-1.5">
-                        <Label className="text-xs font-semibold text-zinc-500 uppercase">{t('checkin.checkInDate')}<span className="text-red-500">*</span></Label>
+                        <Label className="text-xs font-semibold text-muted-foreground uppercase">{t('checkin.checkInDate')}<span className="text-red-500">*</span></Label>
                         <Input type="date" required className="h-10 bg-zinc-50 border-zinc-200" value={newGuestRef.checkInDate} onChange={e => setNewGuestRef({...newGuestRef, checkInDate: e.target.value})} />
                       </div>
                       <div className="space-y-1.5">
-                        <Label className="text-xs font-semibold text-zinc-500 uppercase">{t('checkin.checkOutDate')}<span className="text-red-500">*</span></Label>
+                        <Label className="text-xs font-semibold text-muted-foreground uppercase">{t('checkin.checkOutDate')}<span className="text-red-500">*</span></Label>
                         <Input type="date" required className="h-10 bg-zinc-50 border-zinc-200" value={newGuestRef.checkOutDate} onChange={e => setNewGuestRef({...newGuestRef, checkOutDate: e.target.value})} />
                       </div>
                       <div className="space-y-1.5">
-                        <Label className="text-xs font-semibold text-zinc-500 uppercase">{t('checkin.arrivalTime.label')}</Label>
+                        <Label className="text-xs font-semibold text-muted-foreground uppercase">{t('checkin.arrivalTime.label')}</Label>
                         <Select value={newGuestRef.arrivalTime} onValueChange={(val: string) => setNewGuestRef({...newGuestRef, arrivalTime: val as "morning" | "afternoon" | "evening" | "late"})}>
                           <SelectTrigger className="h-10 bg-zinc-50 border-zinc-200"><SelectValue placeholder="—" /></SelectTrigger>
                           <SelectContent>
@@ -442,7 +442,7 @@ export function CheckInPanel({ setActiveTab }: { setActiveTab?: (tab: string) =>
                         </Select>
                       </div>
                       <div className="space-y-1.5">
-                        <Label className="text-xs font-semibold text-zinc-500 uppercase">{t('checkin.roomPreference')}</Label>
+                        <Label className="text-xs font-semibold text-muted-foreground uppercase">{t('checkin.roomPreference')}</Label>
                         <Select value={newGuestRef.roomPreference} onValueChange={(val: string) => setNewGuestRef({...newGuestRef, roomPreference: val as '' | 'dorm-mixed' | 'dorm-female' | 'private'})}>
                           <SelectTrigger className="h-10 bg-zinc-50 border-zinc-200"><SelectValue placeholder="—" /></SelectTrigger>
                           <SelectContent>
@@ -455,7 +455,7 @@ export function CheckInPanel({ setActiveTab }: { setActiveTab?: (tab: string) =>
                         </Select>
                       </div>
                       <div className="space-y-1.5 sm:w-1/3">
-                        <Label className="text-xs font-semibold text-zinc-500 uppercase">{t('checkin.bedPreference') || 'Bed Preference'}</Label>
+                        <Label className="text-xs font-semibold text-muted-foreground uppercase">{t('checkin.bedPreference') || 'Bed Preference'}</Label>
                         <Select value={newGuestRef.bedPreference} onValueChange={(val: string) => setNewGuestRef({...newGuestRef, bedPreference: val as '' | 'top' | 'bottom' | 'any'})}>
                           <SelectTrigger className="h-10 bg-zinc-50 border-zinc-200"><SelectValue placeholder="—" /></SelectTrigger>
                           <SelectContent>
@@ -470,10 +470,10 @@ export function CheckInPanel({ setActiveTab }: { setActiveTab?: (tab: string) =>
 
                   {/* ── Section 3: ID & Source ── */}
                   <div className="space-y-3 pt-3 border-t border-zinc-100">
-                    <div className="text-xs font-bold text-zinc-500 uppercase tracking-wider">ID &amp; Source</div>
+                    <div className="text-xs font-bold text-muted-foreground uppercase tracking-wider">ID &amp; Source</div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <div className="space-y-1.5">
-                        <Label className="text-xs font-semibold text-zinc-500 uppercase">{t('checkin.idType.label')}<span className="text-red-500">*</span></Label>
+                        <Label className="text-xs font-semibold text-muted-foreground uppercase">{t('checkin.idType.label')}<span className="text-red-500">*</span></Label>
                         <Select required value={newGuestRef.idType} onValueChange={(val: string) => setNewGuestRef({...newGuestRef, idType: val as "passport" | "idCard" | "driverLicense"})}>
                           <SelectTrigger className="h-10 bg-zinc-50 border-zinc-200"><SelectValue /></SelectTrigger>
                           <SelectContent>
@@ -484,16 +484,16 @@ export function CheckInPanel({ setActiveTab }: { setActiveTab?: (tab: string) =>
                         </Select>
                       </div>
                       <div className="space-y-1.5">
-                        <Label className="text-xs font-semibold text-zinc-500 uppercase">{t('checkin.passportOrId')}<span className="text-red-500">*</span></Label>
+                        <Label className="text-xs font-semibold text-muted-foreground uppercase">{t('checkin.passportOrId')}<span className="text-red-500">*</span></Label>
                         <div className="relative">
-                          <IdCard className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-400" />
+                          <IdCard className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
                           <Input required className="pl-8 h-10 bg-zinc-50 border-zinc-200" value={newGuestRef.passportOrId} onChange={e => setNewGuestRef({...newGuestRef, passportOrId: e.target.value})} />
                         </div>
                       </div>
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <div className="space-y-1.5">
-                        <Label className="text-xs font-semibold text-zinc-500 uppercase">{t('checkin.source.label')}</Label>
+                        <Label className="text-xs font-semibold text-muted-foreground uppercase">{t('checkin.source.label')}</Label>
                         <Select value={newGuestRef.bookingSource} onValueChange={(val: string) => setNewGuestRef({...newGuestRef, bookingSource: val as "walk-in" | "hostelworld" | "booking-com" | "airbnb" | "google" | "other-ota"})}>
                           <SelectTrigger className="h-10 bg-zinc-50 border-zinc-200"><SelectValue /></SelectTrigger>
                           <SelectContent>
@@ -508,7 +508,7 @@ export function CheckInPanel({ setActiveTab }: { setActiveTab?: (tab: string) =>
                       </div>
                     </div>
                     <div className="space-y-1.5">
-                      <Label className="text-xs font-semibold text-zinc-500 uppercase flex items-center gap-1.5"><FileText className="w-3 h-3" />{t('checkin.notes')}</Label>
+                      <Label className="text-xs font-semibold text-muted-foreground uppercase flex items-center gap-1.5"><FileText className="w-3 h-3" />{t('checkin.notes')}</Label>
                       <Input className="h-10 bg-zinc-50 border-zinc-200" placeholder="E.g., Prefers bottom bunk" value={newGuestRef.notes} onChange={e => setNewGuestRef({...newGuestRef, notes: e.target.value})} />
                     </div>
                   </div>

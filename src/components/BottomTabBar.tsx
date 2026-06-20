@@ -66,7 +66,7 @@ export function BottomTabBar({ activeTab, setActiveTab }: BottomTabBarProps) {
               onClick={() => setActiveTab(tab.id)}
               className={cn(
                 'relative flex flex-col items-center justify-center gap-0.5 min-h-[56px] py-2 transition-colors active:scale-95',
-                isActive ? 'text-blue-600' : 'text-zinc-500 active:text-zinc-700',
+                isActive ? 'text-blue-600' : 'text-muted-foreground active:text-zinc-700',
               )}
             >
               {isActive && (

@@ -224,7 +224,7 @@ export function AutoAssignConfirmDialog({
                   <h2 id="auto-assign-title" className="text-base md:text-lg font-extrabold text-zinc-900 leading-tight">
                     {t('checkin.confirmAutoAssignTitle') || 'Confirm auto-assignment'}
                   </h2>
-                  <p className="text-xs text-zinc-500 mt-0.5">
+                  <p className="text-xs text-muted-foreground mt-0.5">
                     {t('checkin.confirmAutoAssignSubtitle') || 'Review the recommended bed before checking in'}
                   </p>
                 </div>
@@ -248,16 +248,16 @@ export function AutoAssignConfirmDialog({
                 <div className="flex-1 min-w-0">
                   <div className="font-bold text-sm text-zinc-900 truncate">{guestName}</div>
                   <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
-                    <span className="text-xs text-zinc-500">{guest.countryCode}</span>
+                    <span className="text-xs text-muted-foreground">{guest.countryCode}</span>
                     {genderChip && (
                       <span className={cn('inline-flex items-center gap-0.5 text-xs font-bold px-1.5 py-0.5 rounded', genderChip.bg)}>
                         {genderChip.icon} {t(`guest.${guest.gender}`) || guest.gender}
                       </span>
                     )}
-                    <span className="text-xs text-zinc-500">{guest.nights} {t('dashboard.nights')}</span>
+                    <span className="text-xs text-muted-foreground">{guest.nights} {t('dashboard.nights')}</span>
                   </div>
                 </div>
-                <ArrowRight className="w-4 h-4 text-zinc-400 shrink-0" />
+                <ArrowRight className="w-4 h-4 text-muted-foreground shrink-0" />
               </div>
 
               {/* Recommended bed card */}
@@ -274,7 +274,7 @@ export function AutoAssignConfirmDialog({
                         {roomTypeName}
                       </span>
                     </div>
-                    <div className="text-xs text-zinc-500 mt-0.5 ml-5">
+                    <div className="text-xs text-muted-foreground mt-0.5 ml-5">
                       {recommendedBed.bedName} · {bedTypeName} · R{recommendedBed.roomNumber}
                     </div>
                   </div>
@@ -285,10 +285,10 @@ export function AutoAssignConfirmDialog({
                   <span className="text-xl font-extrabold text-zinc-900">
                     {formatCurrency(recommendedBed.pricePerNight, language)}
                   </span>
-                  <span className="text-xs text-zinc-500 font-medium">/night</span>
-                  <span className="text-xs text-zinc-400 ml-1">×</span>
+                  <span className="text-xs text-muted-foreground font-medium">/night</span>
+                  <span className="text-xs text-muted-foreground ml-1">×</span>
                   <span className="text-xs text-zinc-600 font-semibold">{guest.nights} {t('dashboard.nights')}</span>
-                  <span className="text-xs text-zinc-400 ml-1">=</span>
+                  <span className="text-xs text-muted-foreground ml-1">=</span>
                   <span className="text-base font-extrabold text-emerald-700 ml-auto">
                     {formatCurrency(totalForStay, language)}
                   </span>

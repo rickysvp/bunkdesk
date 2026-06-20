@@ -199,7 +199,7 @@ export function RevenueBoost({ autoOpenPromo, onAutoOpenPromoConsumed }: { autoO
       {/* ── 1. Occupancy Overview ─────────────────────────────── */}
       <div className="bg-white rounded-xl border border-zinc-200 shadow-sm p-5 mb-4">
         <div className="flex items-center gap-2 mb-4">
-          <Bed className="w-4 h-4 text-zinc-400" />
+          <Bed className="w-4 h-4 text-muted-foreground" />
           <h2 className="text-sm font-semibold text-zinc-900">
             {t("revenue.occupancyOverview")}
           </h2>
@@ -218,7 +218,7 @@ export function RevenueBoost({ autoOpenPromo, onAutoOpenPromoConsumed }: { autoO
                   transition={{ duration: 0.5, delay: i * 0.05 }}
                 />
               </div>
-              <span className="text-xs font-medium text-zinc-500">
+              <span className="text-xs font-medium text-muted-foreground">
                 {day.dayName}
               </span>
               <span
@@ -279,7 +279,7 @@ export function RevenueBoost({ autoOpenPromo, onAutoOpenPromoConsumed }: { autoO
       {/* ── 3. Pricing Suggestions ────────────────────────────── */}
       <div className="bg-white rounded-xl border border-zinc-200 shadow-sm p-5 mb-4">
         <div className="flex items-center gap-2 mb-4">
-          <DollarSign className="w-4 h-4 text-zinc-400" />
+          <DollarSign className="w-4 h-4 text-muted-foreground" />
           <h2 className="text-sm font-semibold text-zinc-900">
             {t("revenue.pricingSuggestions")}
           </h2>
@@ -288,16 +288,16 @@ export function RevenueBoost({ autoOpenPromo, onAutoOpenPromoConsumed }: { autoO
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-zinc-100">
-                <th className="text-left py-2 pr-4 text-xs font-medium text-zinc-500">
+                <th className="text-left py-2 pr-4 text-xs font-medium text-muted-foreground">
                   {t("revenue.season")}
                 </th>
-                <th className="text-right py-2 px-4 text-xs font-medium text-zinc-500">
+                <th className="text-right py-2 px-4 text-xs font-medium text-muted-foreground">
                   {t("revenue.currentPrice")}
                 </th>
-                <th className="text-right py-2 px-4 text-xs font-medium text-zinc-500">
+                <th className="text-right py-2 px-4 text-xs font-medium text-muted-foreground">
                   {t("revenue.suggestedPrice")}
                 </th>
-                <th className="text-right py-2 pl-4 text-xs font-medium text-zinc-500">
+                <th className="text-right py-2 pl-4 text-xs font-medium text-muted-foreground">
                   {t("revenue.revenueChange")}
                 </th>
               </tr>
@@ -343,7 +343,7 @@ export function RevenueBoost({ autoOpenPromo, onAutoOpenPromoConsumed }: { autoO
       <div className="mb-4">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
-            <Tag className="w-4 h-4 text-zinc-400" />
+            <Tag className="w-4 h-4 text-muted-foreground" />
             <h2 className="text-sm font-semibold text-zinc-900">
               {t("revenue.activePromotions")}
             </h2>
@@ -359,8 +359,8 @@ export function RevenueBoost({ autoOpenPromo, onAutoOpenPromoConsumed }: { autoO
 
         {promotions.length === 0 ? (
           <div className="bg-white rounded-xl border border-zinc-200 shadow-sm p-8 text-center">
-            <Tag className="w-8 h-8 text-zinc-300 mx-auto mb-2" />
-            <p className="text-sm text-zinc-500">
+            <Tag className="w-8 h-8 text-muted-foreground/70 mx-auto mb-2" />
+            <p className="text-sm text-muted-foreground">
               {t("revenue.noPromotions")}
             </p>
           </div>
@@ -387,7 +387,7 @@ export function RevenueBoost({ autoOpenPromo, onAutoOpenPromoConsumed }: { autoO
                         {t(`revenue.type${promo.type.split("-").map(w => w[0].toUpperCase() + w.slice(1)).join("")}`)}
                       </span>
                     </div>
-                    <div className="flex items-center gap-4 text-xs text-zinc-500">
+                    <div className="flex items-center gap-4 text-xs text-muted-foreground">
                       <span className="font-semibold text-emerald-600">
                         {promo.discount}% {t("revenue.off")}
                       </span>
@@ -447,7 +447,7 @@ export function RevenueBoost({ autoOpenPromo, onAutoOpenPromoConsumed }: { autoO
               <div className="grid grid-cols-2 gap-3">
                 {/* Type */}
                 <div>
-                  <label className="text-xs font-medium text-zinc-500 mb-1 block">
+                  <label className="text-xs font-medium text-muted-foreground mb-1 block">
                     {t("revenue.promotionType")}
                   </label>
                   <select
@@ -467,7 +467,7 @@ export function RevenueBoost({ autoOpenPromo, onAutoOpenPromoConsumed }: { autoO
 
                 {/* Name */}
                 <div>
-                  <label className="text-xs font-medium text-zinc-500 mb-1 block">
+                  <label className="text-xs font-medium text-muted-foreground mb-1 block">
                     {t("revenue.promotionName")}
                   </label>
                   <input
@@ -480,7 +480,7 @@ export function RevenueBoost({ autoOpenPromo, onAutoOpenPromoConsumed }: { autoO
 
                 {/* Discount */}
                 <div>
-                  <label className="text-xs font-medium text-zinc-500 mb-1 block">
+                  <label className="text-xs font-medium text-muted-foreground mb-1 block">
                     {t("revenue.discountPercent")}
                   </label>
                   <input
@@ -495,7 +495,7 @@ export function RevenueBoost({ autoOpenPromo, onAutoOpenPromoConsumed }: { autoO
 
                 {/* Room type filter */}
                 <div>
-                  <label className="text-xs font-medium text-zinc-500 mb-1 block">
+                  <label className="text-xs font-medium text-muted-foreground mb-1 block">
                     {t("revenue.roomTypeFilter")} ({t("revenue.optional")})
                   </label>
                   <select
@@ -518,7 +518,7 @@ export function RevenueBoost({ autoOpenPromo, onAutoOpenPromoConsumed }: { autoO
 
                 {/* Start date */}
                 <div>
-                  <label className="text-xs font-medium text-zinc-500 mb-1 block">
+                  <label className="text-xs font-medium text-muted-foreground mb-1 block">
                     {t("revenue.startDate")}
                   </label>
                   <input
@@ -531,7 +531,7 @@ export function RevenueBoost({ autoOpenPromo, onAutoOpenPromoConsumed }: { autoO
 
                 {/* End date */}
                 <div>
-                  <label className="text-xs font-medium text-zinc-500 mb-1 block">
+                  <label className="text-xs font-medium text-muted-foreground mb-1 block">
                     {t("revenue.endDate")}
                   </label>
                   <input
@@ -545,7 +545,7 @@ export function RevenueBoost({ autoOpenPromo, onAutoOpenPromoConsumed }: { autoO
                 {/* Min nights (long-stay only) */}
                 {formType === "long-stay" && (
                   <div>
-                    <label className="text-xs font-medium text-zinc-500 mb-1 block">
+                    <label className="text-xs font-medium text-muted-foreground mb-1 block">
                       {t("revenue.minNights")}
                     </label>
                     <input
@@ -562,7 +562,7 @@ export function RevenueBoost({ autoOpenPromo, onAutoOpenPromoConsumed }: { autoO
                 {/* Min guests (group-discount only) */}
                 {formType === "group-discount" && (
                   <div>
-                    <label className="text-xs font-medium text-zinc-500 mb-1 block">
+                    <label className="text-xs font-medium text-muted-foreground mb-1 block">
                       {t("revenue.minGuests")}
                     </label>
                     <input
@@ -581,7 +581,7 @@ export function RevenueBoost({ autoOpenPromo, onAutoOpenPromoConsumed }: { autoO
               <div className="flex items-center justify-end gap-2 mt-4 pt-4 border-t border-zinc-100">
                 <button
                   onClick={() => setShowForm(false)}
-                  className="text-sm text-zinc-500 hover:text-zinc-700 px-3 py-1.5 rounded-lg transition-colors"
+                  className="text-sm text-muted-foreground hover:text-zinc-700 px-3 py-1.5 rounded-lg transition-colors"
                 >
                   {t("revenue.cancel")}
                 </button>

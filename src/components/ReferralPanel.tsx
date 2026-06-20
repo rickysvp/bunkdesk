@@ -91,8 +91,8 @@ export function ReferralPanel() {
       <div className="grid grid-cols-3 gap-3 mb-6">
         <div className="bg-white rounded-xl border border-zinc-200 shadow-sm p-4">
           <div className="flex items-center gap-2 mb-1">
-            <Hash className="w-4 h-4 text-zinc-400" />
-            <span className="text-xs font-medium text-zinc-500">
+            <Hash className="w-4 h-4 text-muted-foreground" />
+            <span className="text-xs font-medium text-muted-foreground">
               {t("referral.totalReferrals")}
             </span>
           </div>
@@ -100,8 +100,8 @@ export function ReferralPanel() {
         </div>
         <div className="bg-white rounded-xl border border-zinc-200 shadow-sm p-4">
           <div className="flex items-center gap-2 mb-1">
-            <Users className="w-4 h-4 text-zinc-400" />
-            <span className="text-xs font-medium text-zinc-500">
+            <Users className="w-4 h-4 text-muted-foreground" />
+            <span className="text-xs font-medium text-muted-foreground">
               {t("referral.conversions")}
             </span>
           </div>
@@ -109,8 +109,8 @@ export function ReferralPanel() {
         </div>
         <div className="bg-white rounded-xl border border-zinc-200 shadow-sm p-4">
           <div className="flex items-center gap-2 mb-1">
-            <DollarSign className="w-4 h-4 text-zinc-400" />
-            <span className="text-xs font-medium text-zinc-500">
+            <DollarSign className="w-4 h-4 text-muted-foreground" />
+            <span className="text-xs font-medium text-muted-foreground">
               {t("referral.commissionSaved")}
             </span>
           </div>
@@ -127,7 +127,7 @@ export function ReferralPanel() {
         </h2>
         <div className="grid grid-cols-[1fr_1fr_auto] gap-3 items-end">
           <div>
-            <label className="text-xs font-medium text-zinc-500 mb-1 block">
+            <label className="text-xs font-medium text-muted-foreground mb-1 block">
               {t("referral.guestName")}
             </label>
             <input
@@ -138,7 +138,7 @@ export function ReferralPanel() {
             />
           </div>
           <div>
-            <label className="text-xs font-medium text-zinc-500 mb-1 block">
+            <label className="text-xs font-medium text-muted-foreground mb-1 block">
               {t("referral.rewardType")}
             </label>
             <select
@@ -172,8 +172,8 @@ export function ReferralPanel() {
         </h2>
         {referrals.length === 0 ? (
           <div className="bg-white rounded-xl border border-zinc-200 shadow-sm p-8 text-center">
-            <Ticket className="w-8 h-8 text-zinc-300 mx-auto mb-2" />
-            <p className="text-sm text-zinc-500">{t("referral.noReferrals")}</p>
+            <Ticket className="w-8 h-8 text-muted-foreground/70 mx-auto mb-2" />
+            <p className="text-sm text-muted-foreground">{t("referral.noReferrals")}</p>
           </div>
         ) : (
           <div className="space-y-3">
@@ -203,7 +203,7 @@ export function ReferralPanel() {
                         </span>
                       </span>
                     </div>
-                    <div className="flex items-center gap-4 text-xs text-zinc-500">
+                    <div className="flex items-center gap-4 text-xs text-muted-foreground">
                       <span>
                         {t("referral.usedByGuests").replace(
                           "{n}",
@@ -222,7 +222,7 @@ export function ReferralPanel() {
                     variant="ghost"
                     size="sm"
                     onClick={() => handleCopy(ref.code)}
-                    className="shrink-0 text-zinc-500 hover:text-emerald-600"
+                    className="shrink-0 text-muted-foreground hover:text-emerald-600"
                   >
                     {copiedCode === ref.code ? (
                       <>
@@ -275,11 +275,11 @@ export function ReferralPanel() {
               <p className="text-sm font-semibold text-zinc-900 mb-1">
                 {step.title}
               </p>
-              <p className="text-xs text-zinc-500 leading-relaxed">
+              <p className="text-xs text-muted-foreground leading-relaxed">
                 {step.desc}
               </p>
               {i < 2 && (
-                <ArrowRight className="w-4 h-4 text-zinc-300 absolute -right-2 top-1/2 -translate-y-1/2" />
+                <ArrowRight className="w-4 h-4 text-muted-foreground/70 absolute -right-2 top-1/2 -translate-y-1/2" />
               )}
             </div>
           ))}

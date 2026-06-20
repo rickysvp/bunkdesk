@@ -95,12 +95,12 @@ export function AssistantPanelGrowth({
               <span className="text-emerald-700">
                 {formatCurrency(totalPotentialRevenue, language)}
               </span>
-              <span className="text-sm font-normal text-zinc-500">
+              <span className="text-sm font-normal text-muted-foreground">
                 {t('assistant.growthOverview.potential7d')}
               </span>
             </p>
             {totalPotentialBedNights > 0 && (
-              <p className="text-xs text-zinc-500 mt-0.5">
+              <p className="text-xs text-muted-foreground mt-0.5">
                 {t('dashboard.moreCount', { n: totalPotentialBedNights }).replace('+', '+')}
                 {' '}
                 {t('assistant.growthOverview.bedNights')}
@@ -110,19 +110,19 @@ export function AssistantPanelGrowth({
           <div className="flex gap-5 text-sm">
             <div>
               <p className="text-2xl font-bold text-zinc-900">5</p>
-              <p className="text-xs text-zinc-500 uppercase tracking-wider">
+              <p className="text-xs text-muted-foreground uppercase tracking-wider">
                 {t('assistant.growthOverview.tools')}
               </p>
             </div>
             <div>
               <p className="text-2xl font-bold text-zinc-900">{recallCount}</p>
-              <p className="text-xs text-zinc-500 uppercase tracking-wider">
+              <p className="text-xs text-muted-foreground uppercase tracking-wider">
                 {t('assistant.growthOverview.recallable')}
               </p>
             </div>
             <div>
               <p className="text-2xl font-bold text-zinc-900">{occupancyActions.length}</p>
-              <p className="text-xs text-zinc-500 uppercase tracking-wider">
+              <p className="text-xs text-muted-foreground uppercase tracking-wider">
                 {t('assistant.needsAttention')}
               </p>
             </div>
@@ -147,10 +147,10 @@ export function AssistantPanelGrowth({
               onClick={() => setActiveSubTab(tab.id)}
               className={cn(
                 'relative flex items-center gap-1.5 px-3 py-2 text-sm font-medium transition-colors flex-shrink-0',
-                active ? 'text-zinc-900' : 'text-zinc-500 hover:text-zinc-900',
+                active ? 'text-zinc-900' : 'text-muted-foreground hover:text-zinc-900',
               )}
             >
-              <Icon className={cn('h-4 w-4', active ? 'text-blue-600' : 'text-zinc-400')} />
+              <Icon className={cn('h-4 w-4', active ? 'text-blue-600' : 'text-muted-foreground')} />
               <span>{t(tab.i18nKey)}</span>
               {active && (
                 <span

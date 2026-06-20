@@ -232,6 +232,8 @@ export function BookingBlock({
         className="absolute inset-0 z-[1]"
         {...attributes}
         {...dragListeners}
+        role="button"
+        aria-label={`Guest ${booking.name}, drag to move or press space to pick up`}
         onClick={(e) => {
           e.stopPropagation();
           if (suppressClickRef.current) {
@@ -263,14 +265,14 @@ export function BookingBlock({
           block extends back further than they can see. */}
       <div className="absolute left-[20%] right-[20%] top-0 bottom-0 z-[5] flex flex-col justify-center px-2 min-w-0 pointer-events-none overflow-hidden">
         <div className="truncate text-xs font-medium leading-tight">
-          {isContinuation && <span className="text-zinc-500 mr-0.5">←</span>}
+          {isContinuation && <span className="text-muted-foreground mr-0.5">←</span>}
           {booking.name}
         </div>
         <div className="truncate text-xs leading-tight opacity-75 mt-0.5">
           {booking.countryCode}
           {typeof booking.nights === 'number' && booking.nights > 0 && (
             <>
-              <span className="text-zinc-400 mx-0.5">·</span>
+              <span className="text-muted-foreground mx-0.5">·</span>
               <span>{booking.nights}n</span>
             </>
           )}
@@ -279,7 +281,7 @@ export function BookingBlock({
               showing dates like "6/13 – 6/19" even though only 6/14
               onward is rendered, so the user understands the block
               is clipped. */}
-          <span className="text-zinc-400 mx-0.5">·</span>
+          <span className="text-muted-foreground mx-0.5">·</span>
           <span>{format(checkIn, 'M/d')} – {format(checkOut, 'M/d')}</span>
         </div>
       </div>
@@ -309,7 +311,7 @@ export function BookingBlock({
             </button>
           )}
           <button
-            className="p-1 rounded text-zinc-500 pointer-events-auto group-hover:pointer-events-auto hover:bg-zinc-100 active:scale-90 transition-transform"
+            className="p-1 rounded text-muted-foreground pointer-events-auto group-hover:pointer-events-auto hover:bg-zinc-100 active:scale-90 transition-transform"
             title="Edit guest details"
             onPointerDown={(e) => e.stopPropagation()}
             onClick={(e) => { e.stopPropagation(); onClick?.(); }}

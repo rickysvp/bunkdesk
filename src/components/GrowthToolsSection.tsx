@@ -74,10 +74,10 @@ export function GrowthToolsSection({
               onClick={() => setActiveSubTab(tab.id)}
               className={cn(
                 'relative flex items-center gap-1.5 px-3 py-2 text-sm font-medium transition-colors flex-shrink-0',
-                active ? 'text-zinc-900' : 'text-zinc-500 hover:text-zinc-900',
+                active ? 'text-zinc-900' : 'text-muted-foreground hover:text-zinc-900',
               )}
             >
-              <Icon className={cn('h-4 w-4', active ? 'text-blue-600' : 'text-zinc-400')} />
+              <Icon className={cn('h-4 w-4', active ? 'text-blue-600' : 'text-muted-foreground')} />
               <span>{t(tab.i18nKey) || tab.fallback}</span>
               {active && (
                 <span

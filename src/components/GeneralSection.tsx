@@ -115,7 +115,7 @@ export function GeneralSection() {
     <div className="max-w-2xl mx-auto space-y-3 pb-20 md:pb-0">
       <Section title={t('common.language')}>
         <Row
-          icon={<Languages className="h-4 w-4 text-zinc-500" />}
+          icon={<Languages className="h-4 w-4 text-muted-foreground" />}
           label={t('common.language')}
           description={t('common.currentLanguage')}
         >
@@ -125,17 +125,17 @@ export function GeneralSection() {
 
       <Section title={t('common.version')}>
         <Row
-          icon={<Info className="h-4 w-4 text-zinc-500" />}
+          icon={<Info className="h-4 w-4 text-muted-foreground" />}
           label={APP_NAME}
           description={`${t('common.version')} ${APP_VERSION}`}
         >
-          <span className="text-xs font-mono text-zinc-400">v{APP_VERSION}</span>
+          <span className="text-xs font-mono text-muted-foreground">v{APP_VERSION}</span>
         </Row>
       </Section>
 
       <Section title={t('common.logout')}>
         <Row
-          icon={<LogOut className="h-4 w-4 text-zinc-500" />}
+          icon={<LogOut className="h-4 w-4 text-muted-foreground" />}
           label={t('common.logout')}
           description=""
         >
@@ -240,7 +240,7 @@ function LanguageSwitcher({ value, onChange }: { value: Language; onChange: (l: 
               'px-3 py-1.5 text-xs font-semibold rounded-md transition-colors min-w-[64px]',
               active
                 ? 'bg-white text-zinc-900 shadow-sm'
-                : 'text-zinc-500 hover:text-zinc-900',
+                : 'text-muted-foreground hover:text-zinc-900',
             )}
           >
             {opt.label}
@@ -254,7 +254,7 @@ function LanguageSwitcher({ value, onChange }: { value: Language; onChange: (l: 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section className="bg-white border border-zinc-200 rounded-lg overflow-hidden">
-      <h3 className="px-4 py-2.5 text-xs font-semibold text-zinc-500 uppercase tracking-wider border-b border-zinc-100 bg-zinc-50/50">
+      <h3 className="px-4 py-2.5 text-xs font-semibold text-muted-foreground uppercase tracking-wider border-b border-zinc-100 bg-zinc-50/50">
         {title}
       </h3>
       <div className="divide-y divide-zinc-100">{children}</div>
@@ -278,7 +278,7 @@ function Row({
       <div className="flex-1 min-w-0">
         <div className="text-sm font-medium text-zinc-900 truncate">{label}</div>
         {description && (
-          <div className="text-xs text-zinc-500 truncate">{description}</div>
+          <div className="text-xs text-muted-foreground truncate">{description}</div>
         )}
       </div>
       <div className="flex-shrink-0">{children}</div>

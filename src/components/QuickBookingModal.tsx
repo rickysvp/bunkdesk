@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { format, addDays, parseISO } from 'date-fns';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, UserPlus, IdCard } from 'lucide-react';
@@ -17,6 +17,7 @@ import { useHostel } from '../HostelContext';
 import { Guest, Bed, Room } from '../types';
 import { getBedPrice } from '../utils/bedPricing';
 import { toast } from 'sonner';
+import { useFocusTrap } from '../hooks/useFocusTrap';
 
 interface QuickBookingModalProps {
   isOpen: boolean;
@@ -47,6 +48,8 @@ const COUNTRY_OPTIONS = [
 export function QuickBookingModal({ isOpen, onClose, bed, room, initialDate }: QuickBookingModalProps) {
   const { t, language } = useTranslation();
   const { addArrival, occupyBed } = useHostel();
+  const dialogRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(dialogRef, isOpen);
 
   const [name, setName] = useState('');
   const [countryCode, setCountryCode] = useState('');
@@ -136,17 +139,21 @@ export function QuickBookingModal({ isOpen, onClose, bed, room, initialDate }: Q
           onClick={onClose}
         >
           <motion.div
+            ref={dialogRef}
             initial={{ opacity: 0, scale: 0.95, y: 10 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 10 }}
             transition={{ duration: 0.15 }}
-            className="bg-card rounded-2xl shadow-modal max-w-sm w-full overflow-hidden ring-1 ring-border/50"
+            className="bg-card rounded-2xl shadow-modal max-w-sm w-full overflow-hidden ring-1 ring-border/50 focus:outline-none"
             onClick={(e) => e.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="quick-booking-title"
           >
             <div className="p-5 border-b border-border flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <UserPlus className="w-4 h-4 text-success" />
-                <h3 className="font-semibold text-foreground">{t('calendarview.quickBooking')}</h3>
+                <h3 id="quick-booking-title" className="font-semibold text-foreground">{t('calendarview.quickBooking')}</h3>
               </div>
               <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-colors" aria-label="Close">
                 <X className="w-4 h-4" />
@@ -178,13 +185,13 @@ export function QuickBookingModal({ isOpen, onClose, bed, room, initialDate }: Q
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label className="text-xs font-semibold text-zinc-500 uppercase">{t('calendarview.guestName')}</Label>
-                  <Input required placeholder={t('calendarview.namePlaceholder')} value={name} onChange={(e) => setName(e.target.value)} className="h-9 text-sm" autoFocus />
+                  <Label className="text-xs font-semibold text-muted-foreground uppercase">{t('calendarview.guestName')}</Label>
+                  <Input required placeholder={t('calendarview.namePlaceholder')} autoComplete="name" value={name} onChange={(e) => setName(e.target.value)} className="h-9 text-sm" autoFocus />
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1.5">
-                    <Label className="text-xs font-semibold text-zinc-500 uppercase">{t('calendarview.country')}</Label>
+                    <Label className="text-xs font-semibold text-muted-foreground uppercase">{t('calendarview.country')}</Label>
                     <Select value={countryCode} onValueChange={setCountryCode}>
                       <SelectTrigger className="h-9 text-sm"><SelectValue placeholder={t('calendarview.selectCountry')} /></SelectTrigger>
                       <SelectContent>
@@ -193,7 +200,7 @@ export function QuickBookingModal({ isOpen, onClose, bed, room, initialDate }: Q
                     </Select>
                   </div>
                   <div className="space-y-1.5">
-                    <Label className="text-xs font-semibold text-zinc-500 uppercase">{t('calendarview.gender')}</Label>
+                    <Label className="text-xs font-semibold text-muted-foreground uppercase">{t('calendarview.gender')}</Label>
                     <Select value={gender} onValueChange={(v: string) => setGender(v as 'male' | 'female' | 'other')}>
                       <SelectTrigger className="h-9 text-sm"><SelectValue placeholder={t('calendarview.selectGender')} /></SelectTrigger>
                       <SelectContent>
@@ -207,11 +214,11 @@ export function QuickBookingModal({ isOpen, onClose, bed, room, initialDate }: Q
 
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1.5">
-                    <Label className="text-xs font-semibold text-zinc-500 uppercase">{t('calendarview.checkIn')}</Label>
+                    <Label className="text-xs font-semibold text-muted-foreground uppercase">{t('calendarview.checkIn')}</Label>
                     <Input type="date" required value={checkInDate} onChange={(e) => setCheckInDate(e.target.value)} className="h-9 text-sm" />
                   </div>
                   <div className="space-y-1.5">
-                    <Label className="text-xs font-semibold text-zinc-500 uppercase">{t('calendarview.checkOut')}</Label>
+                    <Label className="text-xs font-semibold text-muted-foreground uppercase">{t('calendarview.checkOut')}</Label>
                     <Input type="date" required value={checkOutDate} onChange={(e) => setCheckOutDate(e.target.value)} className="h-9 text-sm" min={checkInDate} />
                   </div>
                 </div>
@@ -219,7 +226,7 @@ export function QuickBookingModal({ isOpen, onClose, bed, room, initialDate }: Q
                 {/* 护照/证件 — 必填 */}
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1.5">
-                    <Label className="text-xs font-semibold text-zinc-500 uppercase">{t('checkin.idType.label')}<span className="text-red-500">*</span></Label>
+                    <Label className="text-xs font-semibold text-muted-foreground uppercase">{t('checkin.idType.label')}<span className="text-red-500">*</span></Label>
                     <Select value={idType} onValueChange={(v: string) => setIdType(v as 'passport' | 'idCard' | 'driverLicense')}>
                       <SelectTrigger className="h-9 text-sm"><SelectValue /></SelectTrigger>
                       <SelectContent>
@@ -230,16 +237,16 @@ export function QuickBookingModal({ isOpen, onClose, bed, room, initialDate }: Q
                     </Select>
                   </div>
                   <div className="space-y-1.5">
-                    <Label className="text-xs font-semibold text-zinc-500 uppercase">{t('checkin.passportOrId')}<span className="text-red-500">*</span></Label>
+                    <Label className="text-xs font-semibold text-muted-foreground uppercase">{t('checkin.passportOrId')}<span className="text-red-500">*</span></Label>
                     <div className="relative">
-                      <IdCard className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-400" />
+                      <IdCard className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
                       <Input required className="pl-8 h-9 text-sm" value={passportOrId} onChange={(e) => setPassportOrId(e.target.value)} placeholder="AB1234567" />
                     </div>
                   </div>
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label className="text-xs font-semibold text-zinc-500 uppercase">{t('calendarview.source')}</Label>
+                  <Label className="text-xs font-semibold text-muted-foreground uppercase">{t('calendarview.source')}</Label>
                   <Select value={source} onValueChange={(v: string) => setSource(v as 'walk-in' | 'manual')}>
                     <SelectTrigger className="h-9 text-sm"><SelectValue placeholder={t('calendarview.selectSource')} /></SelectTrigger>
                     <SelectContent>

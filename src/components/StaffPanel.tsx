@@ -91,7 +91,7 @@ export function StaffPanel() {
         <div className="bg-white rounded-xl border border-zinc-200 shadow-sm p-4 mb-4 space-y-3">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             <div>
-              <label className="text-xs font-medium text-zinc-500 mb-1 block">{t("staff.name")}</label>
+              <label className="text-xs font-medium text-muted-foreground mb-1 block">{t("staff.name")}</label>
               <input
                 className="w-full border border-zinc-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-300"
                 value={newStaffName}
@@ -100,7 +100,7 @@ export function StaffPanel() {
               />
             </div>
             <div>
-              <label className="text-xs font-medium text-zinc-500 mb-1 block">{t("staff.role")}</label>
+              <label className="text-xs font-medium text-muted-foreground mb-1 block">{t("staff.role")}</label>
               <select
                 className="w-full border border-zinc-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-300"
                 value={newStaffRole}
@@ -112,9 +112,9 @@ export function StaffPanel() {
               </select>
             </div>
             <div>
-              <label className="text-xs font-medium text-zinc-500 mb-1 block">{t("staff.pin")}</label>
+              <label className="text-xs font-medium text-muted-foreground mb-1 block">{t("staff.pin")}</label>
               <div className="relative">
-                <KeyRound className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-400" />
+                <KeyRound className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
                 <input
                   type="password"
                   maxLength={4}
@@ -126,9 +126,9 @@ export function StaffPanel() {
               </div>
             </div>
             <div>
-              <label className="text-xs font-medium text-zinc-500 mb-1 block">{t("staff.phone")}</label>
+              <label className="text-xs font-medium text-muted-foreground mb-1 block">{t("staff.phone")}</label>
               <div className="relative">
-                <Phone className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-400" />
+                <Phone className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
                 <input
                   className="w-full border border-zinc-200 rounded-lg pl-8 pr-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-300"
                   value={newStaffPhone}
@@ -166,7 +166,7 @@ export function StaffPanel() {
                 <div className="space-y-3">
                   <div className="grid grid-cols-3 gap-3">
                     <div>
-                      <label className="text-xs font-medium text-zinc-500 mb-1 block">{t("staff.name")}</label>
+                      <label className="text-xs font-medium text-muted-foreground mb-1 block">{t("staff.name")}</label>
                       <input
                         className="w-full border border-zinc-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-300"
                         value={editName}
@@ -174,7 +174,7 @@ export function StaffPanel() {
                       />
                     </div>
                     <div>
-                      <label className="text-xs font-medium text-zinc-500 mb-1 block">{t("staff.role")}</label>
+                      <label className="text-xs font-medium text-muted-foreground mb-1 block">{t("staff.role")}</label>
                       <select
                         className="w-full border border-zinc-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-300"
                         value={editRole}
@@ -186,7 +186,7 @@ export function StaffPanel() {
                       </select>
                     </div>
                     <div>
-                      <label className="text-xs font-medium text-zinc-500 mb-1 block">{t("staff.phone")}</label>
+                      <label className="text-xs font-medium text-muted-foreground mb-1 block">{t("staff.phone")}</label>
                       <input
                         className="w-full border border-zinc-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-300"
                         value={editPhone}
@@ -207,7 +207,7 @@ export function StaffPanel() {
                 /* Display Mode */
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <UserCircle className="w-8 h-8 text-zinc-400 shrink-0" />
+                    <UserCircle className="w-8 h-8 text-muted-foreground shrink-0" />
                     <div>
                       <div className="flex items-center gap-2">
                         <span className="font-semibold text-zinc-900">{staff.name}</span>
@@ -215,13 +215,13 @@ export function StaffPanel() {
                           {t(ROLE_LABEL_KEY[staff.role])}
                         </span>
                         {!staff.isActive && (
-                          <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-zinc-100 text-zinc-500">
+                          <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-zinc-100 text-muted-foreground">
                             {t("staff.inactive")}
                           </span>
                         )}
                       </div>
                       {staff.phone && (
-                        <div className="flex items-center gap-1 mt-0.5 text-sm text-zinc-500">
+                        <div className="flex items-center gap-1 mt-0.5 text-sm text-muted-foreground">
                           <Phone className="w-3 h-3" />
                           {staff.phone}
                         </div>
@@ -230,13 +230,13 @@ export function StaffPanel() {
                   </div>
                   <div className="flex items-center gap-1">
                     <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => startEdit(staff)}>
-                      <Edit2 className="w-4 h-4 text-zinc-500" />
+                      <Edit2 className="w-4 h-4 text-muted-foreground" />
                     </Button>
                     <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => toggleActive(staff)}>
                       {staff.isActive ? (
-                        <UserX className="w-4 h-4 text-zinc-500" />
+                        <UserX className="w-4 h-4 text-muted-foreground" />
                       ) : (
-                        <UserCheck className="w-4 h-4 text-zinc-500" />
+                        <UserCheck className="w-4 h-4 text-muted-foreground" />
                       )}
                     </Button>
                   </div>

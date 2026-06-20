@@ -45,7 +45,7 @@ export function GrowPanel({ initialSubTab, onSubTabChanged, autoOpenPromo, onAut
             className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
               activeSubTab === tab.id
                 ? 'bg-white shadow-sm text-emerald-600'
-                : 'text-zinc-500 hover:text-zinc-700'
+                : 'text-muted-foreground hover:text-zinc-700'
             }`}
           >
             <tab.icon className="w-4 h-4" />

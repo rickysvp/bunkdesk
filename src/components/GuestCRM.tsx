@@ -69,7 +69,7 @@ export function GuestCRM() {
             </div>
             <div>
               <p className="text-2xl font-semibold text-zinc-900 leading-none">{totalGuests}</p>
-              <p className="text-xs text-zinc-500 mt-0.5">{t('crm.totalGuests')}</p>
+              <p className="text-xs text-muted-foreground mt-0.5">{t('crm.totalGuests')}</p>
             </div>
           </CardContent>
         </Card>
@@ -80,7 +80,7 @@ export function GuestCRM() {
             </div>
             <div>
               <p className="text-2xl font-semibold text-zinc-900 leading-none">{totalRepeatGuests}</p>
-              <p className="text-xs text-zinc-500 mt-0.5">{t('crm.repeatGuests')}</p>
+              <p className="text-xs text-muted-foreground mt-0.5">{t('crm.repeatGuests')}</p>
             </div>
           </CardContent>
         </Card>
@@ -91,7 +91,7 @@ export function GuestCRM() {
             </div>
             <div>
               <p className="text-2xl font-semibold text-zinc-900 leading-none">{totalRecallable}</p>
-              <p className="text-xs text-zinc-500 mt-0.5">{t('crm.toRecall')}</p>
+              <p className="text-xs text-muted-foreground mt-0.5">{t('crm.toRecall')}</p>
             </div>
           </CardContent>
         </Card>
@@ -110,7 +110,7 @@ export function GuestCRM() {
               onClick={() => { setView(tab.id); setTagFilter(null); }}
               className={cn(
                 "px-4 py-2 rounded-lg text-sm font-medium transition-colors",
-                view === tab.id ? 'bg-white shadow-sm text-emerald-600' : 'text-zinc-500 hover:text-zinc-700'
+                view === tab.id ? 'bg-white shadow-sm text-emerald-600' : 'text-muted-foreground hover:text-zinc-700'
               )}
             >
               {tab.label}
@@ -118,7 +118,7 @@ export function GuestCRM() {
           ))}
         </div>
         <div className="relative flex-1 max-w-sm">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             className="pl-9 h-9"
             placeholder={t('crm.searchGuests')}
@@ -186,11 +186,11 @@ export function GuestCRM() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
                       <span className="text-sm font-medium text-zinc-900 truncate">{profile.name}</span>
-                      <span className="text-xs text-zinc-400 shrink-0">{profile.countryCode}</span>
+                      <span className="text-xs text-muted-foreground shrink-0">{profile.countryCode}</span>
                     </div>
                     <div className="flex items-center gap-2 sm:gap-3 mt-1 flex-wrap">
-                      <span className="text-xs text-zinc-500">{profile.totalStays}x {t('crm.stays')}</span>
-                      <span className="text-xs text-zinc-500">{profile.totalNights}N</span>
+                      <span className="text-xs text-muted-foreground">{profile.totalStays}x {t('crm.stays')}</span>
+                      <span className="text-xs text-muted-foreground">{profile.totalNights}N</span>
                       <span className="text-xs font-medium text-emerald-600">{formatCurrency(profile.totalSpent, language)}</span>
                     </div>
                   </div>
@@ -204,13 +204,13 @@ export function GuestCRM() {
                       );
                     })}
                     {profile.tags.length > 3 && (
-                      <span className="text-xs text-zinc-400">+{profile.tags.length - 3}</span>
+                      <span className="text-xs text-muted-foreground">+{profile.tags.length - 3}</span>
                     )}
                   </div>
                   <div className="hidden sm:flex items-center gap-1.5 shrink-0">
-                    {profile.email && <Mail className="h-3.5 w-3.5 text-zinc-300" />}
+                    {profile.email && <Mail className="h-3.5 w-3.5 text-muted-foreground/70" />}
                     {profile.whatsapp && <MessageCircle className="h-3.5 w-3.5 text-green-400" />}
-                    {profile.phone && <Phone className="h-3.5 w-3.5 text-zinc-300" />}
+                    {profile.phone && <Phone className="h-3.5 w-3.5 text-muted-foreground/70" />}
                   </div>
                 </CardContent>
                 {/* Mobile-only tags row */}
@@ -224,7 +224,7 @@ export function GuestCRM() {
                     );
                   })}
                   {profile.tags.length > 3 && (
-                    <span className="text-xs text-zinc-400">+{profile.tags.length - 3}</span>
+                    <span className="text-xs text-muted-foreground">+{profile.tags.length - 3}</span>
                   )}
                 </div>
               </Card>
@@ -232,7 +232,7 @@ export function GuestCRM() {
           ))}
         </AnimatePresence>
         {filteredProfiles.length === 0 && (
-          <div className="py-12 text-center text-sm text-zinc-500">
+          <div className="py-12 text-center text-sm text-muted-foreground">
             {view === 'recall'
               ? (t('crm.noRecallCandidates'))
               : (t('crm.noGuests'))
@@ -266,29 +266,29 @@ export function GuestCRM() {
                   </div>
                   <div>
                     <h3 className="font-semibold text-zinc-900">{selectedProfile.name}</h3>
-                    <span className="text-xs text-zinc-500">{selectedProfile.country}</span>
+                    <span className="text-xs text-muted-foreground">{selectedProfile.country}</span>
                   </div>
                 </div>
                 <button onClick={() => setSelectedProfile(null)} className="p-1 hover:bg-zinc-100 rounded-lg">
-                  <span className="text-zinc-400 text-lg">&times;</span>
+                  <span className="text-muted-foreground text-lg">&times;</span>
                 </button>
               </div>
               <div className="p-5 grid grid-cols-3 gap-3">
                 <div className="bg-zinc-50 rounded-lg p-3 text-center">
                   <p className="text-lg font-semibold text-zinc-900">{selectedProfile.totalStays}</p>
-                  <p className="text-xs text-zinc-500 uppercase">{t('crm.stays')}</p>
+                  <p className="text-xs text-muted-foreground uppercase">{t('crm.stays')}</p>
                 </div>
                 <div className="bg-zinc-50 rounded-lg p-3 text-center">
                   <p className="text-lg font-semibold text-zinc-900">{selectedProfile.totalNights}</p>
-                  <p className="text-xs text-zinc-500 uppercase">{t('crm.nights')}</p>
+                  <p className="text-xs text-muted-foreground uppercase">{t('crm.nights')}</p>
                 </div>
                 <div className="bg-zinc-50 rounded-lg p-3 text-center">
                   <p className="text-lg font-semibold text-emerald-600">{formatCurrency(selectedProfile.totalSpent, language)}</p>
-                  <p className="text-xs text-zinc-500 uppercase">{t('crm.spent')}</p>
+                  <p className="text-xs text-muted-foreground uppercase">{t('crm.spent')}</p>
                 </div>
               </div>
               <div className="px-5 pb-4">
-                <p className="text-xs font-semibold text-zinc-400 uppercase mb-2">{t('crm.tags')}</p>
+                <p className="text-xs font-semibold text-muted-foreground uppercase mb-2">{t('crm.tags')}</p>
                 <div className="flex flex-wrap gap-1.5">
                   {selectedProfile.tags.map(tag => {
                     const label = getTagLabel(tag);
@@ -299,20 +299,20 @@ export function GuestCRM() {
                     );
                   })}
                   {selectedProfile.tags.length === 0 && (
-                    <span className="text-xs text-zinc-400">{t('crm.noTags')}</span>
+                    <span className="text-xs text-muted-foreground">{t('crm.noTags')}</span>
                   )}
                 </div>
               </div>
               <div className="px-5 pb-4 space-y-2">
-                <p className="text-xs font-semibold text-zinc-400 uppercase mb-2">{t('crm.contact')}</p>
+                <p className="text-xs font-semibold text-muted-foreground uppercase mb-2">{t('crm.contact')}</p>
                 {selectedProfile.email && (
                   <div className="flex items-center gap-2 text-xs text-zinc-600">
-                    <Mail className="h-3.5 w-3.5 text-zinc-400" /> {selectedProfile.email}
+                    <Mail className="h-3.5 w-3.5 text-muted-foreground" /> {selectedProfile.email}
                   </div>
                 )}
                 {selectedProfile.phone && (
                   <div className="flex items-center gap-2 text-xs text-zinc-600">
-                    <Phone className="h-3.5 w-3.5 text-zinc-400" /> {selectedProfile.phone}
+                    <Phone className="h-3.5 w-3.5 text-muted-foreground" /> {selectedProfile.phone}
                   </div>
                 )}
                 {selectedProfile.whatsapp && (
@@ -321,15 +321,15 @@ export function GuestCRM() {
                   </div>
                 )}
                 {!selectedProfile.email && !selectedProfile.phone && !selectedProfile.whatsapp && (
-                  <span className="text-xs text-zinc-400">{t('crm.noContact')}</span>
+                  <span className="text-xs text-muted-foreground">{t('crm.noContact')}</span>
                 )}
               </div>
               <div className="px-5 pb-5">
-                <p className="text-xs font-semibold text-zinc-400 uppercase mb-2">{t('crm.stayHistory')}</p>
-                <div className="text-xs text-zinc-500">
+                <p className="text-xs font-semibold text-muted-foreground uppercase mb-2">{t('crm.stayHistory')}</p>
+                <div className="text-xs text-muted-foreground">
                   {t('crm.firstStay')}: {format(parseISO(selectedProfile.firstStayDate), 'MMM d, yyyy')}
                 </div>
-                <div className="text-xs text-zinc-500">
+                <div className="text-xs text-muted-foreground">
                   {t('crm.lastStay')}: {format(parseISO(selectedProfile.lastStayDate), 'MMM d, yyyy')}
                 </div>
               </div>

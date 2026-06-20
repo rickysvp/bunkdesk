@@ -121,7 +121,7 @@ export function LandingPage({ onEnterApp }: LandingPageProps) {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
-            <div className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-3 py-1 text-xs text-zinc-300 backdrop-blur">
+            <div className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-3 py-1 text-xs text-muted-foreground/70 backdrop-blur">
               <BedDouble className="h-3 w-3 text-blue-400" />
               {t('landing.heroBadge') || 'Built for hostel owners · Bed-level'}
             </div>
@@ -134,7 +134,7 @@ export function LandingPage({ onEnterApp }: LandingPageProps) {
               </span>
             </h1>
 
-            <p className="mt-6 text-base sm:text-lg text-zinc-300 max-w-md leading-relaxed">
+            <p className="mt-6 text-base sm:text-lg text-muted-foreground/70 max-w-md leading-relaxed">
               {t('landing.heroSubtitle') ||
                 'Visual bed board, direct booking page, and built-in CRM. No commissions, no API headaches — $19/month, all in.'}
             </p>
@@ -159,7 +159,7 @@ export function LandingPage({ onEnterApp }: LandingPageProps) {
             </div>
 
             {/* Social proof */}
-            <div className="mt-10 flex items-center gap-4 text-sm text-zinc-400">
+            <div className="mt-10 flex items-center gap-4 text-sm text-muted-foreground">
               <div className="flex -space-x-2">
                 {['bg-amber-400', 'bg-rose-400', 'bg-emerald-400', 'bg-blue-400'].map((c, i) => (
                   <div key={i} className={cn('w-7 h-7 rounded-full border-2 border-zinc-900', c)} />
@@ -224,7 +224,7 @@ export function LandingPage({ onEnterApp }: LandingPageProps) {
                       {p.stat}
                     </div>
                     <h3 className="text-sm font-semibold text-zinc-900">{p.title}</h3>
-                    <p className="text-xs text-zinc-500 leading-relaxed">{p.desc}</p>
+                    <p className="text-xs text-muted-foreground leading-relaxed">{p.desc}</p>
                   </CardContent>
                 </Card>
               </motion.div>
@@ -236,10 +236,10 @@ export function LandingPage({ onEnterApp }: LandingPageProps) {
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: 0.2 }}
-            className="mt-12 text-center text-base text-zinc-500 italic max-w-2xl mx-auto"
+            className="mt-12 text-center text-base text-muted-foreground italic max-w-2xl mx-auto"
           >
             &ldquo;{t('landing.realityQuote') || 'I was running a hostel, not running a spreadsheet'}&rdquo;
-            <span className="block text-xs not-italic text-zinc-400 mt-2">
+            <span className="block text-xs not-italic text-muted-foreground mt-2">
               {t('landing.realityQuoteSource') || '\u2014 from 12 hostel owner interviews'}
             </span>
           </motion.p>
@@ -273,7 +273,7 @@ export function LandingPage({ onEnterApp }: LandingPageProps) {
                     {t('landing.beforeTitle') || 'Without BunkDesk'}
                   </h3>
                   <span className="text-2xl font-bold text-red-500 font-mono">
-                    6+<span className="text-sm text-zinc-500 font-sans font-normal"> {t('landing.hoursPerDay') || 'hours/day'}</span>
+                    6+<span className="text-sm text-muted-foreground font-sans font-normal"> {t('landing.hoursPerDay') || 'hours/day'}</span>
                   </span>
                 </div>
                 <ul className="space-y-2.5 text-sm text-zinc-600">
@@ -295,7 +295,7 @@ export function LandingPage({ onEnterApp }: LandingPageProps) {
                     {t('landing.afterTitle') || 'With BunkDesk'}
                   </h3>
                   <span className="text-2xl font-bold text-emerald-600 font-mono">
-                    30<span className="text-sm text-zinc-500 font-sans font-normal"> {t('landing.minutesPerDay') || 'min/day'}</span>
+                    30<span className="text-sm text-muted-foreground font-sans font-normal"> {t('landing.minutesPerDay') || 'min/day'}</span>
                   </span>
                 </div>
                 <ul className="space-y-2.5 text-sm text-zinc-700">
@@ -357,7 +357,7 @@ export function LandingPage({ onEnterApp }: LandingPageProps) {
                       </div>
                       <div>
                         <h3 className="text-base font-semibold text-zinc-900">{f.title}</h3>
-                        <p className="text-sm text-zinc-500 mt-1 leading-relaxed">{f.desc}</p>
+                        <p className="text-sm text-muted-foreground mt-1 leading-relaxed">{f.desc}</p>
                       </div>
                     </CardContent>
                   </Card>
@@ -372,7 +372,7 @@ export function LandingPage({ onEnterApp }: LandingPageProps) {
               const Icon = f.icon;
               return (
                 <div key={i} className="flex items-center gap-2 text-sm text-zinc-600">
-                  <Icon className="h-4 w-4 text-zinc-400" />
+                  <Icon className="h-4 w-4 text-muted-foreground" />
                   <span>{f.label}</span>
                 </div>
               );
@@ -397,7 +397,7 @@ export function LandingPage({ onEnterApp }: LandingPageProps) {
             <h2 className="mt-3 text-3xl md:text-4xl font-bold tracking-tight text-zinc-900">
               {t('landing.bedGapTitle') || 'Hotel software doesn’t get hostels'}
             </h2>
-            <p className="mt-4 text-base text-zinc-500 max-w-2xl mx-auto">
+            <p className="mt-4 text-base text-muted-foreground max-w-2xl mx-auto">
               {t('landing.bedGapSubtitle') ||
                 'Traditional PMS thinks in rooms. Hostels operate on beds. That mismatch shows up as lost revenue every week.'}
             </p>
@@ -408,7 +408,7 @@ export function LandingPage({ onEnterApp }: LandingPageProps) {
             <Card className="border-zinc-200 shadow-none bg-white">
               <CardContent className="p-6 space-y-4">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-sm font-semibold text-zinc-500">
+                  <h3 className="text-sm font-semibold text-muted-foreground">
                     {t('landing.bedGapOther') || 'Traditional PMS'}
                   </h3>
                   <span className="text-xs font-mono uppercase tracking-wider text-red-600 bg-red-50 px-2 py-0.5 rounded">
@@ -416,7 +416,7 @@ export function LandingPage({ onEnterApp }: LandingPageProps) {
                   </span>
                 </div>
                 <BedGridOccupied layout="full" />
-                <p className="text-xs text-zinc-500 text-center pt-2">
+                <p className="text-xs text-muted-foreground text-center pt-2">
                   {t('landing.bedGapOtherCaption') || 'Whole 6-bed dorm: ‘full’. But 1 bed was free the whole time.'}
                 </p>
               </CardContent>
@@ -446,7 +446,7 @@ export function LandingPage({ onEnterApp }: LandingPageProps) {
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: 0.2 }}
-            className="mt-10 text-center text-sm text-zinc-500 italic max-w-2xl mx-auto"
+            className="mt-10 text-center text-sm text-muted-foreground italic max-w-2xl mx-auto"
           >
             &ldquo;{t('landing.bedGapQuote') || 'Hotel PMS thinks in rooms. Hostels think in beds.'}&rdquo;
           </motion.p>
@@ -473,7 +473,7 @@ export function LandingPage({ onEnterApp }: LandingPageProps) {
             <h2 className="mt-3 text-3xl md:text-4xl font-bold tracking-tight">
               {t('landing.howTitle') || 'From walk-in to checkout, in one screen'}
             </h2>
-            <p className="mt-4 text-zinc-400 max-w-2xl mx-auto">
+            <p className="mt-4 text-muted-foreground max-w-2xl mx-auto">
               {t('landing.howSubtitle') ||
                 'No API integrations. No AI hype. Just the exact tools a small hostel needs to run a shift.'}
             </p>
@@ -501,7 +501,7 @@ export function LandingPage({ onEnterApp }: LandingPageProps) {
                         </div>
                       </div>
                       <h3 className="text-sm font-semibold text-zinc-100">{s.title}</h3>
-                      <p className="text-xs text-zinc-400 leading-relaxed">{s.desc}</p>
+                      <p className="text-xs text-muted-foreground leading-relaxed">{s.desc}</p>
                     </CardContent>
                   </Card>
                 </motion.div>
@@ -527,7 +527,7 @@ export function LandingPage({ onEnterApp }: LandingPageProps) {
             <h2 className="mt-3 text-3xl md:text-4xl font-bold tracking-tight text-zinc-900">
               {t('landing.pricingTitle') || 'One price. Everything included.'}
             </h2>
-            <p className="mt-4 text-zinc-500 max-w-xl mx-auto">
+            <p className="mt-4 text-muted-foreground max-w-xl mx-auto">
               {t('landing.pricingSubtitle') || '14-day free trial, no credit card. Cancel anytime.'}
             </p>
           </motion.div>
@@ -537,14 +537,14 @@ export function LandingPage({ onEnterApp }: LandingPageProps) {
             <Card className="border-zinc-200 shadow-none bg-white">
               <CardContent className="p-7 space-y-5">
                 <div>
-                  <p className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">
+                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                     {t('landing.pricingFreeName') || 'Trial'}
                   </p>
                   <div className="mt-3 flex items-baseline gap-1">
                     <span className="text-4xl font-bold text-zinc-900">$0</span>
-                    <span className="text-sm text-zinc-500">{t('landing.perMonth') || '/month'}</span>
+                    <span className="text-sm text-muted-foreground">{t('landing.perMonth') || '/month'}</span>
                   </div>
-                  <p className="text-xs text-zinc-500 mt-2">
+                  <p className="text-xs text-muted-foreground mt-2">
                     {t('landing.pricingFreeDesc') || 'Try everything free for 14 days.'}
                   </p>
                 </div>
@@ -578,9 +578,9 @@ export function LandingPage({ onEnterApp }: LandingPageProps) {
                   </p>
                   <div className="mt-3 flex items-baseline gap-1">
                     <span className="text-4xl font-bold text-zinc-900">$19</span>
-                    <span className="text-sm text-zinc-500">{t('landing.perMonth') || '/month'}</span>
+                    <span className="text-sm text-muted-foreground">{t('landing.perMonth') || '/month'}</span>
                   </div>
-                  <p className="text-xs text-zinc-500 mt-2">
+                  <p className="text-xs text-muted-foreground mt-2">
                     {t('landing.pricingProDesc') || 'For hostels ready to grow. $19/month, billed monthly.'}
                   </p>
                 </div>
@@ -616,7 +616,7 @@ export function LandingPage({ onEnterApp }: LandingPageProps) {
             <h2 className="text-3xl md:text-4xl font-bold tracking-tight">
               {t('landing.ctaTitle') || 'Run your hostel, not your spreadsheet'}
             </h2>
-            <p className="mt-4 text-zinc-400 text-lg">
+            <p className="mt-4 text-muted-foreground text-lg">
               {t('landing.ctaSubtitle') || '14-day free trial. No credit card. Set up in an afternoon.'}
             </p>
             <Button
@@ -627,7 +627,7 @@ export function LandingPage({ onEnterApp }: LandingPageProps) {
               {t('landing.ctaButton') || 'Start free trial'}
               <ArrowRight className="w-5 h-5" />
             </Button>
-            <div className="mt-6 flex items-center justify-center gap-6 text-xs text-zinc-500">
+            <div className="mt-6 flex items-center justify-center gap-6 text-xs text-muted-foreground">
               <span className="flex items-center gap-1">
                 <Shield className="w-3.5 h-3.5" /> {t('landing.footerFree') || '14-day free trial'}
               </span>
@@ -649,9 +649,9 @@ export function LandingPage({ onEnterApp }: LandingPageProps) {
             <div className="w-7 h-7 bg-zinc-900 rounded-md flex items-center justify-center">
               <span className="text-white font-bold text-xs">B</span>
             </div>
-            <span className="text-sm text-zinc-500">{t('landing.footerTagline') || 'BunkDesk · Bed-level hostel management'}</span>
+            <span className="text-sm text-muted-foreground">{t('landing.footerTagline') || 'BunkDesk · Bed-level hostel management'}</span>
           </div>
-          <span className="text-xs text-zinc-400">© 2026 BunkDesk</span>
+          <span className="text-xs text-muted-foreground">© 2026 BunkDesk</span>
         </div>
       </footer>
     </div>
@@ -670,7 +670,7 @@ function HeroMockup() {
           <div className="w-2.5 h-2.5 rounded-full bg-red-400/80" />
           <div className="w-2.5 h-2.5 rounded-full bg-amber-400/80" />
           <div className="w-2.5 h-2.5 rounded-full bg-emerald-400/80" />
-          <div className="ml-3 text-xs text-zinc-500 font-mono">bunkdesk.app</div>
+          <div className="ml-3 text-xs text-muted-foreground font-mono">bunkdesk.app</div>
         </div>
         {/* Mockup content */}
         <div className="p-5 space-y-3">
@@ -682,13 +682,13 @@ function HeroMockup() {
               { label: 'To clean', val: '4', color: 'purple' },
             ].map((c) => (
               <div key={c.label} className="bg-white/5 rounded-lg p-3 border border-white/5">
-                <div className="text-xs text-zinc-500">{c.label}</div>
+                <div className="text-xs text-muted-foreground">{c.label}</div>
                 <div className="text-xl font-bold text-white mt-0.5">{c.val}</div>
               </div>
             ))}
           </div>
           <div className="bg-white/5 rounded-lg p-3 border border-white/5">
-            <div className="flex items-center gap-2 text-xs text-zinc-400">
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
               <Zap className="h-3 w-3 text-amber-400" />
               7-day occupancy forecast
             </div>
@@ -704,7 +704,7 @@ function HeroMockup() {
           </div>
           <div className="bg-amber-500/10 border border-amber-500/20 rounded-lg p-3">
             <div className="text-xs text-amber-300 font-medium">Heads up</div>
-            <div className="text-xs text-zinc-300 mt-0.5">Wed occupancy at 28% \u2014 consider a last-minute promo</div>
+            <div className="text-xs text-muted-foreground/70 mt-0.5">Wed occupancy at 28% \u2014 consider a last-minute promo</div>
           </div>
         </div>
       </div>

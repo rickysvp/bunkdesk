@@ -41,10 +41,10 @@ export function OccupancyActions() {
         <CardContent className="p-5">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-sm font-semibold text-zinc-900 flex items-center gap-2">
-              <BarChart3 className="h-4 w-4 text-zinc-400" />
+              <BarChart3 className="h-4 w-4 text-muted-foreground" />
               {t('occupancy.next7Days')}
             </h3>
-            <span className="text-xs text-zinc-500">
+            <span className="text-xs text-muted-foreground">
               {t('occupancy.avgOccupancy')}: {Math.round(avgOccupancy)}%
             </span>
           </div>
@@ -62,14 +62,14 @@ export function OccupancyActions() {
                     style={{ height: `${day.occupancyRate}%` }}
                   />
                 </div>
-                <span className="text-xs text-zinc-400">
+                <span className="text-xs text-muted-foreground">
                   {format(addDays(new Date(), i), 'EEE')}
                 </span>
               </div>
             ))}
           </div>
 
-          <div className="mt-3 flex items-center justify-between text-xs text-zinc-500">
+          <div className="mt-3 flex items-center justify-between text-xs text-muted-foreground">
             <span>{totalEmptyBedNights} {t('occupancy.emptyBedNights')}</span>
             <span>{t('occupancy.potentialRevenue')}: <span className="font-medium text-emerald-600">{formatCurrency(totalPotentialRevenue, language)}</span></span>
           </div>
@@ -109,7 +109,7 @@ export function OccupancyActions() {
                               {language === 'zh' ? typeLabel.zh : typeLabel.en}
                             </span>
                           </div>
-                          <p className="text-xs text-zinc-500 mb-3">{action.description}</p>
+                          <p className="text-xs text-muted-foreground mb-3">{action.description}</p>
 
                           <div className="flex items-center gap-4 mb-3">
                             <div className="flex items-center gap-1.5">
@@ -127,7 +127,7 @@ export function OccupancyActions() {
                               <Check className="h-3 w-3" />
                               {t('occupancy.apply')}
                             </Button>
-                            <Button variant="ghost" size="sm" className="h-7 text-xs text-zinc-400" onClick={() => handleDismiss(action.id)}>
+                            <Button variant="ghost" size="sm" className="h-7 text-xs text-muted-foreground" onClick={() => handleDismiss(action.id)}>
                               {t('occupancy.dismiss')}
                             </Button>
                           </div>
@@ -146,7 +146,7 @@ export function OccupancyActions() {
                 <Check className="h-6 w-6 text-emerald-500" />
               </div>
               <p className="text-sm font-medium text-zinc-900">{t('occupancy.allGood')}</p>
-              <p className="text-xs text-zinc-500 mt-1">{t('occupancy.noActionsNeeded')}</p>
+              <p className="text-xs text-muted-foreground mt-1">{t('occupancy.noActionsNeeded')}</p>
             </div>
           )}
         </div>

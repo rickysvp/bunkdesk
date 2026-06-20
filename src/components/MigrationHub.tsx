@@ -441,7 +441,7 @@ export function MigrationHub() {
           <h2 className="text-lg font-semibold text-zinc-900">
             {t('migration.title')}
           </h2>
-          <p className="text-sm text-zinc-500">{t('migration.subtitle')}</p>
+          <p className="text-sm text-muted-foreground">{t('migration.subtitle')}</p>
         </div>
       </div>
 
@@ -467,7 +467,7 @@ export function MigrationHub() {
                       ? 'bg-emerald-500 text-white'
                       : isActive
                         ? 'bg-zinc-900 text-white'
-                        : 'bg-zinc-100 text-zinc-400'
+                        : 'bg-zinc-100 text-muted-foreground'
                   }`}
                 >
                   {isDone ? <CheckCircle2 className="w-3.5 h-3.5" /> : s}
@@ -478,7 +478,7 @@ export function MigrationHub() {
                       ? 'text-zinc-900'
                       : isDone
                         ? 'text-emerald-600'
-                        : 'text-zinc-400'
+                        : 'text-muted-foreground'
                   }`}
                 >
                   {stepLabels[i]}
@@ -533,7 +533,7 @@ export function MigrationHub() {
             </h3>
             <div className="flex gap-2">
               <div className="relative flex-1">
-                <Link className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
+                <Link className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <Input
                   className="pl-9 h-10 bg-zinc-50 border-zinc-200"
                   placeholder="https://..."
@@ -562,7 +562,7 @@ export function MigrationHub() {
             )}
             {icalEvents.length > 0 && (
               <div className="mt-3 space-y-2">
-                <p className="text-xs text-zinc-500 font-medium">
+                <p className="text-xs text-muted-foreground font-medium">
                   {t('migration.icalPreview')}
                 </p>
                 <div className="max-h-48 overflow-y-auto space-y-1.5">
@@ -574,7 +574,7 @@ export function MigrationHub() {
                       <p className="text-sm font-medium text-zinc-900 truncate">
                         {evt.summary}
                       </p>
-                      <p className="text-xs text-zinc-500">
+                      <p className="text-xs text-muted-foreground">
                         {evt.dtStart} → {evt.dtEnd}
                       </p>
                     </div>
@@ -616,11 +616,11 @@ export function MigrationHub() {
             onClick={() => fileInputRef.current?.click()}
             className="border-2 border-dashed border-zinc-300 hover:border-emerald-400 rounded-xl p-10 text-center cursor-pointer transition-colors bg-zinc-50/50 hover:bg-emerald-50/30"
           >
-            <Upload className="w-8 h-8 text-zinc-400 mx-auto mb-3" />
+            <Upload className="w-8 h-8 text-muted-foreground mx-auto mb-3" />
             <p className="text-sm text-zinc-600 font-medium">
               {t('migration.dragDrop')}
             </p>
-            <p className="text-xs text-zinc-400 mt-1">
+            <p className="text-xs text-muted-foreground mt-1">
               {t('migration.dragDropHint')}
             </p>
             <input
@@ -638,7 +638,7 @@ export function MigrationHub() {
               setCsvHeaders([]);
               setCsvRows([]);
             }}
-            className="flex items-center gap-1 text-xs text-zinc-500 hover:text-zinc-700 transition-colors"
+            className="flex items-center gap-1 text-xs text-muted-foreground hover:text-zinc-700 transition-colors"
           >
             <ArrowLeft className="w-3 h-3" />
             {t('migration.back')}
@@ -653,7 +653,7 @@ export function MigrationHub() {
           <div>
             <h3 className="text-sm font-medium text-zinc-700 mb-3">
               {t('migration.preview')}{' '}
-              <span className="text-zinc-400 font-normal">
+              <span className="text-muted-foreground font-normal">
                 ({csvRows.length} {t('migration.records')})
               </span>
             </h3>
@@ -688,7 +688,7 @@ export function MigrationHub() {
               </table>
             </div>
             {csvRows.length > 5 && (
-              <p className="text-xs text-zinc-400 mt-1">
+              <p className="text-xs text-muted-foreground mt-1">
                 {t('migration.showingFirst5')}
               </p>
             )}
@@ -708,7 +708,7 @@ export function MigrationHub() {
                   <span className="text-sm text-zinc-700 font-medium min-w-[140px] truncate">
                     {header}
                   </span>
-                  <ArrowRight className="w-4 h-4 text-zinc-400 shrink-0" />
+                  <ArrowRight className="w-4 h-4 text-muted-foreground shrink-0" />
                   <div className="relative flex-1">
                     <select
                       value={fieldMapping[header] || ''}
@@ -722,7 +722,7 @@ export function MigrationHub() {
                         </option>
                       ))}
                     </select>
-                    <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-400 pointer-events-none" />
+                    <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground pointer-events-none" />
                   </div>
                 </div>
               ))}
@@ -733,7 +733,7 @@ export function MigrationHub() {
           <div className="flex items-center justify-between">
             <button
               onClick={() => setStep(2)}
-              className="flex items-center gap-1 text-xs text-zinc-500 hover:text-zinc-700 transition-colors"
+              className="flex items-center gap-1 text-xs text-muted-foreground hover:text-zinc-700 transition-colors"
             >
               <ArrowLeft className="w-3 h-3" />
               {t('migration.back')}

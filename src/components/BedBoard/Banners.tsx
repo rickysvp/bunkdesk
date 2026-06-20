@@ -67,13 +67,13 @@ export function Banners({ statusFilter, dirtyBedsCount, arrivalsCount, setStatus
           <span className="text-zinc-200 font-medium">
             {t('bedboard.cleaningModeActive') || 'Cleaning Mode Active'}
           </span>
-          <span className="text-zinc-400 text-xs hidden sm:inline">
+          <span className="text-muted-foreground text-xs hidden sm:inline">
             {t('bedboard.showingOnlyDirty') || 'Showing only beds that need attention.'}
           </span>
           <Button
             variant="outline"
             size="sm"
-            className="ml-auto gap-1.5 h-8 text-xs border-zinc-500 text-zinc-300 hover:bg-zinc-700"
+            className="ml-auto gap-1.5 h-8 text-xs border-zinc-500 text-muted-foreground/70 hover:bg-zinc-700"
             onClick={() => setStatusFilter('all')}
           >
             {t('bedboard.exitCleaningMode') || 'Exit Cleaning Mode'}

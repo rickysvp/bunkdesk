@@ -157,7 +157,7 @@ export function AssistantPanelToday({ setActiveTab, onSwitchToGrowth }: Assistan
                 {todaySummary.occupancy}
                 <span className="text-2xl font-semibold">%</span>
               </span>
-              <p className="text-sm text-zinc-500">
+              <p className="text-sm text-muted-foreground">
                 {t('assistant.hero.bedsFmt', {
                   occupied: todaySummary.occupied,
                   total: todaySummary.totalBeds,
@@ -189,7 +189,7 @@ export function AssistantPanelToday({ setActiveTab, onSwitchToGrowth }: Assistan
           <div className="flex gap-6 text-right">
             <div>
               <p className="text-2xl font-bold text-zinc-900">{recallCount}</p>
-              <p className="text-xs text-zinc-500 uppercase tracking-wider">
+              <p className="text-xs text-muted-foreground uppercase tracking-wider">
                 {t('assistant.growthOverview.recallable')}
               </p>
             </div>
@@ -197,7 +197,7 @@ export function AssistantPanelToday({ setActiveTab, onSwitchToGrowth }: Assistan
               <p className="text-2xl font-bold text-emerald-700">
                 {formatCurrency(totalPotentialRevenue, language)}
               </p>
-              <p className="text-xs text-zinc-500 uppercase tracking-wider">
+              <p className="text-xs text-muted-foreground uppercase tracking-wider">
                 {t('assistant.growthOverview.potential7d')}
               </p>
             </div>
@@ -246,7 +246,7 @@ export function AssistantPanelToday({ setActiveTab, onSwitchToGrowth }: Assistan
       {/* ───── Row 3 · 3 天 strip ───── */}
       <section>
         <div className="flex items-center gap-2 mb-2.5">
-          <TrendingUp className="h-4 w-4 text-zinc-400" />
+          <TrendingUp className="h-4 w-4 text-muted-foreground" />
           <h3 className="text-sm font-semibold text-zinc-900">
             {t('assistant.threeDay.title')}
           </h3>
@@ -308,14 +308,14 @@ export function AssistantPanelToday({ setActiveTab, onSwitchToGrowth }: Assistan
                       style={{ height: `${Math.max(occupancyRate, 5)}%` }}
                     />
                   </div>
-                  <span className="text-xs text-zinc-400">
+                  <span className="text-xs text-muted-foreground">
                     {format(dayDate, 'EEE')}
                   </span>
                 </div>
               );
             })}
           </div>
-          <div className="flex items-center justify-between text-xs text-zinc-500 pt-2 mt-2 border-t border-zinc-100">
+          <div className="flex items-center justify-between text-xs text-muted-foreground pt-2 mt-2 border-t border-zinc-100">
             <span>
               {t('assistant.todaySummary.peak')}: {format(parseISO(weekForecast.peakDay.date), 'EEE')} ({weekForecast.peakDay.rate}%)
             </span>
@@ -389,8 +389,8 @@ function StatCard({
           <p className={cn('text-2xl font-semibold leading-none', valueColor[color])}>
             {value}
           </p>
-          {subValue && <p className="text-xs text-zinc-500 mt-0.5">{subValue}</p>}
-          <p className="text-xs text-zinc-500 mt-1 truncate">{label}</p>
+          {subValue && <p className="text-xs text-muted-foreground mt-0.5">{subValue}</p>}
+          <p className="text-xs text-muted-foreground mt-1 truncate">{label}</p>
         </div>
       </CardContent>
     </Card>
@@ -414,7 +414,7 @@ function ThreeDayCard({
       ? 'border-amber-200 bg-amber-50/30'
       : 'border-emerald-200 bg-emerald-50/30';
   const rateColor = isFull
-    ? 'text-zinc-400'
+    ? 'text-muted-foreground'
     : day.occupancyRate >= 70
       ? 'text-amber-600'
       : 'text-emerald-600';
@@ -422,22 +422,22 @@ function ThreeDayCard({
     <Card className={cn('border shadow-none', cardColor)}>
       <CardContent className="p-3 sm:p-4 flex flex-col gap-2">
         <div className="flex items-center justify-between">
-          <span className="text-xs font-medium text-zinc-500 uppercase tracking-wider">
+          <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
             {label}
           </span>
-          <span className="text-xs text-zinc-400">{format(dayDate, 'MMM d')}</span>
+          <span className="text-xs text-muted-foreground">{format(dayDate, 'MMM d')}</span>
         </div>
         <div className="flex items-baseline gap-1.5">
           <span className={cn('text-3xl font-bold leading-none', rateColor)}>
             {day.occupancyRate}
           </span>
-          <span className="text-sm font-semibold text-zinc-500">%</span>
-          <span className="text-xs text-zinc-400 ml-1">
+          <span className="text-sm font-semibold text-muted-foreground">%</span>
+          <span className="text-xs text-muted-foreground ml-1">
             {t('assistant.threeDay.occupancyFmt', { pct: day.occupancyRate }).replace(`${day.occupancyRate}% `, '')}
           </span>
         </div>
         {isFull ? (
-          <div className="flex items-center gap-1 text-xs font-medium text-zinc-500">
+          <div className="flex items-center gap-1 text-xs font-medium text-muted-foreground">
             <Check className="h-3.5 w-3.5" />
             <span>{t('assistant.threeDay.fullHouse')}</span>
           </div>
@@ -476,7 +476,7 @@ function InsightColumn({
       <div className="flex items-center gap-2 mb-3">
         <HeaderIcon className={cn('h-4 w-4', headerColor)} />
         <h3 className="text-sm font-semibold text-zinc-900">{title}</h3>
-        <span className="text-xs text-zinc-400">({insights.length})</span>
+        <span className="text-xs text-muted-foreground">({insights.length})</span>
       </div>
       {insights.length === 0 ? (
         <Card
@@ -491,12 +491,12 @@ function InsightColumn({
             {kind === 'risk' ? (
               <Shield className="h-4 w-4 text-emerald-500" />
             ) : (
-              <Lightbulb className="h-4 w-4 text-zinc-400" />
+              <Lightbulb className="h-4 w-4 text-muted-foreground" />
             )}
             <p
               className={cn(
                 'text-xs',
-                kind === 'risk' ? 'text-emerald-700' : 'text-zinc-500',
+                kind === 'risk' ? 'text-emerald-700' : 'text-muted-foreground',
               )}
             >
               {allClearText}
@@ -548,7 +548,7 @@ function InsightRow({
         <div className="flex-1 min-w-0">
           <h4 className="text-sm font-medium text-zinc-900 whitespace-normal">{insight.title}</h4>
           {insight.description && (
-            <p className="text-xs text-zinc-500 mt-0.5">{insight.description}</p>
+            <p className="text-xs text-muted-foreground mt-0.5">{insight.description}</p>
           )}
         </div>
         <div className="flex items-center gap-1.5 shrink-0">
@@ -570,7 +570,7 @@ function InsightRow({
             className="p-1 hover:bg-zinc-100 rounded transition-colors"
             aria-label="Dismiss"
           >
-            <X className="h-3.5 w-3.5 text-zinc-400" />
+            <X className="h-3.5 w-3.5 text-muted-foreground" />
           </button>
         </div>
       </CardContent>

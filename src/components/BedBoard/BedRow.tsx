@@ -114,13 +114,13 @@ export function BedRow({
         className="sticky left-0 z-10 flex items-center gap-2 px-3 py-1 bg-white border-r border-zinc-100 shrink-0"
         style={{ width: labelWidth }}
       >
-        <span className="text-xs font-medium text-zinc-500 w-5 text-right shrink-0">
+        <span className="text-xs font-medium text-muted-foreground w-5 text-right shrink-0">
           {bed.name.split(' ')[0]}
         </span>
         <span className="text-sm" title={bed.bedType}>
           {bedTypeIcons[bed.bedType || 'single'] || '▤'}
         </span>
-        <span className="text-xs text-zinc-400 ml-auto">{formatCurrency(price, language)}</span>
+        <span className="text-xs text-muted-foreground ml-auto">{formatCurrency(price, language)}</span>
         {bed.status === 'cleaning' && (
           <button
             className="p-0.5 hover:bg-purple-100 rounded text-purple-500 shrink-0"

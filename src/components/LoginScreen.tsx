@@ -110,7 +110,7 @@ export function LoginScreen() {
         <h1 className="text-xl font-semibold text-zinc-900 mb-1">
           {t("login.title")}
         </h1>
-        <p className="text-sm text-zinc-500 mb-6">
+        <p className="text-sm text-muted-foreground mb-6">
           {t("login.selectUser")}
         </p>
 
@@ -129,7 +129,7 @@ export function LoginScreen() {
                 onClick={() => handleSelectStaff(staff.id)}
                 className="flex items-center gap-3 w-full px-4 py-3 rounded-xl border border-zinc-200 hover:border-zinc-300 hover:bg-zinc-50 transition-colors text-left"
               >
-                <UserCircle className="w-5 h-5 text-zinc-400 shrink-0" />
+                <UserCircle className="w-5 h-5 text-muted-foreground shrink-0" />
                 <span className="text-sm font-medium text-zinc-800 flex-1">
                   {staff.name}
                 </span>
@@ -146,13 +146,13 @@ export function LoginScreen() {
           <div className="flex flex-col gap-4">
             <button
               onClick={handleBack}
-              className="text-xs text-zinc-400 hover:text-zinc-600 transition-colors self-start"
+              className="text-xs text-muted-foreground hover:text-zinc-600 transition-colors self-start"
             >
               &larr; {t("login.selectUser")}
             </button>
 
             <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-zinc-50">
-              <UserCircle className="w-5 h-5 text-zinc-400 shrink-0" />
+              <UserCircle className="w-5 h-5 text-muted-foreground shrink-0" />
               <span className="text-sm font-medium text-zinc-800 flex-1">
                 {selectedStaff?.name}
               </span>
@@ -164,9 +164,11 @@ export function LoginScreen() {
             </div>
 
             <div className={`flex items-center gap-2 border rounded-xl px-4 py-3 ${error ? "border-red-300 animate-shake" : "border-zinc-200"}`}>
-              <Lock className="w-4 h-4 text-zinc-400 shrink-0" />
+              <Lock className="w-4 h-4 text-muted-foreground shrink-0" />
               <input
                 type="password"
+                inputMode="numeric"
+                autoComplete="off"
                 maxLength={4}
                 autoFocus
                 value={pin}
@@ -176,7 +178,7 @@ export function LoginScreen() {
                 }}
                 onKeyDown={handleKeyDown}
                 placeholder={t("login.pin")}
-                className="flex-1 text-sm bg-transparent outline-none text-zinc-800 placeholder:text-zinc-300"
+                className="flex-1 text-sm bg-transparent outline-none text-zinc-800 placeholder:text-muted-foreground/70"
               />
             </div>
 

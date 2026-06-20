@@ -34,12 +34,12 @@ const categoryIcons: Record<ShiftNoteCategory, React.ElementType> = {
 };
 
 const categoryColors: Record<ShiftNoteCategory, string> = {
-  general: "text-zinc-500 bg-zinc-100",
+  general: "text-muted-foreground bg-zinc-100",
   "late-arrival": "text-amber-600 bg-amber-50",
   maintenance: "text-red-500 bg-red-50",
   pickup: "text-blue-500 bg-blue-50",
   laundry: "text-purple-500 bg-purple-50",
-  other: "text-zinc-500 bg-zinc-100",
+  other: "text-muted-foreground bg-zinc-100",
 };
 
 const categoryBorderColors: Record<ShiftNoteCategory, string> = {
@@ -65,7 +65,7 @@ const sourceIcons: Record<ShiftNoteSource, { icon: React.ElementType; className:
   checkin: { icon: LogIn, className: "bg-emerald-50 text-emerald-700" },
   checkout: { icon: LogOut, className: "bg-orange-50 text-orange-700" },
   cleaning: { icon: Sparkles, className: "bg-purple-50 text-purple-700" },
-  system: { icon: Cpu, className: "bg-zinc-100 text-zinc-500" },
+  system: { icon: Cpu, className: "bg-zinc-100 text-muted-foreground" },
 };
 
 const sourceI18nKeys: Record<ShiftNoteSource, string> = {
@@ -195,7 +195,7 @@ export function ShiftLog({ onNavigate }: ShiftLogProps) {
         <h1 className="text-2xl font-semibold tracking-tight text-zinc-900">
           {t("shiftlog.title") || "Shift Log"}
         </h1>
-        <p className="text-sm text-zinc-500 mt-1">
+        <p className="text-sm text-muted-foreground mt-1">
           {unresolvedCount} {t("shiftlog.unresolved") || "unresolved"}
           {urgentCount > 0 && (
             <span className="text-red-500 font-medium">
@@ -215,7 +215,7 @@ export function ShiftLog({ onNavigate }: ShiftLogProps) {
             onChange={(e) => setNewNoteContent(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder={t("shiftlog.addNote") || "Add a shift note..."}
-            className="flex-1 px-3 py-2 text-sm border rounded-lg bg-zinc-50 border-zinc-200 focus:outline-none focus:ring-2 focus:ring-zinc-300 focus:border-transparent placeholder:text-zinc-400"
+            className="flex-1 px-3 py-2 text-sm border rounded-lg bg-zinc-50 border-zinc-200 focus:outline-none focus:ring-2 focus:ring-zinc-300 focus:border-transparent placeholder:text-muted-foreground"
           />
           <Button
             size="sm"
@@ -245,7 +245,7 @@ export function ShiftLog({ onNavigate }: ShiftLogProps) {
             className={`inline-flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-lg border transition-colors ${
               newNotePriority === "urgent"
                 ? "border-red-300 bg-red-50 text-red-600"
-                : "border-zinc-200 bg-zinc-50 text-zinc-500 hover:text-zinc-700"
+                : "border-zinc-200 bg-zinc-50 text-muted-foreground hover:text-zinc-700"
             }`}
           >
             <AlertTriangle className="h-3 w-3" />
@@ -287,7 +287,7 @@ export function ShiftLog({ onNavigate }: ShiftLogProps) {
       {/* Notes Timeline */}
       <div className="space-y-3">
         {filteredNotes.length === 0 && (
-          <div className="text-center py-12 text-zinc-400">
+          <div className="text-center py-12 text-muted-foreground">
             <ClipboardList className="h-10 w-10 mx-auto mb-3 opacity-50" />
             <p className="text-sm">{t("shiftlog.noNotes") || "No shift notes found."}</p>
           </div>
@@ -324,7 +324,7 @@ export function ShiftLog({ onNavigate }: ShiftLogProps) {
                       <span className="text-xs font-medium text-zinc-900">
                         {note.author}
                       </span>
-                      <span className="text-xs text-zinc-400">
+                      <span className="text-xs text-muted-foreground">
                         {formatDistanceToNow(parseISO(note.createdAt), {
                           addSuffix: true,
                         })}
@@ -347,14 +347,14 @@ export function ShiftLog({ onNavigate }: ShiftLogProps) {
                     </div>
                     <p
                       className={`text-sm text-zinc-700 leading-relaxed ${
-                        note.isResolved ? "line-through text-zinc-400" : ""
+                        note.isResolved ? "line-through text-muted-foreground" : ""
                       }`}
                     >
                       {note.content}
                     </p>
                     <div className="flex items-center gap-3 mt-1.5 flex-wrap">
                       {note.assignee && (
-                        <p className="text-xs text-zinc-400">
+                        <p className="text-xs text-muted-foreground">
                           {t("shiftlog.assignedTo") || "Assigned to"}:{" "}
                           <span className="text-zinc-600 font-medium">{note.assignee}</span>
                         </p>
@@ -376,7 +376,7 @@ export function ShiftLog({ onNavigate }: ShiftLogProps) {
                       onClick={() => handleResolveToggle(note)}
                       className={`p-1.5 rounded-lg transition-colors ${
                         note.isResolved
-                          ? "text-zinc-400 hover:text-zinc-600 hover:bg-zinc-100"
+                          ? "text-muted-foreground hover:text-zinc-600 hover:bg-zinc-100"
                           : "text-emerald-500 hover:bg-emerald-50"
                       }`}
                       title={
@@ -398,7 +398,7 @@ export function ShiftLog({ onNavigate }: ShiftLogProps) {
                         </button>
                         <button
                           onClick={() => setDeleteConfirmId(null)}
-                          className="p-1.5 rounded-lg text-zinc-400 hover:bg-zinc-100"
+                          className="p-1.5 rounded-lg text-muted-foreground hover:bg-zinc-100"
                           title={t("shiftlog.cancel") || "Cancel"}
                         >
                           <X className="h-4 w-4" />
@@ -407,7 +407,7 @@ export function ShiftLog({ onNavigate }: ShiftLogProps) {
                     ) : (
                       <button
                         onClick={() => setDeleteConfirmId(note.id)}
-                        className="p-1.5 rounded-lg text-zinc-300 hover:text-red-400 hover:bg-red-50 transition-colors"
+                        className="p-1.5 rounded-lg text-muted-foreground/70 hover:text-red-400 hover:bg-red-50 transition-colors"
                         title={t("shiftlog.delete") || "Delete"}
                       >
                         <Trash2 className="h-4 w-4" />

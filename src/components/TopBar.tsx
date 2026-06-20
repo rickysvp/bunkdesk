@@ -71,7 +71,7 @@ export function TopBar({ activeTab, setActiveTab }: TopBarProps) {
         <span className="font-semibold text-zinc-900 tracking-tight text-sm hidden sm:inline">
           {t('sidebar.hostelDesk')}
         </span>
-        <span className="text-xs text-zinc-400 hidden md:inline ml-1">v{APP_VERSION}</span>
+        <span className="text-xs text-muted-foreground hidden md:inline ml-1">v{APP_VERSION}</span>
       </div>
 
       {/* Primary tabs — horizontal scroll on narrow screens */}
@@ -93,10 +93,10 @@ export function TopBar({ activeTab, setActiveTab }: TopBarProps) {
                 'relative flex items-center gap-1.5 px-3 py-2 rounded-md text-sm font-medium transition-colors flex-shrink-0 whitespace-nowrap',
                 isActive
                   ? 'text-zinc-900'
-                  : 'text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100',
+                  : 'text-muted-foreground hover:text-zinc-900 hover:bg-zinc-100',
               )}
             >
-              <Icon className={cn('h-4 w-4', isActive ? 'text-blue-600' : 'text-zinc-400')} />
+              <Icon className={cn('h-4 w-4', isActive ? 'text-blue-600' : 'text-muted-foreground')} />
               <span>{t(tab.i18nKey)}</span>
               {isActive && (
                 <span
@@ -125,7 +125,7 @@ export function TopBar({ activeTab, setActiveTab }: TopBarProps) {
         )}
         <button
           onClick={onSignOut}
-          className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium text-zinc-500 hover:text-red-600 hover:bg-red-50 transition-colors"
+          className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium text-muted-foreground hover:text-red-600 hover:bg-red-50 transition-colors"
           title={t('common.logout')}
         >
           <svg
@@ -177,7 +177,7 @@ function LanguageToggle() {
               'px-2 py-1 text-xs font-semibold rounded-md transition-colors min-w-[28px]',
               active
                 ? 'bg-white text-zinc-900 shadow-sm'
-                : 'text-zinc-500 hover:text-zinc-900',
+                : 'text-muted-foreground hover:text-zinc-900',
             )}
           >
             {opt.label}

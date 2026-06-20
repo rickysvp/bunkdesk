@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { motion } from 'motion/react';
 import { X, Link, CheckSquare, Square, Loader2, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { useTranslation } from '../i18nContext';
 import { parseICal, mapEventToGuest, ParsedEvent } from '../utils/icalParser';
 import { Guest } from '../types';
+import { useFocusTrap } from '../hooks/useFocusTrap';
 
 interface ICalImportProps {
   open: boolean;
@@ -15,6 +16,8 @@ interface ICalImportProps {
 
 export function ICalImport({ open, onClose, onImport }: ICalImportProps) {
   const { t } = useTranslation();
+  const dialogRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(dialogRef, open);
   const [url, setUrl] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -86,16 +89,20 @@ export function ICalImport({ open, onClose, onImport }: ICalImportProps) {
       onClick={handleClose}
     >
       <motion.div
+        ref={dialogRef}
         initial={{ opacity: 0, scale: 0.95, y: 10 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 10 }}
         transition={{ duration: 0.15 }}
-        className="bg-card rounded-2xl shadow-modal max-w-md w-full overflow-hidden ring-1 ring-border/50"
+        className="bg-card rounded-2xl shadow-modal max-w-md w-full overflow-hidden ring-1 ring-border/50 focus:outline-none"
         onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="ical-import-title"
       >
         {/* Header */}
         <div className="p-5 border-b border-border flex items-center justify-between">
-          <h3 className="font-semibold text-foreground">{t('checkin.importICal')}</h3>
+          <h3 id="ical-import-title" className="font-semibold text-foreground">{t('checkin.importICal')}</h3>
           <button onClick={handleClose} className="p-1.5 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-colors" aria-label="Close">
             <X className="w-4 h-4" />
           </button>
@@ -105,7 +112,7 @@ export function ICalImport({ open, onClose, onImport }: ICalImportProps) {
         <div className="p-5 space-y-3">
           <div className="flex gap-2">
             <div className="relative flex-1">
-              <Link className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
+              <Link className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
                 className="pl-9 h-10 bg-zinc-50 border-zinc-200 focus-visible:ring-zinc-900"
                 placeholder="https://..."
@@ -134,7 +141,7 @@ export function ICalImport({ open, onClose, onImport }: ICalImportProps) {
           {/* Preview List */}
           {events.length > 0 && (
             <div className="space-y-2">
-              <p className="text-xs text-zinc-500 font-medium">{t('checkin.selectToImport')}</p>
+              <p className="text-xs text-muted-foreground font-medium">{t('checkin.selectToImport')}</p>
               <div className="max-h-60 overflow-y-auto space-y-1.5">
                 {events.map((evt, idx) => (
                   <button
@@ -148,15 +155,15 @@ export function ICalImport({ open, onClose, onImport }: ICalImportProps) {
                       {selected.has(idx) ? (
                         <CheckSquare className="w-4 h-4 text-zinc-900 mt-0.5 shrink-0" />
                       ) : (
-                        <Square className="w-4 h-4 text-zinc-400 mt-0.5 shrink-0" />
+                        <Square className="w-4 h-4 text-muted-foreground mt-0.5 shrink-0" />
                       )}
                       <div className="min-w-0">
                         <p className="text-sm font-medium text-zinc-900 truncate">{evt.summary}</p>
-                        <p className="text-xs text-zinc-500">
+                        <p className="text-xs text-muted-foreground">
                           {evt.dtStart} → {evt.dtEnd}
                         </p>
                         {evt.description && (
-                          <p className="text-xs text-zinc-400 truncate mt-0.5">{evt.description}</p>
+                          <p className="text-xs text-muted-foreground truncate mt-0.5">{evt.description}</p>
                         )}
                       </div>
                     </div>
@@ -167,7 +174,7 @@ export function ICalImport({ open, onClose, onImport }: ICalImportProps) {
           )}
 
           {fetched && events.length === 0 && !error && (
-            <div className="py-4 text-center text-sm text-zinc-500">{t('checkin.noEventsFound')}</div>
+            <div className="py-4 text-center text-sm text-muted-foreground">{t('checkin.noEventsFound')}</div>
           )}
         </div>
 

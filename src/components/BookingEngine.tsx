@@ -281,12 +281,12 @@ export function BookingEngine() {
                     ? 'bg-emerald-500 text-white'
                     : s === step
                     ? 'bg-emerald-600 text-white ring-4 ring-emerald-200'
-                    : 'bg-zinc-200 text-zinc-500'
+                    : 'bg-zinc-200 text-muted-foreground'
                 }`}
               >
                 {s < step ? <CheckCircle2 className="size-3.5 sm:size-4" /> : s}
               </div>
-              <span className={`text-xs sm:text-xs font-medium ${s === step ? 'text-emerald-700' : 'text-zinc-400'}`}>
+              <span className={`text-xs sm:text-xs font-medium ${s === step ? 'text-emerald-700' : 'text-muted-foreground'}`}>
                 {stepLabels[i]}
               </span>
             </div>
@@ -329,7 +329,7 @@ export function BookingEngine() {
             </div>
 
             {nights > 0 && (
-              <p className="text-sm text-zinc-500">
+              <p className="text-sm text-muted-foreground">
                 {t('booking.nightCount', `${nights}`)} {nights > 1 ? t('booking.nights') : t('booking.night')}
               </p>
             )}
@@ -376,7 +376,7 @@ export function BookingEngine() {
           </CardHeader>
           <CardContent className="space-y-3">
             {roomOptions.length === 0 && (
-              <p className="py-6 text-center text-sm text-zinc-400">{t('booking.noRooms')}</p>
+              <p className="py-6 text-center text-sm text-muted-foreground">{t('booking.noRooms')}</p>
             )}
             {roomOptions.map(room => {
               const isSelected = selectedRoomId === room.roomId;
@@ -404,7 +404,7 @@ export function BookingEngine() {
                       <span className="text-lg">{roomTypeIcon(room.type)}</span>
                       <div>
                         <p className="font-medium text-zinc-900">{room.name}</p>
-                        <p className="text-xs text-zinc-500">{roomTypeLabel(room.type)}</p>
+                        <p className="text-xs text-muted-foreground">{roomTypeLabel(room.type)}</p>
                       </div>
                     </div>
                     <div className="text-right">
@@ -413,7 +413,7 @@ export function BookingEngine() {
                           ? formatCurrency(room.priceRange.min, language)
                           : `${formatCurrency(room.priceRange.min, language)}–${formatCurrency(room.priceRange.max, language)}`}
                       </p>
-                      <p className="text-xs text-zinc-400">{t('booking.perBedNight')}</p>
+                      <p className="text-xs text-muted-foreground">{t('booking.perBedNight')}</p>
                     </div>
                   </div>
                   <div className="mt-2 flex items-center gap-2">
@@ -552,20 +552,20 @@ export function BookingEngine() {
             {/* Summary */}
             <div className="space-y-2 rounded-xl bg-zinc-50 p-4">
               <div className="flex justify-between text-sm">
-                <span className="text-zinc-500">{t('booking.dates')}</span>
+                <span className="text-muted-foreground">{t('booking.dates')}</span>
                 <span className="font-medium">{checkIn} → {checkOut} ({nights} {nights > 1 ? t('booking.nights') : t('booking.night')})</span>
               </div>
               <div className="flex justify-between text-sm">
-                <span className="text-zinc-500">{t('booking.roomType')}</span>
+                <span className="text-muted-foreground">{t('booking.roomType')}</span>
                 <span className="font-medium">{selectedRoom?.name} ({roomTypeLabel(selectedRoom!.type)})</span>
               </div>
               <div className="flex justify-between text-sm">
-                <span className="text-zinc-500">{t('booking.guests')}</span>
+                <span className="text-muted-foreground">{t('booking.guests')}</span>
                 <span className="font-medium">{guests} {guests > 1 ? t('booking.guestsPlural') : t('booking.guestSingular')}</span>
               </div>
               <div className="border-t border-zinc-200 pt-2">
                 <div className="flex justify-between text-sm">
-                  <span className="text-zinc-500">{t('booking.basePrice')}</span>
+                  <span className="text-muted-foreground">{t('booking.basePrice')}</span>
                   <span>{formatCurrency(basePrice, language)}</span>
                 </div>
                 {groupDiscount > 0 && (
@@ -626,7 +626,7 @@ export function BookingEngine() {
               <CheckCircle2 className="size-8 text-emerald-600" />
             </div>
             <h3 className="text-lg font-bold text-zinc-900">{t('booking.bookingConfirmed')}</h3>
-            <p className="mt-1 text-sm text-zinc-500">{t('booking.bookingConfirmedDesc')}</p>
+            <p className="mt-1 text-sm text-muted-foreground">{t('booking.bookingConfirmedDesc')}</p>
 
             <div className="mx-auto mt-6 max-w-xs rounded-xl border-2 border-dashed border-emerald-300 bg-emerald-50 p-4">
               <p className="text-xs font-medium text-emerald-600">{t('booking.yourReferralCode')}</p>
@@ -635,7 +635,7 @@ export function BookingEngine() {
             </div>
 
             <div className="mx-auto mt-6 max-w-xs space-y-2">
-              <p className="text-xs font-medium text-zinc-500">{t('booking.shareWithFriends')}</p>
+              <p className="text-xs font-medium text-muted-foreground">{t('booking.shareWithFriends')}</p>
               <div className="flex gap-2">
                 <Button
                   variant="outline"
