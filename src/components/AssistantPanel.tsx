@@ -56,9 +56,9 @@ export function AssistantPanel({ setActiveTab, growHint, onGrowHintConsumed }: A
 
   return (
     <div className="flex flex-col h-full">
-      {/* Sub-tab bar — matches SettingsPanel visual style */}
+      {/* Sub-tab bar — pill 风格 segmented control */}
       <div
-        className="flex items-center gap-1 border-b border-zinc-200 mb-4 md:mb-6 -mt-1 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        className="flex items-center gap-1 p-1 bg-muted rounded-xl mb-4 md:mb-6 w-fit overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         role="tablist"
         aria-label={t('sidebar.assistant')}
       >
@@ -110,18 +110,14 @@ function SubTabButton({
       aria-selected={active}
       onClick={onClick}
       className={cn(
-        'relative flex items-center gap-1.5 px-3 py-2 text-sm font-medium transition-colors flex-shrink-0',
-        active ? 'text-zinc-900' : 'text-muted-foreground hover:text-zinc-900',
+        'relative flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-sm font-medium transition-all flex-shrink-0',
+        active
+          ? 'bg-card text-foreground shadow-pop'
+          : 'text-muted-foreground hover:text-foreground',
       )}
     >
       {icon}
       <span>{label}</span>
-      {active && (
-        <span
-          aria-hidden
-          className="absolute left-2 right-2 -bottom-px h-[2px] bg-blue-600 rounded-full"
-        />
-      )}
     </button>
   );
 }

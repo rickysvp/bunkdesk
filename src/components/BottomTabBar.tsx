@@ -46,7 +46,7 @@ export function BottomTabBar({ activeTab, setActiveTab }: BottomTabBarProps) {
 
   return (
     <nav
-      className="md:hidden fixed bottom-0 inset-x-0 z-40 bg-white/95 backdrop-blur-lg border-t border-zinc-200 shadow-[0_-4px_12px_rgba(0,0,0,0.04)]"
+      className="md:hidden fixed bottom-0 inset-x-0 z-40 bg-card/95 backdrop-blur-xl border-t border-border shadow-[0_-4px_20px_rgba(0,0,0,0.06)]"
       role="tablist"
       aria-label="Primary mobile"
       style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
@@ -65,18 +65,18 @@ export function BottomTabBar({ activeTab, setActiveTab }: BottomTabBarProps) {
               aria-selected={isActive}
               onClick={() => setActiveTab(tab.id)}
               className={cn(
-                'relative flex flex-col items-center justify-center gap-0.5 min-h-[56px] py-2 transition-colors active:scale-95',
-                isActive ? 'text-blue-600' : 'text-muted-foreground active:text-zinc-700',
+                'relative flex flex-col items-center justify-center gap-1 min-h-[60px] py-2 transition-all active:scale-95',
+                isActive ? 'text-brand' : 'text-muted-foreground active:text-foreground',
               )}
             >
               {isActive && (
                 <span
                   aria-hidden
-                  className="absolute top-0 left-1/2 -translate-x-1/2 h-[2px] w-8 bg-blue-600 rounded-full"
+                  className="absolute top-1.5 left-1/2 -translate-x-1/2 h-1 w-1 bg-brand rounded-full"
                 />
               )}
-              <Icon className="h-5 w-5" strokeWidth={isActive ? 2.25 : 2} />
-              <span className="text-xs font-semibold tracking-tight leading-none">
+              <Icon className="h-5 w-5" strokeWidth={isActive ? 2.5 : 2} />
+              <span className="text-[10px] font-semibold tracking-tight leading-none">
                 {t(tab.i18nKey)}
               </span>
             </button>

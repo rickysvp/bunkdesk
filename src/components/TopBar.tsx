@@ -60,21 +60,23 @@ export function TopBar({ activeTab, setActiveTab }: TopBarProps) {
 
   return (
     <header
-      className="hidden md:flex h-14 flex-shrink-0 border-b border-border bg-card/80 backdrop-blur-md items-center px-3 md:px-6 sticky top-0 z-30 gap-2"
+      className="hidden md:flex h-16 flex-shrink-0 border-b border-border bg-card/80 backdrop-blur-xl items-center px-4 md:px-6 sticky top-0 z-30 gap-3"
       data-topbar
     >
-      {/* Logo — kept on the left so the brand is always anchored */}
-      <div className="flex items-center gap-2 pr-3 md:pr-4 mr-1 md:mr-2 border-r border-zinc-200/60 flex-shrink-0">
-        <div className="h-7 w-7 bg-zinc-900 rounded-lg flex items-center justify-center shadow-sm">
-          <span className="text-white font-bold text-sm tracking-tighter">B</span>
+      {/* Logo — 品牌青绿方块 + 品牌名 */}
+      <div className="flex items-center gap-2.5 pr-4 md:pr-5 mr-1 md:mr-2 border-r border-border flex-shrink-0">
+        <div className="h-9 w-9 bg-brand rounded-xl flex items-center justify-center shadow-pop">
+          <span className="text-brand-foreground font-bold text-base tracking-tighter">B</span>
         </div>
-        <span className="font-semibold text-zinc-900 tracking-tight text-sm hidden sm:inline">
-          {t('sidebar.hostelDesk')}
-        </span>
-        <span className="text-xs text-muted-foreground hidden md:inline ml-1">v{APP_VERSION}</span>
+        <div className="flex flex-col leading-none">
+          <span className="font-bold text-foreground tracking-tight text-sm">
+            {t('sidebar.hostelDesk')}
+          </span>
+          <span className="text-[10px] text-muted-foreground mt-0.5">v{APP_VERSION}</span>
+        </div>
       </div>
 
-      {/* Primary tabs — horizontal scroll on narrow screens */}
+      {/* Primary tabs — pill 风格 segmented control */}
       <nav
         className="flex-1 min-w-0 flex items-center gap-1 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         role="tablist"
@@ -90,31 +92,25 @@ export function TopBar({ activeTab, setActiveTab }: TopBarProps) {
               aria-selected={isActive}
               onClick={() => setActiveTab(tab.id)}
               className={cn(
-                'relative flex items-center gap-1.5 px-3 py-2 rounded-md text-sm font-medium transition-colors flex-shrink-0 whitespace-nowrap',
+                'relative flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-medium transition-all flex-shrink-0 whitespace-nowrap',
                 isActive
-                  ? 'text-zinc-900'
-                  : 'text-muted-foreground hover:text-zinc-900 hover:bg-zinc-100',
+                  ? 'bg-brand text-brand-foreground shadow-pop'
+                  : 'text-muted-foreground hover:text-foreground hover:bg-muted',
               )}
             >
-              <Icon className={cn('h-4 w-4', isActive ? 'text-blue-600' : 'text-muted-foreground')} />
+              <Icon className="h-4 w-4" />
               <span>{t(tab.i18nKey)}</span>
-              {isActive && (
-                <span
-                  aria-hidden
-                  className="absolute left-2 right-2 -bottom-[7px] h-[2px] bg-blue-600 rounded-full"
-                />
-              )}
             </button>
           );
         })}
       </nav>
 
       {/* Right side: language toggle + user badge + sign-out */}
-      <div className="flex items-center gap-1.5 flex-shrink-0">
+      <div className="flex items-center gap-2 flex-shrink-0">
         <LanguageToggle />
         {currentStaff && (
-          <div className="flex items-center gap-1.5 bg-zinc-50 border border-zinc-200 rounded-lg px-2.5 py-1.5">
-            <span className="text-xs font-medium text-zinc-700">{currentStaff.name}</span>
+          <div className="flex items-center gap-1.5 bg-muted border border-border rounded-lg px-2.5 py-1.5">
+            <span className="text-xs font-medium text-foreground">{currentStaff.name}</span>
             {RoleIcon && roleBadge && (
               <span className={`inline-flex items-center gap-0.5 text-xs font-medium px-1.5 py-0.5 rounded ${roleBadge.className}`}>
                 <RoleIcon className="h-3 w-3" />
@@ -125,7 +121,7 @@ export function TopBar({ activeTab, setActiveTab }: TopBarProps) {
         )}
         <button
           onClick={onSignOut}
-          className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium text-muted-foreground hover:text-red-600 hover:bg-red-50 transition-colors"
+          className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium text-muted-foreground hover:text-destructive hover:bg-destructive/5 transition-colors"
           title={t('common.logout')}
         >
           <svg
@@ -164,7 +160,7 @@ function LanguageToggle() {
     <div
       role="group"
       aria-label="Language"
-      className="flex items-center bg-zinc-100 border border-zinc-200 rounded-lg p-0.5"
+      className="flex items-center bg-muted border border-border rounded-lg p-0.5"
     >
       {options.map((opt) => {
         const active = language === opt.value;
@@ -176,8 +172,8 @@ function LanguageToggle() {
             className={cn(
               'px-2 py-1 text-xs font-semibold rounded-md transition-colors min-w-[28px]',
               active
-                ? 'bg-white text-zinc-900 shadow-sm'
-                : 'text-muted-foreground hover:text-zinc-900',
+                ? 'bg-card text-foreground shadow-sm'
+                : 'text-muted-foreground hover:text-foreground',
             )}
           >
             {opt.label}

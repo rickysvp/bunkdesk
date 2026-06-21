@@ -124,16 +124,17 @@ export function AssistantPanelToday({ setActiveTab, onSwitchToGrowth }: Assistan
 
   // Hero 对比 7 天均值的差值（百分点）
   const diffPct = todaySummary.occupancy - weekForecast.avgOccupancy;
+  // 用语义色 token 替换硬编码 emerald/amber/red
   const heroColor =
     todaySummary.occupancy >= 70
-      ? 'emerald'
+      ? 'success'
       : todaySummary.occupancy >= 40
-        ? 'amber'
-        : 'red';
+        ? 'warning'
+        : 'destructive';
   const heroColorMap = {
-    emerald: { bg: 'from-emerald-50/60', text: 'text-emerald-700', border: 'border-emerald-200', sub: 'text-emerald-600' },
-    amber:   { bg: 'from-amber-50/60',   text: 'text-amber-700',   border: 'border-amber-200',   sub: 'text-amber-600' },
-    red:     { bg: 'from-red-50/60',     text: 'text-red-700',     border: 'border-red-200',     sub: 'text-red-600' },
+    success:    { bg: 'from-success/10',   text: 'text-success',    border: 'border-success/30',    sub: 'text-success' },
+    warning:    { bg: 'from-warning/10',   text: 'text-warning',    border: 'border-warning/30',    sub: 'text-warning' },
+    destructive:{ bg: 'from-destructive/10', text: 'text-destructive', border: 'border-destructive/30', sub: 'text-destructive' },
   };
   const hero = heroColorMap[heroColor];
 
@@ -142,20 +143,20 @@ export function AssistantPanelToday({ setActiveTab, onSwitchToGrowth }: Assistan
       {/* ───── Row 1 · Hero 入住率 ───── */}
       <Card
         className={cn(
-          'border shadow-none bg-gradient-to-br to-white',
+          'border shadow-card bg-gradient-to-br to-card overflow-hidden',
           hero.bg,
           hero.border,
         )}
       >
-        <CardContent className="p-5 sm:p-6 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+        <CardContent className="p-5 sm:p-7 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
           <div>
             <p className={cn('text-xs font-semibold tracking-widest uppercase', hero.sub)}>
               {t('assistant.hero.occupancy')}
             </p>
-            <div className="mt-1 flex items-baseline gap-3">
-              <span className={cn('text-5xl sm:text-6xl font-bold leading-none tracking-tight', hero.text)}>
+            <div className="mt-2 flex items-baseline gap-3">
+              <span className={cn('text-6xl sm:text-7xl font-bold leading-none tracking-tight', hero.text)}>
                 {todaySummary.occupancy}
-                <span className="text-2xl font-semibold">%</span>
+                <span className="text-3xl font-semibold">%</span>
               </span>
               <p className="text-sm text-muted-foreground">
                 {t('assistant.hero.bedsFmt', {
@@ -188,13 +189,13 @@ export function AssistantPanelToday({ setActiveTab, onSwitchToGrowth }: Assistan
           </div>
           <div className="flex gap-6 text-right">
             <div>
-              <p className="text-2xl font-bold text-zinc-900">{recallCount}</p>
+              <p className="text-2xl font-bold text-foreground">{recallCount}</p>
               <p className="text-xs text-muted-foreground uppercase tracking-wider">
                 {t('assistant.growthOverview.recallable')}
               </p>
             </div>
             <div>
-              <p className="text-2xl font-bold text-emerald-700">
+              <p className="text-2xl font-bold text-success">
                 {formatCurrency(totalPotentialRevenue, language)}
               </p>
               <p className="text-xs text-muted-foreground uppercase tracking-wider">
@@ -247,7 +248,7 @@ export function AssistantPanelToday({ setActiveTab, onSwitchToGrowth }: Assistan
       <section>
         <div className="flex items-center gap-2 mb-2.5">
           <TrendingUp className="h-4 w-4 text-muted-foreground" />
-          <h3 className="text-sm font-semibold text-zinc-900">
+          <h3 className="text-sm font-semibold text-foreground">
             {t('assistant.threeDay.title')}
           </h3>
         </div>
@@ -267,20 +268,20 @@ export function AssistantPanelToday({ setActiveTab, onSwitchToGrowth }: Assistan
       </section>
 
       {/* ───── Row 4 · 7 天 forecast（细条形图） ───── */}
-      <Card className="border shadow-none bg-white">
+      <Card className="border shadow-card bg-card">
         <CardContent className="p-4 sm:p-5">
           <div className="flex items-center justify-between mb-3">
-            <h3 className="text-sm font-semibold text-zinc-900">
+            <h3 className="text-sm font-semibold text-foreground">
               {t('assistant.week.sevenDays')}
             </h3>
             <span
               className={cn(
                 'text-base font-bold',
                 weekForecast.avgOccupancy >= 70
-                  ? 'text-emerald-600'
+                  ? 'text-success'
                   : weekForecast.avgOccupancy >= 40
-                    ? 'text-amber-600'
-                    : 'text-red-600',
+                    ? 'text-warning'
+                    : 'text-destructive',
               )}
             >
               {t('assistant.todaySummary.thisWeek')} · {weekForecast.avgOccupancy}%
@@ -295,15 +296,15 @@ export function AssistantPanelToday({ setActiveTab, onSwitchToGrowth }: Assistan
                   className="flex-1 flex flex-col items-center gap-1"
                   title={`${format(dayDate, 'EEE MMM d')} — ${occupancyRate}%`}
                 >
-                  <div className="w-full relative h-full bg-zinc-100 rounded overflow-hidden">
+                  <div className="w-full relative h-full bg-muted rounded overflow-hidden">
                     <div
                       className={cn(
                         'absolute bottom-0 w-full transition-all',
                         occupancyRate >= 80
-                          ? 'bg-emerald-400'
+                          ? 'bg-success'
                           : occupancyRate >= 50
-                            ? 'bg-amber-400'
-                            : 'bg-red-400',
+                            ? 'bg-warning'
+                            : 'bg-destructive',
                       )}
                       style={{ height: `${Math.max(occupancyRate, 5)}%` }}
                     />
@@ -362,24 +363,25 @@ function StatCard({
   highlight?: boolean;
   onClick?: () => void;
 }) {
+  // 用语义色 token 替换硬编码 blue/orange/emerald/purple
   const colorMap = {
-    blue: 'bg-blue-50 text-blue-500',
-    orange: 'bg-orange-50 text-orange-500',
-    emerald: 'bg-emerald-50 text-emerald-500',
-    purple: 'bg-purple-50 text-purple-500',
+    blue: 'bg-info/10 text-info',
+    orange: 'bg-warning/10 text-warning',
+    emerald: 'bg-success/10 text-success',
+    purple: 'bg-primary/10 text-primary',
   };
   const valueColor = {
-    blue: 'text-zinc-900',
-    orange: 'text-zinc-900',
-    emerald: 'text-emerald-700',
-    purple: 'text-zinc-900',
+    blue: 'text-foreground',
+    orange: 'text-foreground',
+    emerald: 'text-success',
+    purple: 'text-foreground',
   };
   return (
     <Card
       className={cn(
-        'border shadow-none bg-white transition-shadow',
-        onClick && 'cursor-pointer hover:shadow-sm',
-        highlight && 'border-emerald-200 bg-emerald-50/30',
+        'border shadow-card bg-card transition-all',
+        onClick && 'cursor-pointer hover:shadow-pop hover:-translate-y-0.5',
+        highlight && 'border-success/30 bg-success/5',
       )}
       onClick={onClick}
     >
@@ -409,17 +411,17 @@ function ThreeDayCard({
   const dayDate = parseISO(day.date);
   const isFull = day.emptyBeds === 0;
   const cardColor = isFull
-    ? 'border-zinc-200 bg-zinc-50/50'
+    ? 'border-border bg-muted/50'
     : day.occupancyRate >= 70
-      ? 'border-amber-200 bg-amber-50/30'
-      : 'border-emerald-200 bg-emerald-50/30';
+      ? 'border-warning/30 bg-warning/5'
+      : 'border-success/30 bg-success/5';
   const rateColor = isFull
     ? 'text-muted-foreground'
     : day.occupancyRate >= 70
-      ? 'text-amber-600'
-      : 'text-emerald-600';
+      ? 'text-warning'
+      : 'text-success';
   return (
-    <Card className={cn('border shadow-none', cardColor)}>
+    <Card className={cn('border shadow-card', cardColor)}>
       <CardContent className="p-3 sm:p-4 flex flex-col gap-2">
         <div className="flex items-center justify-between">
           <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
@@ -443,12 +445,12 @@ function ThreeDayCard({
           </div>
         ) : (
           <>
-            <p className="text-xs text-zinc-600">
+            <p className="text-xs text-muted-foreground">
               {t('assistant.threeDay.canFill', { n: day.canFill })}
             </p>
             <button
               onClick={onAction}
-              className="text-xs font-medium text-blue-700 bg-blue-50 hover:bg-blue-100 px-2.5 py-1.5 rounded-md transition-colors self-start"
+              className="text-xs font-medium text-primary bg-primary/10 hover:bg-primary/20 px-2.5 py-1.5 rounded-md transition-colors self-start"
             >
               {t('assistant.threeDay.action')} →
             </button>
@@ -469,13 +471,13 @@ function InsightColumn({
   onAction: (i: CopilotInsight) => void;
   onDismiss: (id: string) => void;
 }) {
-  const headerColor = kind === 'risk' ? 'text-red-600' : 'text-emerald-600';
+  const headerColor = kind === 'risk' ? 'text-destructive' : 'text-success';
   const HeaderIcon = kind === 'risk' ? AlertTriangle : Lightbulb;
   return (
     <section>
       <div className="flex items-center gap-2 mb-3">
         <HeaderIcon className={cn('h-4 w-4', headerColor)} />
-        <h3 className="text-sm font-semibold text-zinc-900">{title}</h3>
+        <h3 className="text-sm font-semibold text-foreground">{title}</h3>
         <span className="text-xs text-muted-foreground">({insights.length})</span>
       </div>
       {insights.length === 0 ? (
@@ -483,20 +485,20 @@ function InsightColumn({
           className={cn(
             'border shadow-sm',
             kind === 'risk'
-              ? 'border-emerald-200 bg-emerald-50/50'
-              : 'border-zinc-200 bg-zinc-50/50',
+              ? 'border-success/30 bg-success/10/50'
+              : 'border-border bg-muted/50/50',
           )}
         >
           <CardContent className="p-4 flex items-center gap-2">
             {kind === 'risk' ? (
-              <Shield className="h-4 w-4 text-emerald-500" />
+              <Shield className="h-4 w-4 text-success" />
             ) : (
               <Lightbulb className="h-4 w-4 text-muted-foreground" />
             )}
             <p
               className={cn(
                 'text-xs',
-                kind === 'risk' ? 'text-emerald-700' : 'text-muted-foreground',
+                kind === 'risk' ? 'text-success' : 'text-muted-foreground',
               )}
             >
               {allClearText}
@@ -540,13 +542,13 @@ function InsightRow({
 }) {
   const borderColor = kind === 'risk' ? 'border-l-red-500' : 'border-l-emerald-400';
   const Icon = kind === 'risk' ? AlertTriangle : Lightbulb;
-  const iconColor = kind === 'risk' ? 'text-red-500' : 'text-emerald-500';
+  const iconColor = kind === 'risk' ? 'text-destructive' : 'text-success';
   return (
-    <Card className={cn('border shadow-none bg-white border-l-4', borderColor)}>
+    <Card className={cn('border shadow-none bg-card border-l-4', borderColor)}>
       <CardContent className="p-3.5 flex items-start gap-3">
         <Icon className={cn('h-4 w-4 mt-0.5 shrink-0', iconColor)} />
         <div className="flex-1 min-w-0">
-          <h4 className="text-sm font-medium text-zinc-900 whitespace-normal">{insight.title}</h4>
+          <h4 className="text-sm font-medium text-foreground whitespace-normal">{insight.title}</h4>
           {insight.description && (
             <p className="text-xs text-muted-foreground mt-0.5">{insight.description}</p>
           )}
@@ -558,8 +560,8 @@ function InsightRow({
               className={cn(
                 'inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1.5 rounded-md transition-colors',
                 kind === 'risk'
-                  ? 'text-white bg-red-600 hover:bg-red-700'
-                  : 'text-white bg-emerald-600 hover:bg-emerald-700',
+                  ? 'text-white bg-destructive hover:bg-destructive/90'
+                  : 'text-white bg-success hover:bg-success/90',
               )}
             >
               {insight.actionLabel}
@@ -567,7 +569,7 @@ function InsightRow({
           )}
           <button
             onClick={onDismiss}
-            className="p-1 hover:bg-zinc-100 rounded transition-colors"
+            className="p-1 hover:bg-muted rounded transition-colors"
             aria-label="Dismiss"
           >
             <X className="h-3.5 w-3.5 text-muted-foreground" />
