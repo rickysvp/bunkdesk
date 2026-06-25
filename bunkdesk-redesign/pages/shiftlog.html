@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>交接日志</title>
+    <style id="theme-vars">
+/* Source: structured-spec */
+/* Brand profile: google / dashboard / clean / analytical / modern */
+/* Theme mode: light-dark */
+/* Alias layer: enabled */
+
+/* Light mode source tokens */
+:root {
+  /* Core surface colors */
+  --background: #ffffff;
+  --foreground: #0e1115;
+  --card: #ffffff;
+  --card-foreground: #0e1115;
+  --popover: #f9f9fa;
+  --popover-foreground: #0e1115;
+
+  /* Semantic action colors */
+  --primary: #4285f4;
+  --primary-foreground: #ffffff;
+  --secondary: #dbeafe;
+  --secondary-foreground: #333942;
+  --muted: #eff1f4;
+  --muted-foreground: #7f8d9f;
+  --accent: #dbeafe;
+  --accent-foreground: #003e8f;
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+
+  /* Borders, inputs, focus */
+  --border: #ebebeb;
+  --input: #e2e3e4;
+  --ring: #4285f4;
+
+  /* Data visualization */
+  --chart-1: #4285f4;
+  --chart-2: #ea4335;
+  --chart-3: #fbbc05;
+  --chart-4: #0043ad;
+  --chart-5: #34a853;
+
+  /* Sidebar */
+  --sidebar: #f0f6ff;
+  --sidebar-foreground: #0e1115;
+  --sidebar-primary: #4285f4;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #dbeafe;
+  --sidebar-accent-foreground: #003e8f;
+  --sidebar-border: #e7eaef;
+  --sidebar-ring: #4285f4;
+
+  /* Typography */
+  --font-sans: DM Sans, ui-sans-serif, sans-serif, system-ui;
+  --font-serif: DM Sans, ui-sans-serif, sans-serif, system-ui;
+  --font-mono: JetBrains Mono, monospace;
+
+  /* Radius */
+  --radius: 0.5rem;
+
+  /* Shadow primitives */
+  --shadow-x: 0;
+  --shadow-y: 3px;
+  --shadow-blur: 0px;
+  --shadow-spread: 0px;
+  --shadow-opacity: 0;
+  --shadow-color: #0e1115;
+
+  /* Elevation */
+  --shadow-2xs: 0 3px 0px 0px rgba(14, 17, 21, 0);
+  --shadow-xs: 0 3px 0px 0px rgba(14, 17, 21, 0);
+  --shadow-sm: 0 3px 0px 0px rgba(14, 17, 21, 0), 0 1px 2px -1px rgba(14, 17, 21, 0);
+  --shadow: 0 3px 0px 0px rgba(14, 17, 21, 0), 0 1px 2px -1px rgba(14, 17, 21, 0);
+  --shadow-md: 0 3px 0px 0px rgba(14, 17, 21, 0), 0 2px 4px -1px rgba(14, 17, 21, 0);
+  --shadow-lg: 0 3px 0px 0px rgba(14, 17, 21, 0), 0 4px 6px -1px rgba(14, 17, 21, 0);
+  --shadow-xl: 0 3px 0px 0px rgba(14, 17, 21, 0), 0 8px 10px -1px rgba(14, 17, 21, 0);
+  --shadow-2xl: 0 3px 0px 0px rgba(14, 17, 21, 0);
+
+  /* Rhythm */
+  --tracking-normal: 0em;
+  --spacing: 0.24rem;
+
+  /* Alias layer */
+  --google-color-background: var(--background);
+  --google-color-foreground: var(--foreground);
+  --google-color-card: var(--card);
+  --google-color-card-foreground: var(--card-foreground);
+  --google-color-popover: var(--popover);
+  --google-color-popover-foreground: var(--popover-foreground);
+  --google-color-primary: var(--primary);
+  --google-color-primary-foreground: var(--primary-foreground);
+  --google-color-secondary: var(--secondary);
+  --google-color-secondary-foreground: var(--secondary-foreground);
+  --google-color-muted: var(--muted);
+  --google-color-muted-foreground: var(--muted-foreground);
+  --google-color-accent: var(--accent);
+  --google-color-accent-foreground: var(--accent-foreground);
+  --google-color-destructive: var(--destructive);
+  --google-color-destructive-foreground: var(--destructive-foreground);
+  --google-color-border: var(--border);
+  --google-color-input: var(--input);
+  --google-color-ring: var(--ring);
+  --google-color-chart-1: var(--chart-1);
+  --google-color-chart-2: var(--chart-2);
+  --google-color-chart-3: var(--chart-3);
+  --google-color-chart-4: var(--chart-4);
+  --google-color-chart-5: var(--chart-5);
+  --google-color-sidebar: var(--sidebar);
+  --google-color-sidebar-foreground: var(--sidebar-foreground);
+  --google-color-sidebar-primary: var(--sidebar-primary);
+  --google-color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --google-color-sidebar-accent: var(--sidebar-accent);
+  --google-color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --google-color-sidebar-border: var(--sidebar-border);
+  --google-color-sidebar-ring: var(--sidebar-ring);
+  --google-font-sans: var(--font-sans);
+  --google-font-serif: var(--font-serif);
+  --google-font-mono: var(--font-mono);
+  --google-radius: var(--radius);
+  --google-radius-sm: calc(var(--radius) - 4px);
+  --google-radius-md: calc(var(--radius) - 2px);
+  --google-radius-lg: var(--radius);
+  --google-radius-xl: calc(var(--radius) + 4px);
+  --google-shadow-x: var(--shadow-x);
+  --google-shadow-y: var(--shadow-y);
+  --google-shadow-blur: var(--shadow-blur);
+  --google-shadow-spread: var(--shadow-spread);
+  --google-shadow-opacity: var(--shadow-opacity);
+  --google-shadow-color: var(--shadow-color);
+  --google-shadow-2xs: var(--shadow-2xs);
+  --google-shadow-xs: var(--shadow-xs);
+  --google-shadow-sm: var(--shadow-sm);
+  --google-shadow: var(--shadow);
+  --google-shadow-md: var(--shadow-md);
+  --google-shadow-lg: var(--shadow-lg);
+  --google-shadow-xl: var(--shadow-xl);
+  --google-shadow-2xl: var(--shadow-2xl);
+  --google-tracking-normal: var(--tracking-normal);
+  --google-spacing: var(--spacing);
+}
+
+/* Dark mode source tokens */
+.dark {
+  /* Core surface colors */
+  --background: #161616;
+  --foreground: #eff1f4;
+  --card: #1d1d1c;
+  --card-foreground: #eff1f4;
+  --popover: #2e2e2e;
+  --popover-foreground: #e5e5e5;
+
+  /* Semantic action colors */
+  --primary: #fc2c50;
+  --primary-foreground: #ffffff;
+  --secondary: #383838;
+  --secondary-foreground: #e5e5e5;
+  --muted: #383838;
+  --muted-foreground: #949494;
+  --accent: #4a2026;
+  --accent-foreground: #fc2c50;
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+
+  /* Borders, inputs, focus */
+  --border: #1d1d1c;
+  --input: #000000;
+  --ring: #ffffff;
+
+  /* Data visualization */
+  --chart-1: #2dccd3;
+  --chart-2: #f1204a;
+  --chart-3: #edbbe8;
+  --chart-4: #fbeb35;
+  --chart-5: #baf6f0;
+
+  /* Sidebar */
+  --sidebar: #171717;
+  --sidebar-foreground: #e5e5e5;
+  --sidebar-primary: #0065fd;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #00266b;
+  --sidebar-accent-foreground: #bfdbfe;
+  --sidebar-border: #404040;
+  --sidebar-ring: #00266b;
+
+  /* Typography */
+  --font-sans: DM Sans, ui-sans-serif, sans-serif, system-ui;
+  --font-serif: DM Sans, ui-sans-serif, sans-serif, system-ui;
+  --font-mono: JetBrains Mono, monospace;
+
+  /* Radius */
+  --radius: 0.5rem;
+
+  /* Shadow primitives */
+  --shadow-x: 0;
+  --shadow-y: 3px;
+  --shadow-blur: 0px;
+  --shadow-spread: 0px;
+  --shadow-opacity: 0;
+  --shadow-color: #000000;
+
+  /* Elevation */
+  --shadow-2xs: 0 3px 0px 0px rgba(0, 0, 0, 0);
+  --shadow-xs: 0 3px 0px 0px rgba(0, 0, 0, 0);
+  --shadow-sm: 0 3px 0px 0px rgba(0, 0, 0, 0), 0 1px 2px -1px rgba(0, 0, 0, 0);
+  --shadow: 0 3px 0px 0px rgba(0, 0, 0, 0), 0 1px 2px -1px rgba(0, 0, 0, 0);
+  --shadow-md: 0 3px 0px 0px rgba(0, 0, 0, 0), 0 2px 4px -1px rgba(0, 0, 0, 0);
+  --shadow-lg: 0 3px 0px 0px rgba(0, 0, 0, 0), 0 4px 6px -1px rgba(0, 0, 0, 0);
+  --shadow-xl: 0 3px 0px 0px rgba(0, 0, 0, 0), 0 8px 10px -1px rgba(0, 0, 0, 0);
+  --shadow-2xl: 0 3px 0px 0px rgba(0, 0, 0, 0);
+}
+
+
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.3.1/dist/index.global.js"></script>
+    <script src="https://unpkg.com/lucide@1.8.0/dist/umd/lucide.min.js"></script>
+    <style type="text/tailwindcss">
+  
+  @layer base {
+    body { background: var(--google-color-background); color: var(--google-color-foreground); }
+    td, th { @apply break-words; word-break: break-all; word-break: auto-phrase; }
+    th { @apply whitespace-nowrap; }
+  }
+    </style>
+    <style>
+      .no-scrollbar::-webkit-scrollbar { display: none; }
+      .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+      [data-icon] {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        -webkit-mask-size: contain;
+        mask-size: contain;
+        -webkit-mask-repeat: no-repeat;
+        mask-repeat: no-repeat;
+        -webkit-mask-position: center;
+        mask-position: center;
+        background-color: currentColor;
+      }
+    </style>
+</head>
+<body class="min-h-screen font-sans antialiased">
+    <main>
+        <!-- ========== TOPBAR (desktop) ========== -->
+        <header class="hidden md:flex h-14 border-b border-[var(--google-color-border)] sticky top-0 z-50 bg-[var(--google-color-background)] items-center gap-3 px-6">
+            <!-- Logo -->
+            <div class="flex items-center gap-2 mr-4">
+                <div class="w-8 h-8 rounded-lg bg-[var(--google-color-primary)] flex items-center justify-center">
+                    <span class="text-white font-bold text-sm">B</span>
+                </div>
+                <span class="font-semibold text-base tracking-tight">BunkDesk</span>
+            </div>
+
+            <!-- Nav pill tabs -->
+            <div class="flex items-center gap-1 overflow-x-auto">
+              <a href="#" data-dom-id="nav-assistant" class="text-[var(--google-color-muted-foreground)] hover:bg-[var(--google-color-muted)] px-3.5 py-1.5 rounded-full text-sm font-medium transition-colors">经营助手</a>
+              <a href="#" data-dom-id="nav-bedboard" class="text-[var(--google-color-muted-foreground)] hover:bg-[var(--google-color-muted)] px-3.5 py-1.5 rounded-full text-sm font-medium transition-colors">床位看板</a>
+              <a href="#" data-dom-id="nav-checkin" class="text-[var(--google-color-muted-foreground)] hover:bg-[var(--google-color-muted)] px-3.5 py-1.5 rounded-full text-sm font-medium transition-colors">入住面板</a>
+              <a href="#" data-dom-id="nav-shiftlog" class="bg-[var(--google-color-primary)] text-[var(--google-color-primary-foreground)] px-3.5 py-1.5 rounded-full text-sm font-medium transition-colors">交接日志</a>
+              <a href="#" data-dom-id="nav-settings" class="text-[var(--google-color-muted-foreground)] hover:bg-[var(--google-color-muted)] px-3.5 py-1.5 rounded-full text-sm font-medium transition-colors">设置</a>
+            </div>
+
+            <div class="flex-1"></div>
+
+            <!-- Language -->
+            <button class="flex items-center gap-1 px-2 py-1 rounded-lg text-sm text-[var(--google-color-muted-foreground)] hover:bg-[var(--google-color-muted)] transition-colors">
+                <i data-lucide="globe" class="w-4 h-4"></i>
+                <span>中文</span>
+            </button>
+
+            <!-- User badge -->
+            <div class="flex items-center gap-2 pl-2">
+                <div class="w-8 h-8 rounded-full bg-[var(--google-color-secondary)] flex items-center justify-center text-sm font-medium text-[var(--google-color-accent-foreground)]">陈</div>
+                <span class="text-sm font-medium">陈经理</span>
+            </div>
+
+            <!-- Sign out -->
+            <button data-dom-id="signout-btn" class="flex items-center gap-1 px-2 py-1 rounded-lg text-sm text-[var(--google-color-muted-foreground)] hover:bg-[var(--google-color-muted)] transition-colors">
+                <i data-lucide="log-out" class="w-4 h-4"></i>
+            </button>
+        </header>
+
+        <!-- ========== TOPBAR (mobile) ========== -->
+        <header class="md:hidden flex h-14 items-center gap-3 px-4 border-b border-[var(--google-color-border)] bg-[var(--google-color-card)]/95 backdrop-blur sticky top-0 z-30">
+            <div class="flex items-center gap-2">
+                <div class="h-8 w-8 bg-[var(--google-color-primary)] rounded-xl flex items-center justify-center text-white font-bold text-sm">B</div>
+                <span class="text-sm font-semibold text-[var(--google-color-foreground)]">BunkDesk</span>
+            </div>
+            <div class="flex-1 text-center text-sm font-medium text-[var(--google-color-foreground)]">交接日志</div>
+            <div class="w-7 h-7 rounded-full bg-[var(--google-color-secondary)] flex items-center justify-center text-xs font-semibold text-[var(--google-color-accent-foreground)]">A</div>
+        </header>
+
+        <!-- ========== MAIN CONTENT ========== -->
+        <div class="p-2 md:p-4 pb-20 md:pb-4 max-w-4xl mx-auto">
+
+            <!-- Filter bar -->
+            <div class="flex items-center gap-2 md:gap-3 overflow-x-auto pb-2 md:pb-0 -mx-3 px-3 md:mx-0 mb-3">
+                <!-- Status filters -->
+                <div class="flex items-center gap-1 shrink-0">
+                    <button class="px-3 py-1.5 rounded-full text-sm font-medium bg-[var(--google-color-primary)] text-white">全部</button>
+                    <button class="px-3 py-1.5 rounded-full text-sm font-medium border border-[var(--google-color-border)] text-[var(--google-color-foreground)] hover:bg-[var(--google-color-muted)] transition-colors">未解决</button>
+                    <button class="px-3 py-1.5 rounded-full text-sm font-medium border border-[var(--google-color-border)] text-[var(--google-color-foreground)] hover:bg-[var(--google-color-muted)] transition-colors">紧急</button>
+                    <button class="px-3 py-1.5 rounded-full text-sm font-medium border border-[var(--google-color-border)] text-[var(--google-color-foreground)] hover:bg-[var(--google-color-muted)] transition-colors">手动</button>
+                    <button class="px-3 py-1.5 rounded-full text-sm font-medium border border-[var(--google-color-border)] text-[var(--google-color-foreground)] hover:bg-[var(--google-color-muted)] transition-colors">自动</button>
+                </div>
+
+                <div class="w-px h-6 bg-[var(--google-color-border)] shrink-0"></div>
+
+                <!-- Category filters -->
+                <div class="flex items-center gap-1 shrink-0">
+                    <button class="px-3 py-1.5 rounded-full text-sm font-medium border border-[var(--google-color-border)] text-[var(--google-color-foreground)] hover:bg-[var(--google-color-muted)] transition-colors">一般</button>
+                    <button class="px-3 py-1.5 rounded-full text-sm font-medium border border-[var(--google-color-border)] text-[var(--google-color-foreground)] hover:bg-[var(--google-color-muted)] transition-colors">晚到</button>
+                    <button class="px-3 py-1.5 rounded-full text-sm font-medium border border-[var(--google-color-border)] text-[var(--google-color-foreground)] hover:bg-[var(--google-color-muted)] transition-colors">维修</button>
+                    <button class="px-3 py-1.5 rounded-full text-sm font-medium border border-[var(--google-color-border)] text-[var(--google-color-foreground)] hover:bg-[var(--google-color-muted)] transition-colors">接送</button>
+                    <button class="px-3 py-1.5 rounded-full text-sm font-medium border border-[var(--google-color-border)] text-[var(--google-color-foreground)] hover:bg-[var(--google-color-muted)] transition-colors">洗衣</button>
+                </div>
+            </div>
+
+            <!-- Add note form -->
+            <div class="border border-[var(--google-color-border)] rounded-xl p-3 mb-3">
+                <textarea class="w-full border border-[var(--google-color-input)] rounded-lg px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-[var(--google-color-ring)] focus:border-transparent" rows="2" placeholder="添加交接备注..."></textarea>
+                <div class="flex items-center gap-3 mt-3 flex-wrap">
+                    <select class="border border-[var(--google-color-input)] rounded-lg px-3 py-1.5 text-sm bg-[var(--google-color-background)] focus:outline-none focus:ring-2 focus:ring-[var(--google-color-ring)]">
+                        <option>一般</option>
+                        <option>晚到</option>
+                        <option>维修</option>
+                        <option>接送</option>
+                        <option>洗衣</option>
+                        <option>其他</option>
+                    </select>
+                    <select class="border border-[var(--google-color-input)] rounded-lg px-3 py-1.5 text-sm bg-[var(--google-color-background)] focus:outline-none focus:ring-2 focus:ring-[var(--google-color-ring)]">
+                        <option>普通</option>
+                        <option>紧急</option>
+                    </select>
+                    <select class="border border-[var(--google-color-input)] rounded-lg px-3 py-1.5 text-sm bg-[var(--google-color-background)] focus:outline-none focus:ring-2 focus:ring-[var(--google-color-ring)]">
+                        <option>陈经理</option>
+                        <option>小李</option>
+                        <option>王阿姨</option>
+                    </select>
+                    <div class="flex-1"></div>
+                    <button class="px-4 py-1.5 rounded-lg text-sm font-medium bg-[var(--google-color-primary)] text-white hover:opacity-90 transition-opacity">添加</button>
+                </div>
+            </div>
+
+            <!-- Notes list -->
+            <div class="space-y-3">
+
+                <!-- Note 1: general, manual, resolved -->
+                <div class="border border-[var(--google-color-border)] rounded-xl overflow-hidden border-l-4 border-l-gray-400 opacity-75">
+                    <div class="p-3">
+                        <div class="flex items-center gap-2 flex-wrap mb-2">
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700">
+                                <i data-lucide="file-text" class="w-3 h-3"></i> 一般
+                            </span>
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700">
+                                <i data-lucide="pencil" class="w-3 h-3"></i> 手动
+                            </span>
+                            <span class="text-xs text-[var(--google-color-muted-foreground)] ml-auto">3 小时前</span>
+                        </div>
+                        <p class="text-sm">早班交接完成，当前入住 32 人</p>
+                        <div class="flex items-center gap-3 mt-2">
+                            <span class="inline-flex items-center gap-1 text-xs text-[var(--google-color-muted-foreground)]">
+                                <i data-lucide="user" class="w-3 h-3"></i> 陈经理
+                            </span>
+                            <div class="flex-1"></div>
+                            <button class="inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium text-green-600 hover:bg-green-50 transition-colors">
+                                <i data-lucide="circle-check" class="w-3.5 h-3.5"></i> 已解决
+                            </button>
+                            <button class="inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium text-[var(--google-color-muted-foreground)] hover:bg-[var(--google-color-muted)] transition-colors">
+                                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Note 2: checkin, auto -->
+                <div class="border border-[var(--google-color-border)] rounded-xl overflow-hidden border-l-4 border-l-green-500">
+                    <div class="p-3">
+                        <div class="flex items-center gap-2 flex-wrap mb-2">
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700">
+                                <i data-lucide="log-in" class="w-3 h-3"></i> 入住
+                            </span>
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-purple-50 text-purple-700">
+                                <i data-lucide="bot" class="w-3 h-3"></i> 系统
+                            </span>
+                            <span class="text-xs text-[var(--google-color-muted-foreground)] ml-auto">2 小时前</span>
+                        </div>
+                        <p class="text-sm">张伟 入住 101-C，Booking.com，3 晚</p>
+                        <div class="flex items-center gap-3 mt-2">
+                            <span class="inline-flex items-center gap-1 text-xs text-[var(--google-color-muted-foreground)]">
+                                <i data-lucide="monitor" class="w-3 h-3"></i> 系统
+                            </span>
+                            <div class="flex-1"></div>
+                            <button class="inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium text-[var(--google-color-muted-foreground)] hover:bg-[var(--google-color-muted)] transition-colors">
+                                <i data-lucide="circle-check" class="w-3.5 h-3.5"></i> 标记解决
+                            </button>
+                            <button class="inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium text-[var(--google-color-muted-foreground)] hover:bg-[var(--google-color-muted)] transition-colors">
+                                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Note 3: cleaning, auto -->
+                <div class="border border-[var(--google-color-border)] rounded-xl overflow-hidden border-l-4 border-l-cyan-500">
+                    <div class="p-3">
+                        <div class="flex items-center gap-2 flex-wrap mb-2">
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-cyan-100 text-cyan-700">
+                                <i data-lucide="sparkles" class="w-3 h-3"></i> 清洁
+                            </span>
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-purple-50 text-purple-700">
+                                <i data-lucide="bot" class="w-3 h-3"></i> 系统
+                            </span>
+                            <span class="text-xs text-[var(--google-color-muted-foreground)] ml-auto">1.5 小时前</span>
+                        </div>
+                        <p class="text-sm">102-B 退房，转入清洁</p>
+                        <div class="flex items-center gap-3 mt-2">
+                            <span class="inline-flex items-center gap-1 text-xs text-[var(--google-color-muted-foreground)]">
+                                <i data-lucide="monitor" class="w-3 h-3"></i> 系统
+                            </span>
+                            <div class="flex-1"></div>
+                            <button class="inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium text-[var(--google-color-muted-foreground)] hover:bg-[var(--google-color-muted)] transition-colors">
+                                <i data-lucide="circle-check" class="w-3.5 h-3.5"></i> 标记解决
+                            </button>
+                            <button class="inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium text-[var(--google-color-muted-foreground)] hover:bg-[var(--google-color-muted)] transition-colors">
+                                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Note 4: maintenance, manual, urgent -->
+                <div class="border border-[var(--google-color-border)] rounded-xl overflow-hidden border-l-4 border-l-red-500">
+                    <div class="p-3">
+                        <div class="flex items-center gap-2 flex-wrap mb-2">
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-700">
+                                <i data-lucide="wrench" class="w-3 h-3"></i> 维修
+                            </span>
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700">
+                                <i data-lucide="pencil" class="w-3 h-3"></i> 手动
+                            </span>
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-red-500 text-white">
+                                <i data-lucide="alert-triangle" class="w-3 h-3"></i> 紧急
+                            </span>
+                            <span class="text-xs text-[var(--google-color-muted-foreground)] ml-auto">1 小时前</span>
+                        </div>
+                        <p class="text-sm">201 空调制冷效果差，已报修</p>
+                        <div class="flex items-center gap-3 mt-2">
+                            <span class="inline-flex items-center gap-1 text-xs text-[var(--google-color-muted-foreground)]">
+                                <i data-lucide="user" class="w-3 h-3"></i> 小李
+                            </span>
+                            <div class="flex-1"></div>
+                            <button class="inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium text-[var(--google-color-muted-foreground)] hover:bg-[var(--google-color-muted)] transition-colors">
+                                <i data-lucide="circle-check" class="w-3.5 h-3.5"></i> 标记解决
+                            </button>
+                            <button class="inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium text-[var(--google-color-muted-foreground)] hover:bg-[var(--google-color-muted)] transition-colors">
+                                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Note 5: late-arrival, manual -->
+                <div class="border border-[var(--google-color-border)] rounded-xl overflow-hidden border-l-4 border-l-amber-500">
+                    <div class="p-3">
+                        <div class="flex items-center gap-2 flex-wrap mb-2">
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-700">
+                                <i data-lucide="clock" class="w-3 h-3"></i> 晚到
+                            </span>
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700">
+                                <i data-lucide="pencil" class="w-3 h-3"></i> 手动
+                            </span>
+                            <span class="text-xs text-[var(--google-color-muted-foreground)] ml-auto">45 分钟前</span>
+                        </div>
+                        <p class="text-sm">Emma W. 预计 22:00 晚到</p>
+                        <div class="flex items-center gap-3 mt-2">
+                            <span class="inline-flex items-center gap-1 text-xs text-[var(--google-color-muted-foreground)]">
+                                <i data-lucide="user" class="w-3 h-3"></i> 小李
+                            </span>
+                            <div class="flex-1"></div>
+                            <button class="inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium text-[var(--google-color-muted-foreground)] hover:bg-[var(--google-color-muted)] transition-colors">
+                                <i data-lucide="circle-check" class="w-3.5 h-3.5"></i> 标记解决
+                            </button>
+                            <button class="inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium text-[var(--google-color-muted-foreground)] hover:bg-[var(--google-color-muted)] transition-colors">
+                                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Note 6: general, manual -->
+                <div class="border border-[var(--google-color-border)] rounded-xl overflow-hidden border-l-4 border-l-gray-400">
+                    <div class="p-3">
+                        <div class="flex items-center gap-2 flex-wrap mb-2">
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700">
+                                <i data-lucide="file-text" class="w-3 h-3"></i> 一般
+                            </span>
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700">
+                                <i data-lucide="pencil" class="w-3 h-3"></i> 手动
+                            </span>
+                            <span class="text-xs text-[var(--google-color-muted-foreground)] ml-auto">30 分钟前</span>
+                        </div>
+                        <p class="text-sm">补充 101 和 102 毛巾</p>
+                        <div class="flex items-center gap-3 mt-2">
+                            <span class="inline-flex items-center gap-1 text-xs text-[var(--google-color-muted-foreground)]">
+                                <i data-lucide="user" class="w-3 h-3"></i> 王阿姨
+                            </span>
+                            <div class="flex-1"></div>
+                            <button class="inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium text-[var(--google-color-muted-foreground)] hover:bg-[var(--google-color-muted)] transition-colors">
+                                <i data-lucide="circle-check" class="w-3.5 h-3.5"></i> 标记解决
+                            </button>
+                            <button class="inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium text-[var(--google-color-muted-foreground)] hover:bg-[var(--google-color-muted)] transition-colors">
+                                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Note 7: laundry, manual -->
+                <div class="border border-[var(--google-color-border)] rounded-xl overflow-hidden border-l-4 border-l-purple-500">
+                    <div class="p-3">
+                        <div class="flex items-center gap-2 flex-wrap mb-2">
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-700">
+                                <i data-lucide="shirt" class="w-3 h-3"></i> 洗衣
+                            </span>
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700">
+                                <i data-lucide="pencil" class="w-3 h-3"></i> 手动
+                            </span>
+                            <span class="text-xs text-[var(--google-color-muted-foreground)] ml-auto">15 分钟前</span>
+                        </div>
+                        <p class="text-sm">本周五床单集中清洗</p>
+                        <div class="flex items-center gap-3 mt-2">
+                            <span class="inline-flex items-center gap-1 text-xs text-[var(--google-color-muted-foreground)]">
+                                <i data-lucide="user" class="w-3 h-3"></i> 王阿姨
+                            </span>
+                            <div class="flex-1"></div>
+                            <button class="inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium text-[var(--google-color-muted-foreground)] hover:bg-[var(--google-color-muted)] transition-colors">
+                                <i data-lucide="circle-check" class="w-3.5 h-3.5"></i> 标记解决
+                            </button>
+                            <button class="inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium text-[var(--google-color-muted-foreground)] hover:bg-[var(--google-color-muted)] transition-colors">
+                                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Note 8: checkout, auto -->
+                <div class="border border-[var(--google-color-border)] rounded-xl overflow-hidden border-l-4 border-l-orange-500">
+                    <div class="p-3">
+                        <div class="flex items-center gap-2 flex-wrap mb-2">
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-700">
+                                <i data-lucide="log-out" class="w-3 h-3"></i> 退房
+                            </span>
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-purple-50 text-purple-700">
+                                <i data-lucide="bot" class="w-3 h-3"></i> 系统
+                            </span>
+                            <span class="text-xs text-[var(--google-color-muted-foreground)] ml-auto">10 分钟前</span>
+                        </div>
+                        <p class="text-sm">Sarah K. 退房 101-D，已结账</p>
+                        <div class="flex items-center gap-3 mt-2">
+                            <span class="inline-flex items-center gap-1 text-xs text-[var(--google-color-muted-foreground)]">
+                                <i data-lucide="monitor" class="w-3 h-3"></i> 系统
+                            </span>
+                            <div class="flex-1"></div>
+                            <button class="inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium text-[var(--google-color-muted-foreground)] hover:bg-[var(--google-color-muted)] transition-colors">
+                                <i data-lucide="circle-check" class="w-3.5 h-3.5"></i> 标记解决
+                            </button>
+                            <button class="inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium text-[var(--google-color-muted-foreground)] hover:bg-[var(--google-color-muted)] transition-colors">
+                                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </main>
+    <script>lucide.createIcons();</script>
+    <nav class="md:hidden fixed bottom-0 inset-x-0 z-40 bg-[var(--google-color-card)]/95 backdrop-blur-xl border-t border-[var(--google-color-border)]" style="padding-bottom:env(safe-area-inset-bottom,0px)">
+        <div class="grid grid-cols-5 max-w-md mx-auto">
+            <button class="flex flex-col items-center justify-center gap-1 min-h-[56px] py-2 text-[var(--google-color-muted-foreground)]"><span class="text-lg">🏠</span><span class="text-[10px] font-semibold">助手</span></button>
+            <button class="flex flex-col items-center justify-center gap-1 min-h-[56px] py-2 text-[var(--google-color-muted-foreground)]"><span class="text-lg">🛏️</span><span class="text-[10px] font-semibold">床位</span></button>
+            <button class="flex flex-col items-center justify-center gap-1 min-h-[56px] py-2 text-[var(--google-color-muted-foreground)]"><span class="text-lg">🔑</span><span class="text-[10px] font-semibold">入住</span></button>
+            <button class="flex flex-col items-center justify-center gap-1 min-h-[56px] py-2 text-[var(--google-color-primary)]"><span class="text-lg">📋</span><span class="text-[10px] font-semibold">日志</span></button>
+            <button class="flex flex-col items-center justify-center gap-1 min-h-[56px] py-2 text-[var(--google-color-muted-foreground)]"><span class="text-lg">⚙️</span><span class="text-[10px] font-semibold">设置</span></button>
+        </div>
+    </nav>
+</body>
+</html>

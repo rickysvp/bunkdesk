@@ -1,20 +1,16 @@
 /**
  * AssistantPanelToday — "今日" sub-tab of 经营助手.
  *
- * Layout (rev 2026-06-15 — 聚焦经营者视角):
- *   Row 1 · Hero        「今日入住率」大字 + 对比 7 天均值
- *   Row 2 · 4 stat      入住 / 退房 / 空床 / 今日潜在 $X（去掉了「待清洁」）
- *   Row 3 · 3 天 strip  今晚 / 明天 / 后天 入住率 + 可填床数 + 动作
- *   Row 4 · 7 天 forecast 细条形图（avg% + 高峰日）
+ * Layout (rev 2026-06-25 — Google-blue chart palette, matches
+ * bunkdesk-redesign/pages/assistant.html):
+ *   Row 1 · Hero        「今日入住率」大字 + 对比 7 天均值 + 图例点
+ *   Row 2 · 4 stat      入住 / 退房 / 空床 / 今日潜在 $X
+ *   Row 3 · 3 天 strip  今晚 / 明天 / 后天 入住率 + 空床 + 查看
+ *   Row 4 · 7 天 forecast 高条形图（% 标签在柱顶，颜色随入住率分级）
  *   Row 5 · 两列 需关注  左：需要立刻处理（risks）| 右：抓住机会（opportunities）
  *
- * 移除了与经营者决策无关的：
- *   - 「待清洁」stat card
- *   - 「紧急交接班」「待清洁床位」insight 模板
- *
  * 接收 onSwitchToGrowth(subTab?) 让 insight 跳转在 Assistant 内部完成
- * （不切换顶部 tab）。3 天 strip 的「查看对策」目前统一跳到 bedboard
- * 顶层——后续若加日期筛选再优化目标。
+ * （不切换顶部 tab）。3 天 strip 的「查看」目前统一跳到 bedboard。
  */
 
 import React, { useState, useMemo, Fragment } from 'react';
@@ -36,15 +32,10 @@ import {
   TrendingUp,
   AlertTriangle,
   Lightbulb,
-  ArrowUp,
-  ArrowDown,
-  Minus,
   Shield,
-  Check,
   DollarSign,
   X,
 } from 'lucide-react';
-import { Card, CardContent } from '@/components/ui/card';
 import { motion, AnimatePresence } from 'motion/react';
 import { format, parseISO } from 'date-fns';
 import { cn } from '@/lib/utils';
@@ -124,90 +115,63 @@ export function AssistantPanelToday({ setActiveTab, onSwitchToGrowth }: Assistan
 
   // Hero 对比 7 天均值的差值（百分点）
   const diffPct = todaySummary.occupancy - weekForecast.avgOccupancy;
-  // 用语义色 token 替换硬编码 emerald/amber/red
-  const heroColor =
-    todaySummary.occupancy >= 70
-      ? 'success'
-      : todaySummary.occupancy >= 40
-        ? 'warning'
-        : 'destructive';
-  const heroColorMap = {
-    success:    { bg: 'from-success/10',   text: 'text-success',    border: 'border-success/30',    sub: 'text-success' },
-    warning:    { bg: 'from-warning/10',   text: 'text-warning',    border: 'border-warning/30',    sub: 'text-warning' },
-    destructive:{ bg: 'from-destructive/10', text: 'text-destructive', border: 'border-destructive/30', sub: 'text-destructive' },
-  };
-  const hero = heroColorMap[heroColor];
+  // 图例文本：复用现有 i18n key，按 " · " 拆成两段，对应两个图例点
+  const bedsLegend = t('assistant.hero.bedsFmt', {
+    occupied: todaySummary.occupied,
+    total: todaySummary.totalBeds,
+    empty: todaySummary.emptyBeds,
+  });
+  const [legendOccupied, legendEmpty] = bedsLegend.split(' · ');
 
   return (
-    <div className="max-w-6xl mx-auto space-y-5 pb-6">
+    <div className="max-w-6xl mx-auto space-y-3 pb-6">
       {/* ───── Row 1 · Hero 入住率 ───── */}
-      <Card
-        className={cn(
-          'border shadow-card bg-gradient-to-br to-card overflow-hidden',
-          hero.bg,
-          hero.border,
-        )}
-      >
-        <CardContent className="p-5 sm:p-7 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+      <div className="rounded-xl border border-chart-1/30 bg-gradient-to-br from-chart-1/10 to-card p-4">
+        <div className="flex items-center justify-between">
           <div>
-            <p className={cn('text-xs font-semibold tracking-widest uppercase', hero.sub)}>
+            <p className="text-sm font-medium text-muted-foreground mb-1">
               {t('assistant.hero.occupancy')}
             </p>
-            <div className="mt-2 flex items-baseline gap-3">
-              <span className={cn('text-6xl sm:text-7xl font-bold leading-none tracking-tight', hero.text)}>
-                {todaySummary.occupancy}
-                <span className="text-3xl font-semibold">%</span>
+            <div className="flex items-baseline gap-3">
+              <span className="text-4xl font-bold font-mono text-foreground">
+                {todaySummary.occupancy}%
               </span>
-              <p className="text-sm text-muted-foreground">
-                {t('assistant.hero.bedsFmt', {
-                  occupied: todaySummary.occupied,
-                  total: todaySummary.totalBeds,
-                  empty: todaySummary.emptyBeds,
-                })}
-              </p>
-            </div>
-            <div className={cn('mt-3 flex items-center gap-1.5 text-sm font-medium', hero.text)}>
-              {diffPct > 0 && (
-                <>
-                  <ArrowUp className="h-4 w-4" />
-                  <span>{t('assistant.hero.comparisonUp', { pct: diffPct })}</span>
-                </>
-              )}
-              {diffPct < 0 && (
-                <>
-                  <ArrowDown className="h-4 w-4" />
-                  <span>{t('assistant.hero.comparisonDown', { pct: Math.abs(diffPct) })}</span>
-                </>
-              )}
-              {diffPct === 0 && (
-                <>
-                  <Minus className="h-4 w-4" />
-                  <span>{t('assistant.hero.comparisonEqual')}</span>
-                </>
-              )}
+              <span
+                className={cn(
+                  'text-sm font-medium',
+                  diffPct > 0
+                    ? 'text-chart-5'
+                    : diffPct < 0
+                      ? 'text-chart-2'
+                      : 'text-muted-foreground',
+                )}
+              >
+                {diffPct > 0 &&
+                  t('assistant.hero.comparisonUp', { pct: diffPct })}
+                {diffPct < 0 &&
+                  t('assistant.hero.comparisonDown', { pct: Math.abs(diffPct) })}
+                {diffPct === 0 && t('assistant.hero.comparisonEqual')}
+              </span>
             </div>
           </div>
-          <div className="flex gap-6 text-right">
-            <div>
-              <p className="text-2xl font-bold text-foreground">{recallCount}</p>
-              <p className="text-xs text-muted-foreground uppercase tracking-wider">
-                {t('assistant.growthOverview.recallable')}
-              </p>
-            </div>
-            <div>
-              <p className="text-2xl font-bold text-success">
-                {formatCurrency(totalPotentialRevenue, language)}
-              </p>
-              <p className="text-xs text-muted-foreground uppercase tracking-wider">
-                {t('assistant.growthOverview.potential7d')}
-              </p>
-            </div>
+          <div className="h-12 w-12 rounded-xl bg-chart-1/10 flex items-center justify-center shrink-0">
+            <TrendingUp className="w-6 h-6 text-chart-1" />
           </div>
-        </CardContent>
-      </Card>
+        </div>
+        <div className="mt-3 flex items-center gap-4 text-sm text-muted-foreground">
+          <span className="flex items-center gap-1.5">
+            <span className="h-2 w-2 rounded-full bg-chart-1" />
+            {legendOccupied}
+          </span>
+          <span className="flex items-center gap-1.5">
+            <span className="h-2 w-2 rounded-full bg-chart-3" />
+            {legendEmpty}
+          </span>
+        </div>
+      </div>
 
-      {/* ───── Row 2 · 4 stat cards（已去 待清洁） ───── */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      {/* ───── Row 2 · 4 stat cards ───── */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <StatCard
           label={t('assistant.todaySummary.checkIns')}
           value={todaySummary.checkIns}
@@ -238,97 +202,92 @@ export function AssistantPanelToday({ setActiveTab, onSwitchToGrowth }: Assistan
               : undefined
           }
           icon={<DollarSign className="h-4 w-4" />}
-          color="emerald"
+          color="purple"
           highlight
           onClick={handlePotentialClick}
         />
       </div>
 
       {/* ───── Row 3 · 3 天 strip ───── */}
-      <section>
-        <div className="flex items-center gap-2 mb-2.5">
-          <TrendingUp className="h-4 w-4 text-muted-foreground" />
-          <h3 className="text-sm font-semibold text-foreground">
-            {t('assistant.threeDay.title')}
-          </h3>
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          {weekForecast.threeDay.map((day, i) => (
-            <Fragment key={day.date}>
-              <ThreeDayCard
-                day={day}
-                label={[t('assistant.threeDay.tonight'), t('assistant.threeDay.tomorrow'), t('assistant.threeDay.dayAfter')][i]}
-                t={t}
-                language={language}
-                onAction={() => setActiveTab?.('bedboard')}
-              />
-            </Fragment>
-          ))}
-        </div>
-      </section>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+        {weekForecast.threeDay.map((day, i) => (
+          <Fragment key={day.date}>
+            <ThreeDayCard
+              day={day}
+              label={[t('assistant.threeDay.tonight'), t('assistant.threeDay.tomorrow'), t('assistant.threeDay.dayAfter')][i]}
+              t={t}
+              language={language}
+              onAction={() => setActiveTab?.('bedboard')}
+            />
+          </Fragment>
+        ))}
+      </div>
 
-      {/* ───── Row 4 · 7 天 forecast（细条形图） ───── */}
-      <Card className="border shadow-card bg-card">
-        <CardContent className="p-4 sm:p-5">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="text-sm font-semibold text-foreground">
+      {/* ───── Row 4 · 7 天 forecast（高条形图） ───── */}
+      <div className="bg-card border border-border rounded-xl p-4">
+        <div className="flex items-center justify-between mb-3">
+          <div>
+            <p className="text-sm font-medium text-foreground">
               {t('assistant.week.sevenDays')}
-            </h3>
-            <span
-              className={cn(
-                'text-base font-bold',
-                weekForecast.avgOccupancy >= 70
-                  ? 'text-success'
-                  : weekForecast.avgOccupancy >= 40
-                    ? 'text-warning'
-                    : 'text-destructive',
-              )}
-            >
+            </p>
+            <p className="text-xs text-muted-foreground mt-0.5">
               {t('assistant.todaySummary.thisWeek')} · {weekForecast.avgOccupancy}%
+            </p>
+          </div>
+          <div className="flex items-center gap-3 text-xs text-muted-foreground">
+            <span className="flex items-center gap-1.5">
+              <span className="h-2 w-2 rounded-full bg-chart-1" />
+              {t('assistant.hero.occupancy')}
             </span>
           </div>
-          <div className="flex gap-1.5 items-end h-16">
-            {weekForecast.daily.map(({ date, occupancyRate }) => {
-              const dayDate = parseISO(date);
-              return (
-                <div
-                  key={date}
-                  className="flex-1 flex flex-col items-center gap-1"
-                  title={`${format(dayDate, 'EEE MMM d')} — ${occupancyRate}%`}
-                >
-                  <div className="w-full relative h-full bg-muted rounded overflow-hidden">
-                    <div
-                      className={cn(
-                        'absolute bottom-0 w-full transition-all',
-                        occupancyRate >= 80
-                          ? 'bg-success'
-                          : occupancyRate >= 50
-                            ? 'bg-warning'
-                            : 'bg-destructive',
-                      )}
-                      style={{ height: `${Math.max(occupancyRate, 5)}%` }}
-                    />
-                  </div>
-                  <span className="text-xs text-muted-foreground">
-                    {format(dayDate, 'EEE')}
-                  </span>
+        </div>
+        <div className="flex items-end justify-between gap-3 h-48 px-2">
+          {weekForecast.daily.map(({ date, occupancyRate }) => {
+            const dayDate = parseISO(date);
+            const isPeak = date === weekForecast.peakDay.date;
+            const barColor = isPeak
+              ? 'bg-chart-4'
+              : occupancyRate >= 90
+                ? 'bg-chart-5'
+                : occupancyRate >= 70
+                  ? 'bg-chart-1'
+                  : occupancyRate >= 50
+                    ? 'bg-chart-3'
+                    : 'bg-chart-2';
+            return (
+              <div
+                key={date}
+                className="flex-1 flex flex-col items-center gap-2 h-full"
+                title={`${format(dayDate, 'EEE MMM d')} — ${occupancyRate}%`}
+              >
+                <span className="text-xs font-mono font-medium text-foreground">
+                  {occupancyRate}%
+                </span>
+                <div className="w-full flex-1 flex items-end">
+                  <div
+                    className={cn('w-full rounded-t-lg', barColor)}
+                    style={{ height: `${Math.max(occupancyRate, 4)}%` }}
+                  />
                 </div>
-              );
-            })}
-          </div>
-          <div className="flex items-center justify-between text-xs text-muted-foreground pt-2 mt-2 border-t border-zinc-100">
-            <span>
-              {t('assistant.todaySummary.peak')}: {format(parseISO(weekForecast.peakDay.date), 'EEE')} ({weekForecast.peakDay.rate}%)
-            </span>
-            <span>
-              {t('assistant.todaySummary.empty')}: {weekForecast.totalEmptyBedNights}
-            </span>
-          </div>
-        </CardContent>
-      </Card>
+                <span className="text-xs text-muted-foreground">
+                  {format(dayDate, 'EEE')}
+                </span>
+              </div>
+            );
+          })}
+        </div>
+        <div className="flex items-center justify-between text-xs text-muted-foreground pt-2 mt-2 border-t border-border">
+          <span>
+            {t('assistant.todaySummary.peak')}: {format(parseISO(weekForecast.peakDay.date), 'EEE')} ({weekForecast.peakDay.rate}%)
+          </span>
+          <span>
+            {t('assistant.todaySummary.empty')}: {weekForecast.totalEmptyBedNights}
+          </span>
+        </div>
+      </div>
 
       {/* ───── Row 5 · 两列 需关注 ───── */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
         <InsightColumn
           kind="risk"
           title={t('assistant.needsAction')}
@@ -363,39 +322,31 @@ function StatCard({
   highlight?: boolean;
   onClick?: () => void;
 }) {
-  // 用语义色 token 替换硬编码 blue/orange/emerald/purple
+  // chart token 颜色映射：blue→chart-1, orange→chart-2, emerald→chart-5, purple→chart-4
   const colorMap = {
-    blue: 'bg-info/10 text-info',
-    orange: 'bg-warning/10 text-warning',
-    emerald: 'bg-success/10 text-success',
-    purple: 'bg-primary/10 text-primary',
-  };
-  const valueColor = {
-    blue: 'text-foreground',
-    orange: 'text-foreground',
-    emerald: 'text-success',
-    purple: 'text-foreground',
+    blue: 'bg-chart-1/10 text-chart-1',
+    orange: 'bg-chart-2/10 text-chart-2',
+    emerald: 'bg-chart-5/10 text-chart-5',
+    purple: 'bg-chart-4/10 text-chart-4',
   };
   return (
-    <Card
-      className={cn(
-        'border shadow-card bg-card transition-all',
-        onClick && 'cursor-pointer hover:shadow-pop hover:-translate-y-0.5',
-        highlight && 'border-success/30 bg-success/5',
-      )}
+    <div
       onClick={onClick}
+      className={cn(
+        'bg-card border border-border rounded-xl p-3 transition-all',
+        onClick && 'cursor-pointer hover:shadow-sm hover:-translate-y-0.5',
+        highlight && 'border-chart-4/30',
+      )}
     >
-      <CardContent className="p-4 flex items-start gap-3">
-        <div className={cn('p-2 rounded-lg', colorMap[color])}>{icon}</div>
-        <div className="min-w-0">
-          <p className={cn('text-2xl font-semibold leading-none', valueColor[color])}>
-            {value}
-          </p>
-          {subValue && <p className="text-xs text-muted-foreground mt-0.5">{subValue}</p>}
-          <p className="text-xs text-muted-foreground mt-1 truncate">{label}</p>
+      <div className="flex items-center justify-between mb-3">
+        <span className="text-sm text-muted-foreground truncate">{label}</span>
+        <div className={cn('h-8 w-8 rounded-lg flex items-center justify-center shrink-0', colorMap[color])}>
+          {icon}
         </div>
-      </CardContent>
-    </Card>
+      </div>
+      <p className="text-2xl font-bold font-mono text-foreground">{value}</p>
+      {subValue && <p className="text-xs text-chart-5 mt-1">{subValue}</p>}
+    </div>
   );
 }
 
@@ -410,54 +361,25 @@ function ThreeDayCard({
 }) {
   const dayDate = parseISO(day.date);
   const isFull = day.emptyBeds === 0;
-  const cardColor = isFull
-    ? 'border-border bg-muted/50'
-    : day.occupancyRate >= 70
-      ? 'border-warning/30 bg-warning/5'
-      : 'border-success/30 bg-success/5';
-  const rateColor = isFull
-    ? 'text-muted-foreground'
-    : day.occupancyRate >= 70
-      ? 'text-warning'
-      : 'text-success';
   return (
-    <Card className={cn('border shadow-card', cardColor)}>
-      <CardContent className="p-3 sm:p-4 flex flex-col gap-2">
-        <div className="flex items-center justify-between">
-          <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-            {label}
-          </span>
-          <span className="text-xs text-muted-foreground">{format(dayDate, 'MMM d')}</span>
-        </div>
-        <div className="flex items-baseline gap-1.5">
-          <span className={cn('text-3xl font-bold leading-none', rateColor)}>
-            {day.occupancyRate}
-          </span>
-          <span className="text-sm font-semibold text-muted-foreground">%</span>
-          <span className="text-xs text-muted-foreground ml-1">
-            {t('assistant.threeDay.occupancyFmt', { pct: day.occupancyRate }).replace(`${day.occupancyRate}% `, '')}
-          </span>
-        </div>
-        {isFull ? (
-          <div className="flex items-center gap-1 text-xs font-medium text-muted-foreground">
-            <Check className="h-3.5 w-3.5" />
-            <span>{t('assistant.threeDay.fullHouse')}</span>
-          </div>
-        ) : (
-          <>
-            <p className="text-xs text-muted-foreground">
-              {t('assistant.threeDay.canFill', { n: day.canFill })}
-            </p>
-            <button
-              onClick={onAction}
-              className="text-xs font-medium text-primary bg-primary/10 hover:bg-primary/20 px-2.5 py-1.5 rounded-md transition-colors self-start"
-            >
-              {t('assistant.threeDay.action')} →
-            </button>
-          </>
-        )}
-      </CardContent>
-    </Card>
+    <div className="bg-card border border-border rounded-xl p-3 flex flex-col justify-between">
+      <div>
+        <p className="text-sm font-medium text-foreground">{label}</p>
+        <p className="text-xs text-muted-foreground mb-3">{format(dayDate, 'M/d')}</p>
+        <p className="text-2xl font-bold font-mono text-foreground">{day.occupancyRate}%</p>
+        <p className="text-xs text-muted-foreground mt-1">
+          {isFull
+            ? t('assistant.threeDay.fullHouse')
+            : t('assistant.threeDay.canFill', { n: day.emptyBeds })}
+        </p>
+      </div>
+      <button
+        onClick={onAction}
+        className="mt-3 w-full py-2 rounded-lg text-sm font-medium bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
+      >
+        {t('assistant.threeDay.action')}
+      </button>
+    </div>
   );
 }
 
@@ -471,42 +393,32 @@ function InsightColumn({
   onAction: (i: CopilotInsight) => void;
   onDismiss: (id: string) => void;
 }) {
-  const headerColor = kind === 'risk' ? 'text-destructive' : 'text-success';
-  const HeaderIcon = kind === 'risk' ? AlertTriangle : Lightbulb;
+  const isRisk = kind === 'risk';
+  const headerBg = isRisk ? 'bg-chart-2/10' : 'bg-chart-5/10';
+  const headerIconColor = isRisk ? 'text-chart-2' : 'text-chart-5';
+  const HeaderIcon = isRisk ? AlertTriangle : Lightbulb;
   return (
-    <section>
+    <div className="bg-card border border-border rounded-xl p-4">
       <div className="flex items-center gap-2 mb-3">
-        <HeaderIcon className={cn('h-4 w-4', headerColor)} />
+        <div className={cn('h-8 w-8 rounded-lg flex items-center justify-center', headerBg)}>
+          <HeaderIcon className={cn('w-4 h-4', headerIconColor)} />
+        </div>
         <h3 className="text-sm font-semibold text-foreground">{title}</h3>
         <span className="text-xs text-muted-foreground">({insights.length})</span>
       </div>
       {insights.length === 0 ? (
-        <Card
-          className={cn(
-            'border shadow-sm',
-            kind === 'risk'
-              ? 'border-success/30 bg-success/10/50'
-              : 'border-border bg-muted/50/50',
+        <div className="flex items-center gap-2 p-3 rounded-lg bg-muted/50">
+          {isRisk ? (
+            <Shield className="h-4 w-4 text-chart-5" />
+          ) : (
+            <Lightbulb className="h-4 w-4 text-muted-foreground" />
           )}
-        >
-          <CardContent className="p-4 flex items-center gap-2">
-            {kind === 'risk' ? (
-              <Shield className="h-4 w-4 text-success" />
-            ) : (
-              <Lightbulb className="h-4 w-4 text-muted-foreground" />
-            )}
-            <p
-              className={cn(
-                'text-xs',
-                kind === 'risk' ? 'text-success' : 'text-muted-foreground',
-              )}
-            >
-              {allClearText}
-            </p>
-          </CardContent>
-        </Card>
+          <p className={cn('text-sm', isRisk ? 'text-chart-5' : 'text-muted-foreground')}>
+            {allClearText}
+          </p>
+        </div>
       ) : (
-        <div className="space-y-2">
+        <div className="space-y-3">
           <AnimatePresence initial={false}>
             {insights.map((insight) => (
               <motion.div
@@ -528,7 +440,7 @@ function InsightColumn({
           </AnimatePresence>
         </div>
       )}
-    </section>
+    </div>
   );
 }
 
@@ -540,42 +452,42 @@ function InsightRow({
   onAction: () => void;
   onDismiss: () => void;
 }) {
-  const borderColor = kind === 'risk' ? 'border-l-red-500' : 'border-l-emerald-400';
-  const Icon = kind === 'risk' ? AlertTriangle : Lightbulb;
-  const iconColor = kind === 'risk' ? 'text-destructive' : 'text-success';
+  const isRisk = kind === 'risk';
+  // risk → chart-2，opportunity → chart-5
+  const borderColor = isRisk ? 'border-l-chart-2' : 'border-l-chart-5';
+  const bgColor = isRisk ? 'bg-chart-2/5' : 'bg-chart-5/5';
+  const Icon = isRisk ? AlertTriangle : Lightbulb;
+  const iconColor = isRisk ? 'text-chart-2' : 'text-chart-5';
+  const actionBtn = isRisk
+    ? 'bg-chart-2 text-white hover:bg-chart-2/90'
+    : 'bg-chart-5 text-white hover:bg-chart-5/90';
   return (
-    <Card className={cn('border shadow-none bg-card border-l-4', borderColor)}>
-      <CardContent className="p-3.5 flex items-start gap-3">
-        <Icon className={cn('h-4 w-4 mt-0.5 shrink-0', iconColor)} />
-        <div className="flex-1 min-w-0">
-          <h4 className="text-sm font-medium text-foreground whitespace-normal">{insight.title}</h4>
-          {insight.description && (
-            <p className="text-xs text-muted-foreground mt-0.5">{insight.description}</p>
-          )}
-        </div>
-        <div className="flex items-center gap-1.5 shrink-0">
-          {insight.actionLabel && (
-            <button
-              onClick={onAction}
-              className={cn(
-                'inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1.5 rounded-md transition-colors',
-                kind === 'risk'
-                  ? 'text-white bg-destructive hover:bg-destructive/90'
-                  : 'text-white bg-success hover:bg-success/90',
-              )}
-            >
-              {insight.actionLabel}
-            </button>
-          )}
+    <div className={cn('flex items-start gap-3 p-3 rounded-lg border-l-[3px]', borderColor, bgColor)}>
+      <Icon className={cn('w-4 h-4 mt-0.5 shrink-0', iconColor)} />
+      <div className="flex-1 min-w-0">
+        <h4 className="text-sm text-foreground whitespace-normal">{insight.title}</h4>
+        {insight.description && (
+          <p className="text-xs text-muted-foreground mt-0.5">{insight.description}</p>
+        )}
+        {insight.actionLabel && (
           <button
-            onClick={onDismiss}
-            className="p-1 hover:bg-muted rounded transition-colors"
-            aria-label="Dismiss"
+            onClick={onAction}
+            className={cn(
+              'mt-2 inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1.5 rounded-md transition-colors',
+              actionBtn,
+            )}
           >
-            <X className="h-3.5 w-3.5 text-muted-foreground" />
+            {insight.actionLabel}
           </button>
-        </div>
-      </CardContent>
-    </Card>
+        )}
+      </div>
+      <button
+        onClick={onDismiss}
+        className="p-1 hover:bg-muted rounded transition-colors shrink-0"
+        aria-label="Dismiss"
+      >
+        <X className="h-3.5 w-3.5 text-muted-foreground" />
+      </button>
+    </div>
   );
 }

@@ -63,87 +63,89 @@
 }
 
 :root {
-    /* 背景：温暖中性色（stone 色系），比纯白更有温度 */
-    --background: oklch(0.985 0.005 95);
-    --foreground: oklch(0.22 0.02 60);
+    /* Google-inspired clean dashboard palette (light) */
+    --background: oklch(1 0 0);
+    --foreground: oklch(0.19 0.01 260);
     --card: oklch(1 0 0);
-    --card-foreground: oklch(0.22 0.02 60);
-    --popover: oklch(1 0 0);
-    --popover-foreground: oklch(0.22 0.02 60);
-    /* 品牌主色：Hostelworld 青绿 #0B9D8F — 旅行/探索/可靠 */
-    --primary: oklch(0.62 0.12 180);
-    --primary-foreground: oklch(0.99 0 0);
-    --secondary: oklch(0.96 0.008 95);
-    --secondary-foreground: oklch(0.3 0.02 60);
-    --muted: oklch(0.96 0.008 95);
-    --muted-foreground: oklch(0.5 0.015 60);
-    --accent: oklch(0.94 0.02 180);
-    --accent-foreground: oklch(0.3 0.05 180);
-    --destructive: oklch(0.58 0.22 27);
-    --border: oklch(0.91 0.008 95);
-    --input: oklch(0.91 0.008 95);
-    --ring: oklch(0.62 0.12 180);
-    /* 语义色 */
-    --success: oklch(0.6 0.14 155);
-    --success-foreground: oklch(0.99 0 0);
-    --warning: oklch(0.75 0.15 75);
-    --warning-foreground: oklch(0.25 0.05 75);
-    --info: oklch(0.6 0.13 240);
-    --info-foreground: oklch(0.99 0 0);
-    --chart-1: oklch(0.62 0.12 180);
-    --chart-2: oklch(0.6 0.14 155);
-    --chart-3: oklch(0.75 0.15 75);
-    --chart-4: oklch(0.6 0.13 240);
-    --chart-5: oklch(0.58 0.22 27);
-    --radius: 0.75rem;
-    --sidebar: oklch(0.97 0.006 95);
-    --sidebar-foreground: oklch(0.22 0.02 60);
-    --sidebar-primary: oklch(0.62 0.12 180);
-    --sidebar-primary-foreground: oklch(0.99 0 0);
-    --sidebar-accent: oklch(0.94 0.02 180);
-    --sidebar-accent-foreground: oklch(0.3 0.05 180);
-    --sidebar-border: oklch(0.91 0.008 95);
-    --sidebar-ring: oklch(0.62 0.12 180);
+    --card-foreground: oklch(0.19 0.01 260);
+    --popover: oklch(0.975 0.002 280);
+    --popover-foreground: oklch(0.19 0.01 260);
+    /* 品牌主色：Google Blue #4285f4 */
+    --primary: oklch(0.62 0.18 255);
+    --primary-foreground: oklch(1 0 0);
+    --secondary: oklch(0.91 0.05 250);
+    --secondary-foreground: oklch(0.32 0.01 260);
+    --muted: oklch(0.95 0.005 250);
+    --muted-foreground: oklch(0.62 0.02 250);
+    --accent: oklch(0.91 0.05 250);
+    --accent-foreground: oklch(0.40 0.14 250);
+    --destructive: oklch(0.63 0.24 28);
+    --border: oklch(0.93 0 0);
+    --input: oklch(0.91 0.003 260);
+    --ring: oklch(0.62 0.18 255);
+    /* 语义色 — 与 Google chart 色对齐 */
+    --success: oklch(0.65 0.15 145);
+    --success-foreground: oklch(1 0 0);
+    --warning: oklch(0.82 0.16 88);
+    --warning-foreground: oklch(0.25 0.05 88);
+    --info: oklch(0.62 0.18 255);
+    --info-foreground: oklch(1 0 0);
+    /* Google chart 配色：blue / red / amber / dark-blue / green */
+    --chart-1: oklch(0.62 0.18 255);
+    --chart-2: oklch(0.61 0.22 25);
+    --chart-3: oklch(0.82 0.16 88);
+    --chart-4: oklch(0.40 0.17 260);
+    --chart-5: oklch(0.65 0.15 145);
+    --radius: 0.5rem;
+    --sidebar: oklch(0.95 0.015 250);
+    --sidebar-foreground: oklch(0.19 0.01 260);
+    --sidebar-primary: oklch(0.62 0.18 255);
+    --sidebar-primary-foreground: oklch(1 0 0);
+    --sidebar-accent: oklch(0.91 0.05 250);
+    --sidebar-accent-foreground: oklch(0.40 0.14 250);
+    --sidebar-border: oklch(0.93 0 0);
+    --sidebar-ring: oklch(0.62 0.18 255);
 }
 
 .dark {
-    --background: oklch(0.18 0.01 60);
-    --foreground: oklch(0.96 0.005 95);
-    --card: oklch(0.22 0.01 60);
-    --card-foreground: oklch(0.96 0.005 95);
-    --popover: oklch(0.22 0.01 60);
-    --popover-foreground: oklch(0.96 0.005 95);
-    --primary: oklch(0.7 0.13 180);
-    --primary-foreground: oklch(0.18 0.01 60);
-    --secondary: oklch(0.27 0.01 60);
-    --secondary-foreground: oklch(0.96 0.005 95);
-    --muted: oklch(0.27 0.01 60);
-    --muted-foreground: oklch(0.7 0.01 60);
-    --accent: oklch(0.3 0.03 180);
-    --accent-foreground: oklch(0.9 0.05 180);
-    --destructive: oklch(0.7 0.19 22);
-    --border: oklch(1 0 0 / 10%);
-    --input: oklch(1 0 0 / 15%);
-    --ring: oklch(0.7 0.13 180);
-    --success: oklch(0.7 0.14 155);
-    --success-foreground: oklch(0.18 0.01 60);
-    --warning: oklch(0.8 0.15 75);
-    --warning-foreground: oklch(0.18 0.01 60);
-    --info: oklch(0.7 0.13 240);
-    --info-foreground: oklch(0.18 0.01 60);
-    --chart-1: oklch(0.7 0.13 180);
-    --chart-2: oklch(0.7 0.14 155);
-    --chart-3: oklch(0.8 0.15 75);
-    --chart-4: oklch(0.7 0.13 240);
-    --chart-5: oklch(0.7 0.19 22);
-    --sidebar: oklch(0.22 0.01 60);
-    --sidebar-foreground: oklch(0.96 0.005 95);
-    --sidebar-primary: oklch(0.7 0.13 180);
-    --sidebar-primary-foreground: oklch(0.18 0.01 60);
-    --sidebar-accent: oklch(0.3 0.03 180);
-    --sidebar-accent-foreground: oklch(0.9 0.05 180);
-    --sidebar-border: oklch(1 0 0 / 10%);
-    --sidebar-ring: oklch(0.7 0.13 180);
+    /* Google-inspired dark palette — pink-red primary like the design spec */
+    --background: oklch(0.21 0.005 260);
+    --foreground: oklch(0.95 0.005 250);
+    --card: oklch(0.24 0.004 80);
+    --card-foreground: oklch(0.95 0.005 250);
+    --popover: oklch(0.34 0.004 80);
+    --popover-foreground: oklch(0.92 0.005 250);
+    --primary: oklch(0.62 0.24 15);
+    --primary-foreground: oklch(1 0 0);
+    --secondary: oklch(0.34 0.004 80);
+    --secondary-foreground: oklch(0.92 0.005 250);
+    --muted: oklch(0.34 0.004 80);
+    --muted-foreground: oklch(0.65 0.004 80);
+    --accent: oklch(0.32 0.06 15);
+    --accent-foreground: oklch(0.62 0.24 15);
+    --destructive: oklch(0.63 0.24 28);
+    --border: oklch(0.24 0.004 80);
+    --input: oklch(0 0 0);
+    --ring: oklch(1 0 0);
+    --success: oklch(0.70 0.14 145);
+    --success-foreground: oklch(0.21 0.005 260);
+    --warning: oklch(0.82 0.16 88);
+    --warning-foreground: oklch(0.21 0.005 260);
+    --info: oklch(0.70 0.13 255);
+    --info-foreground: oklch(0.21 0.005 260);
+    --chart-1: oklch(0.70 0.13 200);
+    --chart-2: oklch(0.62 0.24 15);
+    --chart-3: oklch(0.80 0.10 350);
+    --chart-4: oklch(0.88 0.15 95);
+    --chart-5: oklch(0.85 0.12 180);
+    --sidebar: oklch(0.21 0.005 260);
+    --sidebar-foreground: oklch(0.92 0.005 250);
+    --sidebar-primary: oklch(0.62 0.18 255);
+    --sidebar-primary-foreground: oklch(1 0 0);
+    --sidebar-accent: oklch(0.32 0.06 15);
+    --sidebar-accent-foreground: oklch(0.62 0.24 15);
+    --sidebar-border: oklch(0.34 0.004 80);
+    --sidebar-ring: oklch(0.62 0.18 255);
 }
 
 @layer base {

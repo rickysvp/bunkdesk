@@ -192,7 +192,7 @@ export function ShiftLog({ onNavigate }: ShiftLogProps) {
     <div className="max-w-3xl mx-auto space-y-6 pb-20 md:pb-0">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight text-zinc-900">
+        <h1 className="text-2xl font-semibold tracking-tight text-foreground">
           {t("shiftlog.title") || "Shift Log"}
         </h1>
         <p className="text-sm text-muted-foreground mt-1">
@@ -272,10 +272,10 @@ export function ShiftLog({ onNavigate }: ShiftLogProps) {
             <button
               key={tab.key}
               onClick={() => setFilter(tab.key)}
-              className={`shrink-0 text-xs font-medium px-3 py-1.5 rounded-lg transition-colors ${
+              className={`shrink-0 text-xs font-medium px-3 py-1.5 rounded-full transition-colors ${
                 isActive
-                  ? "bg-zinc-900 text-white"
-                  : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200"
+                  ? "bg-primary text-primary-foreground"
+                  : "border border-border text-foreground hover:bg-muted"
               }`}
             >
               {tab.label}
@@ -321,7 +321,7 @@ export function ShiftLog({ onNavigate }: ShiftLogProps) {
                   {/* Content */}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1 flex-wrap">
-                      <span className="text-xs font-medium text-zinc-900">
+                      <span className="text-xs font-medium text-foreground">
                         {note.author}
                       </span>
                       <span className="text-xs text-muted-foreground">

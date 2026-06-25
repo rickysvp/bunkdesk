@@ -1,0 +1,263 @@
+{
+  "data": [
+    {
+      "id": "page-landing",
+      "title": "落地页",
+      "type": "page",
+      "version": 1,
+      "createdAt": 1750896000000,
+      "canvasData": {
+        "x": 0,
+        "y": 0,
+        "group": 0
+      },
+      "devMetadata": {
+        "htmlSrc": "pages/landing.html",
+        "interactions": [
+          {
+            "domId": "cta-enter-app",
+            "targetPageId": "page-login"
+          }
+        ]
+      }
+    },
+    {
+      "id": "page-login",
+      "title": "登录",
+      "type": "page",
+      "version": 1,
+      "createdAt": 1750896000000,
+      "canvasData": {
+        "x": 620,
+        "y": 0,
+        "group": 0
+      },
+      "devMetadata": {
+        "htmlSrc": "pages/login.html",
+        "interactions": [
+          {
+            "domId": "login-submit",
+            "targetPageId": "page-assistant"
+          },
+          {
+            "domId": "back-to-landing",
+            "targetPageId": "page-landing",
+            "hideEdge": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "page-assistant",
+      "title": "经营助手",
+      "type": "page",
+      "version": 1,
+      "createdAt": 1750896000000,
+      "canvasData": {
+        "x": 0,
+        "y": 1432,
+        "group": 0
+      },
+      "devMetadata": {
+        "htmlSrc": "pages/assistant.html",
+        "interactions": [
+          {
+            "domId": "nav-bedboard",
+            "targetPageId": "page-bedboard"
+          },
+          {
+            "domId": "nav-checkin",
+            "targetPageId": "page-checkin"
+          },
+          {
+            "domId": "nav-shiftlog",
+            "targetPageId": "page-shiftlog"
+          },
+          {
+            "domId": "nav-settings",
+            "targetPageId": "page-settings"
+          },
+          {
+            "domId": "signout-btn",
+            "targetPageId": "page-login"
+          }
+        ]
+      }
+    },
+    {
+      "id": "page-bedboard",
+      "title": "床位看板",
+      "type": "page",
+      "version": 1,
+      "createdAt": 1750896000000,
+      "canvasData": {
+        "x": 0,
+        "y": 1865,
+        "group": 0
+      },
+      "devMetadata": {
+        "htmlSrc": "pages/bedboard.html",
+        "interactions": [
+          {
+            "domId": "nav-assistant",
+            "targetPageId": "page-assistant"
+          },
+          {
+            "domId": "nav-checkin",
+            "targetPageId": "page-checkin"
+          },
+          {
+            "domId": "nav-shiftlog",
+            "targetPageId": "page-shiftlog"
+          },
+          {
+            "domId": "nav-settings",
+            "targetPageId": "page-settings"
+          },
+          {
+            "domId": "signout-btn",
+            "targetPageId": "page-login"
+          }
+        ]
+      }
+    },
+    {
+      "id": "page-checkin",
+      "title": "入住面板",
+      "type": "page",
+      "version": 1,
+      "createdAt": 1750896000000,
+      "canvasData": {
+        "x": 0,
+        "y": 2345,
+        "group": 0
+      },
+      "devMetadata": {
+        "htmlSrc": "pages/checkin.html",
+        "interactions": [
+          {
+            "domId": "nav-assistant",
+            "targetPageId": "page-assistant"
+          },
+          {
+            "domId": "nav-bedboard",
+            "targetPageId": "page-bedboard"
+          },
+          {
+            "domId": "nav-shiftlog",
+            "targetPageId": "page-shiftlog"
+          },
+          {
+            "domId": "nav-settings",
+            "targetPageId": "page-settings"
+          },
+          {
+            "domId": "signout-btn",
+            "targetPageId": "page-login"
+          }
+        ]
+      }
+    },
+    {
+      "id": "page-shiftlog",
+      "title": "交接日志",
+      "type": "page",
+      "version": 1,
+      "createdAt": 1750896000000,
+      "canvasData": {
+        "x": 0,
+        "y": 2722,
+        "group": 0
+      },
+      "devMetadata": {
+        "htmlSrc": "pages/shiftlog.html",
+        "interactions": [
+          {
+            "domId": "nav-assistant",
+            "targetPageId": "page-assistant"
+          },
+          {
+            "domId": "nav-bedboard",
+            "targetPageId": "page-bedboard"
+          },
+          {
+            "domId": "nav-checkin",
+            "targetPageId": "page-checkin"
+          },
+          {
+            "domId": "nav-settings",
+            "targetPageId": "page-settings"
+          },
+          {
+            "domId": "signout-btn",
+            "targetPageId": "page-login"
+          }
+        ]
+      }
+    },
+    {
+      "id": "page-settings",
+      "title": "设置",
+      "type": "page",
+      "version": 1,
+      "createdAt": 1750896000000,
+      "canvasData": {
+        "x": 0,
+        "y": 3183,
+        "group": 0
+      },
+      "devMetadata": {
+        "htmlSrc": "pages/settings.html",
+        "interactions": [
+          {
+            "domId": "nav-assistant",
+            "targetPageId": "page-assistant"
+          },
+          {
+            "domId": "nav-bedboard",
+            "targetPageId": "page-bedboard"
+          },
+          {
+            "domId": "nav-checkin",
+            "targetPageId": "page-checkin"
+          },
+          {
+            "domId": "nav-shiftlog",
+            "targetPageId": "page-shiftlog"
+          },
+          {
+            "domId": "signout-btn",
+            "targetPageId": "page-login"
+          }
+        ]
+      }
+    },
+    {
+      "id": "image-001",
+      "title": "青旅主视觉",
+      "type": "image",
+      "version": 1,
+      "createdAt": 1750896000000,
+      "canvasData": {
+        "x": 0,
+        "y": 3560
+      },
+      "devMetadata": {
+        "imageSrc": "assets/hero-hostel.jpg"
+      }
+    }
+  ],
+  "config": {
+    "autoLayout": true,
+    "deviceType": "desktop",
+    "projectName": "BunkDesk 视觉重设计 v2",
+    "designLibrary": {
+      "name": "谷歌",
+      "id": "dl_builtin_google",
+      "version": null,
+      "scope": "built-in-global",
+      "path": "/Users/ricky/.trae-cn/design_libraries/dl_builtin_google",
+      "versionSource": "metadata.json"
+    }
+  }
+}

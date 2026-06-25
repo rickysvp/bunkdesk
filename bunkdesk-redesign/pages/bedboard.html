@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>床位看板 - BunkDesk</title>
+    <style id="theme-vars">
+:root {
+  --background: #ffffff; --foreground: #0e1115; --card: #ffffff; --card-foreground: #0e1115;
+  --popover: #f9f9fa; --popover-foreground: #0e1115; --primary: #4285f4; --primary-foreground: #ffffff;
+  --secondary: #dbeafe; --secondary-foreground: #333942; --muted: #eff1f4; --muted-foreground: #7f8d9f;
+  --accent: #dbeafe; --accent-foreground: #003e8f; --destructive: #ef4444; --destructive-foreground: #ffffff;
+  --border: #ebebeb; --input: #e2e3e4; --ring: #4285f4;
+  --chart-1: #4285f4; --chart-2: #ea4335; --chart-3: #fbbc05; --chart-4: #0043ad; --chart-5: #34a853;
+  --sidebar: #f0f6ff; --sidebar-foreground: #0e1115; --sidebar-primary: #4285f4; --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #dbeafe; --sidebar-accent-foreground: #003e8f; --sidebar-border: #e7eaef; --sidebar-ring: #4285f4;
+  --font-sans: DM Sans, ui-sans-serif, sans-serif, system-ui; --font-serif: DM Sans, ui-sans-serif, sans-serif, system-ui;
+  --font-mono: JetBrains Mono, monospace; --radius: 0.5rem;
+  --shadow-x: 0; --shadow-y: 3px; --shadow-blur: 0px; --shadow-spread: 0px; --shadow-opacity: 0; --shadow-color: #0e1115;
+  --shadow-2xs: 0 3px 0px 0px rgba(14,17,21,0); --shadow-xs: 0 3px 0px 0px rgba(14,17,21,0);
+  --shadow-sm: 0 3px 0px 0px rgba(14,17,21,0), 0 1px 2px -1px rgba(14,17,21,0);
+  --shadow: 0 3px 0px 0px rgba(14,17,21,0), 0 1px 2px -1px rgba(14,17,21,0);
+  --shadow-md: 0 3px 0px 0px rgba(14,17,21,0), 0 2px 4px -1px rgba(14,17,21,0);
+  --shadow-lg: 0 3px 0px 0px rgba(14,17,21,0), 0 4px 6px -1px rgba(14,17,21,0);
+  --shadow-xl: 0 3px 0px 0px rgba(14,17,21,0), 0 8px 10px -1px rgba(14,17,21,0);
+  --shadow-2xl: 0 3px 0px 0px rgba(14,17,21,0); --tracking-normal: 0em; --spacing: 0.24rem;
+  --google-color-background: var(--background); --google-color-foreground: var(--foreground);
+  --google-color-card: var(--card); --google-color-card-foreground: var(--card-foreground);
+  --google-color-popover: var(--popover); --google-color-popover-foreground: var(--popover-foreground);
+  --google-color-primary: var(--primary); --google-color-primary-foreground: var(--primary-foreground);
+  --google-color-secondary: var(--secondary); --google-color-secondary-foreground: var(--secondary-foreground);
+  --google-color-muted: var(--muted); --google-color-muted-foreground: var(--muted-foreground);
+  --google-color-accent: var(--accent); --google-color-accent-foreground: var(--accent-foreground);
+  --google-color-destructive: var(--destructive); --google-color-destructive-foreground: var(--destructive-foreground);
+  --google-color-border: var(--border); --google-color-input: var(--input); --google-color-ring: var(--ring);
+  --google-color-chart-1: var(--chart-1); --google-color-chart-2: var(--chart-2); --google-color-chart-3: var(--chart-3);
+  --google-color-chart-4: var(--chart-4); --google-color-chart-5: var(--chart-5);
+  --google-color-sidebar: var(--sidebar); --google-color-sidebar-foreground: var(--sidebar-foreground);
+  --google-color-sidebar-primary: var(--sidebar-primary); --google-color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --google-color-sidebar-accent: var(--sidebar-accent); --google-color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --google-color-sidebar-border: var(--sidebar-border); --google-color-sidebar-ring: var(--sidebar-ring);
+  --google-font-sans: var(--font-sans); --google-font-serif: var(--font-serif); --google-font-mono: var(--font-mono);
+  --google-radius: var(--radius); --google-radius-sm: calc(var(--radius) - 4px);
+  --google-radius-md: calc(var(--radius) - 2px); --google-radius-lg: var(--radius);
+  --google-radius-xl: calc(var(--radius) + 4px); --google-shadow-x: var(--shadow-x);
+  --google-shadow-y: var(--shadow-y); --google-shadow-blur: var(--shadow-blur);
+  --google-shadow-spread: var(--shadow-spread); --google-shadow-opacity: var(--shadow-opacity);
+  --google-shadow-color: var(--shadow-color); --google-shadow-2xs: var(--shadow-2xs);
+  --google-shadow-xs: var(--shadow-xs); --google-shadow-sm: var(--shadow-sm);
+  --google-shadow: var(--shadow); --google-shadow-md: var(--shadow-md);
+  --google-shadow-lg: var(--shadow-lg); --google-shadow-xl: var(--shadow-xl);
+  --google-shadow-2xl: var(--shadow-2xl); --google-tracking-normal: var(--tracking-normal);
+  --google-spacing: var(--spacing);
+}
+.dark {
+  --background: #161616; --foreground: #eff1f4; --card: #1d1d1c; --card-foreground: #eff1f4;
+  --popover: #2e2e2e; --popover-foreground: #e5e5e5; --primary: #fc2c50; --primary-foreground: #ffffff;
+  --secondary: #383838; --secondary-foreground: #e5e5e5; --muted: #383838; --muted-foreground: #949494;
+  --accent: #4a2026; --accent-foreground: #fc2c50; --destructive: #ef4444; --destructive-foreground: #ffffff;
+  --border: #1d1d1c; --input: #000000; --ring: #ffffff;
+  --chart-1: #2dccd3; --chart-2: #f1204a; --chart-3: #edbbe8; --chart-4: #fbeb35; --chart-5: #baf6f0;
+  --sidebar: #171717; --sidebar-foreground: #e5e5e5; --sidebar-primary: #0065fd; --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #00266b; --sidebar-accent-foreground: #bfdbfe; --sidebar-border: #404040; --sidebar-ring: #00266b;
+  --font-sans: DM Sans, ui-sans-serif, sans-serif, system-ui; --font-serif: DM Sans, ui-sans-serif, sans-serif, system-ui;
+  --font-mono: JetBrains Mono, monospace; --radius: 0.5rem;
+  --shadow-x: 0; --shadow-y: 3px; --shadow-blur: 0px; --shadow-spread: 0px; --shadow-opacity: 0; --shadow-color: #000000;
+  --shadow-2xs: 0 3px 0px 0px rgba(0,0,0,0); --shadow-xs: 0 3px 0px 0px rgba(0,0,0,0);
+  --shadow-sm: 0 3px 0px 0px rgba(0,0,0,0), 0 1px 2px -1px rgba(0,0,0,0);
+  --shadow: 0 3px 0px 0px rgba(0,0,0,0), 0 1px 2px -1px rgba(0,0,0,0);
+  --shadow-md: 0 3px 0px 0px rgba(0,0,0,0), 0 2px 4px -1px rgba(0,0,0,0);
+  --shadow-lg: 0 3px 0px 0px rgba(0,0,0,0), 0 4px 6px -1px rgba(0,0,0,0);
+  --shadow-xl: 0 3px 0px 0px rgba(0,0,0,0), 0 8px 10px -1px rgba(0,0,0,0);
+  --shadow-2xl: 0 3px 0px 0px rgba(0,0,0,0);
+}
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.3.1/dist/index.global.js"></script>
+    <script src="https://unpkg.com/lucide@1.8.0/dist/umd/lucide.min.js"></script>
+    <style type="text/tailwindcss">
+  @layer base {
+    body { background: var(--google-color-background); color: var(--google-color-foreground); }
+    td, th { @apply break-words; word-break: break-all; word-break: auto-phrase; }
+    th { @apply whitespace-nowrap; }
+  }
+    </style>
+    <style>
+      .no-scrollbar::-webkit-scrollbar { display: none; }
+      .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+      [data-icon] { display: inline-flex; align-items: center; justify-content: center;
+        -webkit-mask-size: contain; mask-size: contain; -webkit-mask-repeat: no-repeat;
+        mask-repeat: no-repeat; -webkit-mask-position: center; mask-position: center;
+        background-color: currentColor; }
+    </style>
+</head>
+<body class="min-h-screen font-sans antialiased">
+
+    <!-- TOPBAR (desktop) -->
+    <header class="hidden md:flex h-14 border-b border-[var(--google-color-border)] sticky top-0 z-50 items-center gap-3 px-6 bg-[var(--google-color-background)]">
+        <div class="flex items-center gap-2 mr-4">
+            <div class="w-8 h-8 rounded-lg bg-[var(--google-color-primary)] flex items-center justify-center text-white font-bold text-sm">B</div>
+            <span class="font-semibold text-sm tracking-tight">BunkDesk</span>
+            <span class="text-[10px] font-mono text-[var(--google-color-muted-foreground)] bg-[var(--google-color-muted)] px-1.5 py-0.5 rounded">v0.1</span>
+        </div>
+        <div class="flex items-center gap-1 overflow-x-auto">
+          <a href="#" data-dom-id="nav-assistant" class="text-[var(--google-color-muted-foreground)] hover:bg-[var(--google-color-muted)] px-3.5 py-1.5 rounded-full text-sm font-medium transition-colors">经营助手</a>
+          <a href="#" data-dom-id="nav-bedboard" class="bg-[var(--google-color-primary)] text-[var(--google-color-primary-foreground)] px-3.5 py-1.5 rounded-full text-sm font-medium transition-colors">床位看板</a>
+          <a href="#" data-dom-id="nav-checkin" class="text-[var(--google-color-muted-foreground)] hover:bg-[var(--google-color-muted)] px-3.5 py-1.5 rounded-full text-sm font-medium transition-colors">入住面板</a>
+          <a href="#" data-dom-id="nav-shiftlog" class="text-[var(--google-color-muted-foreground)] hover:bg-[var(--google-color-muted)] px-3.5 py-1.5 rounded-full text-sm font-medium transition-colors">交接日志</a>
+          <a href="#" data-dom-id="nav-settings" class="text-[var(--google-color-muted-foreground)] hover:bg-[var(--google-color-muted)] px-3.5 py-1.5 rounded-full text-sm font-medium transition-colors">设置</a>
+        </div>
+        <div class="flex-1"></div>
+        <div class="flex items-center gap-3">
+            <button class="flex items-center gap-1 text-xs text-[var(--google-color-muted-foreground)] hover:text-[var(--google-color-foreground)] transition-colors"><i data-lucide="globe" class="w-4 h-4"></i><span>EN</span></button>
+            <div class="flex items-center gap-2"><div class="w-7 h-7 rounded-full bg-[var(--google-color-secondary)] flex items-center justify-center text-xs font-semibold text-[var(--google-color-accent-foreground)]">A</div><span class="text-xs font-medium">Admin</span></div>
+            <button data-dom-id="signout-btn" class="flex items-center gap-1 text-xs text-[var(--google-color-muted-foreground)] hover:text-[var(--google-color-destructive)] transition-colors"><i data-lucide="log-out" class="w-4 h-4"></i></button>
+        </div>
+    </header>
+
+    <!-- TOPBAR (mobile) -->
+    <header class="md:hidden flex h-14 items-center gap-3 px-4 border-b border-[var(--google-color-border)] bg-[var(--google-color-card)]/95 backdrop-blur sticky top-0 z-30">
+        <div class="flex items-center gap-2">
+            <div class="h-8 w-8 bg-[var(--google-color-primary)] rounded-xl flex items-center justify-center text-white font-bold text-sm">B</div>
+            <span class="text-sm font-semibold text-[var(--google-color-foreground)]">BunkDesk</span>
+        </div>
+        <div class="flex-1 text-center text-sm font-medium text-[var(--google-color-foreground)]">床位看板</div>
+        <div class="w-7 h-7 rounded-full bg-[var(--google-color-secondary)] flex items-center justify-center text-xs font-semibold text-[var(--google-color-accent-foreground)]">A</div>
+    </header>
+
+    <!-- MAIN CONTENT -->
+    <main class="p-3 md:p-4 pb-20 md:pb-4 flex flex-col space-y-3">
+
+        <!-- Info Banner -->
+        <div class="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-[var(--google-color-secondary)] border border-[var(--google-color-border)]">
+            <i data-lucide="info" class="w-4 h-4 text-[var(--google-color-primary)] shrink-0"></i>
+            <span class="text-xs font-medium text-[var(--google-color-foreground)]">5 位客人待入住</span>
+            <a href="#" class="text-xs font-medium text-[var(--google-color-primary)] hover:underline ml-1">前往办理 &rarr;</a>
+        </div>
+
+        <!-- Filter Bar -->
+        <div class="flex items-center gap-2 md:gap-3 overflow-x-auto pb-2 md:pb-0 -mx-3 px-3 md:mx-0">
+            <div class="flex items-center bg-[var(--google-color-card)] border border-[var(--google-color-border)] rounded-lg p-0.5 shrink-0">
+                <button class="p-1.5 rounded-md hover:bg-[var(--google-color-muted)] transition-colors"><i data-lucide="chevron-left" class="w-4 h-4 text-[var(--google-color-muted-foreground)]"></i></button>
+                <span class="text-xs font-medium px-2 text-[var(--google-color-foreground)]">Jun 25 &ndash; Jul 8 (14d)</span>
+                <button class="p-1.5 rounded-md hover:bg-[var(--google-color-muted)] transition-colors"><i data-lucide="chevron-right" class="w-4 h-4 text-[var(--google-color-muted-foreground)]"></i></button>
+                <button class="ml-1 px-2 py-1 text-[11px] font-medium border border-[var(--google-color-border)] rounded-md hover:bg-[var(--google-color-muted)] transition-colors text-[var(--google-color-foreground)]">Today</button>
+            </div>
+            <div class="relative shrink-0"><button class="flex items-center justify-between w-[120px] h-9 px-3 text-xs border border-[var(--google-color-border)] rounded-lg bg-[var(--google-color-card)] text-[var(--google-color-foreground)] hover:bg-[var(--google-color-muted)] transition-colors"><span>All Statuses</span><i data-lucide="chevron-down" class="w-3.5 h-3.5 text-[var(--google-color-muted-foreground)]"></i></button></div>
+            <div class="relative shrink-0"><button class="flex items-center justify-between w-[130px] h-9 px-3 text-xs border border-[var(--google-color-border)] rounded-lg bg-[var(--google-color-card)] text-[var(--google-color-foreground)] hover:bg-[var(--google-color-muted)] transition-colors"><span>All Rooms</span><i data-lucide="chevron-down" class="w-3.5 h-3.5 text-[var(--google-color-muted-foreground)]"></i></button></div>
+            <button class="flex items-center gap-1.5 h-9 px-3 text-xs font-medium border border-[var(--google-color-border)] rounded-lg bg-[var(--google-color-card)] text-[var(--google-color-foreground)] hover:bg-[var(--google-color-muted)] transition-colors shrink-0"><i data-lucide="plus" class="w-3.5 h-3.5"></i><span>Add Room</span></button>
+        </div>
+
+        <!-- STATE 6: Date Overlap Warning Banner -->
+        <div class="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-red-50 border border-red-300">
+            <i data-lucide="alert-triangle" class="w-4 h-4 text-red-500 shrink-0"></i>
+            <span class="text-xs font-medium text-red-700">日期重叠 — 无法移动到此处</span>
+            <div class="flex-1"></div>
+            <button class="text-red-400 hover:text-red-600 transition-colors"><i data-lucide="x" class="w-4 h-4"></i></button>
+        </div>
+
+        <!-- TIMELINE GRID -->
+        <div class="flex-1 overflow-auto border border-[var(--google-color-border)] rounded-xl bg-[var(--google-color-card)] relative">
+
+            <!-- Annotation Layer -->
+            <div class="hidden md:block absolute inset-0 z-40 pointer-events-none" style="font-size:10px;">
+                <div class="absolute flex items-center gap-1" style="left:320px;top:108px;"><div class="w-px h-6 bg-black/30"></div><span class="bg-black/60 text-white rounded px-1.5 py-0.5 whitespace-nowrap" style="font-size:9px;">拖拽区域</span></div>
+                <div class="absolute flex items-center gap-1" style="left:200px;top:140px;"><span class="bg-black/60 text-white rounded px-1.5 py-0.5 whitespace-nowrap" style="font-size:9px;">← 调整入住</span><div class="w-4 h-px bg-black/30"></div></div>
+                <div class="absolute flex items-center gap-1" style="left:560px;top:140px;"><div class="w-4 h-px bg-black/30"></div><span class="bg-black/60 text-white rounded px-1.5 py-0.5 whitespace-nowrap" style="font-size:9px;">调整退房 →</span></div>
+                <div class="absolute flex items-center gap-1" style="left:320px;top:172px;"><div class="w-px h-4 bg-black/30"></div><span class="bg-black/60 text-white rounded px-1.5 py-0.5 whitespace-nowrap" style="font-size:9px;">点击空位快速预订</span></div>
+                <div class="absolute flex items-center gap-1" style="left:180px;top:78px;"><span class="bg-black/60 text-white rounded px-1.5 py-0.5 whitespace-nowrap" style="font-size:9px;">点击编辑房间设置</span><div class="w-3 h-px bg-black/30"></div></div>
+                <div class="absolute flex items-center gap-1" style="left:580px;top:460px;"><div class="w-px h-8 bg-black/30"></div><span class="bg-black/60 text-white rounded px-1.5 py-0.5 whitespace-nowrap" style="font-size:9px;">拖拽至目标床位</span></div>
+                <div class="absolute flex items-center gap-1" style="left:680px;top:200px;"><div class="w-3 h-px bg-black/30"></div><span class="bg-black/60 text-white rounded px-1.5 py-0.5 whitespace-nowrap" style="font-size:9px;">拖拽调整退房日期 →</span></div>
+            </div>
+
+            <div class="min-w-[1100px]">
+
+                <!-- DATE HEADER ROW -->
+                <div class="flex border-b border-[var(--google-color-border)] sticky top-0 z-30 bg-[var(--google-color-card)]">
+                    <div class="w-40 shrink-0 px-3 py-2 text-[11px] font-semibold text-[var(--google-color-muted-foreground)] uppercase tracking-wider border-r border-[var(--google-color-border)] bg-[var(--google-color-card)] sticky left-0 z-20">Beds</div>
+                    <div class="flex flex-1">
+                        <div class="w-[56px] shrink-0 text-center py-2 border-r border-[var(--google-color-border)] bg-blue-50/60 relative"><div class="text-[10px] text-[var(--google-color-muted-foreground)]">Thu</div><div class="text-[11px] font-semibold text-[var(--google-color-foreground)]">25</div><span class="absolute -top-0 left-1/2 -translate-x-1/2 text-[8px] font-bold text-blue-600 bg-blue-100 px-1 rounded-b">今天</span></div>
+                        <div class="w-[56px] shrink-0 text-center py-2 border-r border-[var(--google-color-border)]"><div class="text-[10px] text-[var(--google-color-muted-foreground)]">Fri</div><div class="text-[11px] font-medium text-[var(--google-color-foreground)]">26</div></div>
+                        <div class="w-[56px] shrink-0 text-center py-2 border-r border-[var(--google-color-border)] bg-gray-50/80"><div class="text-[10px] text-[var(--google-color-muted-foreground)]">Sat</div><div class="text-[11px] font-medium text-[var(--google-color-foreground)]">27</div></div>
+                        <div class="w-[56px] shrink-0 text-center py-2 border-r border-[var(--google-color-border)] bg-gray-50/80"><div class="text-[10px] text-[var(--google-color-muted-foreground)]">Sun</div><div class="text-[11px] font-medium text-[var(--google-color-foreground)]">28</div></div>
+                        <div class="w-[56px] shrink-0 text-center py-2 border-r border-[var(--google-color-border)]"><div class="text-[10px] text-[var(--google-color-muted-foreground)]">Mon</div><div class="text-[11px] font-medium text-[var(--google-color-foreground)]">29</div></div>
+                        <div class="w-[56px] shrink-0 text-center py-2 border-r border-[var(--google-color-border)]"><div class="text-[10px] text-[var(--google-color-muted-foreground)]">Tue</div><div class="text-[11px] font-medium text-[var(--google-color-foreground)]">30</div></div>
+                        <div class="w-[56px] shrink-0 text-center py-2 border-r border-[var(--google-color-border)]"><div class="text-[10px] text-[var(--google-color-muted-foreground)]">Wed</div><div class="text-[11px] font-medium text-[var(--google-color-foreground)]">1</div></div>
+                        <div class="w-[56px] shrink-0 text-center py-2 border-r border-[var(--google-color-border)]"><div class="text-[10px] text-[var(--google-color-muted-foreground)]">Thu</div><div class="text-[11px] font-medium text-[var(--google-color-foreground)]">2</div></div>
+                        <div class="w-[56px] shrink-0 text-center py-2 border-r border-[var(--google-color-border)]"><div class="text-[10px] text-[var(--google-color-muted-foreground)]">Fri</div><div class="text-[11px] font-medium text-[var(--google-color-foreground)]">3</div></div>
+                        <div class="w-[56px] shrink-0 text-center py-2 border-r border-[var(--google-color-border)] bg-gray-50/80"><div class="text-[10px] text-[var(--google-color-muted-foreground)]">Sat</div><div class="text-[11px] font-medium text-[var(--google-color-foreground)]">4</div></div>
+                        <div class="w-[56px] shrink-0 text-center py-2 border-r border-[var(--google-color-border)] bg-gray-50/80"><div class="text-[10px] text-[var(--google-color-muted-foreground)]">Sun</div><div class="text-[11px] font-medium text-[var(--google-color-foreground)]">5</div></div>
+                        <div class="w-[56px] shrink-0 text-center py-2 border-r border-[var(--google-color-border)]"><div class="text-[10px] text-[var(--google-color-muted-foreground)]">Mon</div><div class="text-[11px] font-medium text-[var(--google-color-foreground)]">6</div></div>
+                        <div class="w-[56px] shrink-0 text-center py-2 border-r border-[var(--google-color-border)]"><div class="text-[10px] text-[var(--google-color-muted-foreground)]">Tue</div><div class="text-[11px] font-medium text-[var(--google-color-foreground)]">7</div></div>
+                        <div class="w-[56px] shrink-0 text-center py-2"><div class="text-[10px] text-[var(--google-color-muted-foreground)]">Wed</div><div class="text-[11px] font-medium text-[var(--google-color-foreground)]">8</div></div>
+                    </div>
+                </div>
+
+                <!-- ROOM 101 HEADER -->
+                <div class="flex border-b border-[var(--google-color-border)] bg-[var(--google-color-muted)] hover:bg-[var(--google-color-border)] cursor-pointer transition-colors">
+                    <div class="w-40 shrink-0 px-3 py-2 border-r border-[var(--google-color-border)] sticky left-0 z-10 bg-[var(--google-color-muted)] hover:bg-[var(--google-color-border)] flex items-center gap-2">
+                        <span class="text-[11px] font-bold text-[var(--google-color-foreground)]">Room 101</span>
+                        <span class="text-[9px] font-medium bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded-full">Mixed Dorm</span>
+                        <span class="text-[10px] text-[var(--google-color-muted-foreground)]">¥60-80</span>
+                    </div>
+                    <div class="flex-1 flex">
+                        <div class="w-[56px] shrink-0 text-center py-2 text-[10px] font-semibold text-emerald-600 border-r border-[var(--google-color-border)]">1</div>
+                        <div class="w-[56px] shrink-0 text-center py-2 text-[10px] font-semibold text-emerald-600 border-r border-[var(--google-color-border)]">1</div>
+                        <div class="w-[56px] shrink-0 text-center py-2 text-[10px] font-semibold text-emerald-600 border-r border-[var(--google-color-border)]">1</div>
+                        <div class="w-[56px] shrink-0 text-center py-2 text-[10px] font-semibold text-emerald-600 border-r border-[var(--google-color-border)]">2</div>
+                        <div class="w-[56px] shrink-0 text-center py-2 text-[10px] font-semibold text-emerald-600 border-r border-[var(--google-color-border)]">2</div>
+                        <div class="w-[56px] shrink-0 text-center py-2 text-[10px] font-semibold text-emerald-600 border-r border-[var(--google-color-border)]">2</div>
+                        <div class="w-[56px] shrink-0 text-center py-2 text-[10px] font-semibold text-emerald-600 border-r border-[var(--google-color-border)]">2</div>
+                        <div class="w-[56px] shrink-0 text-center py-2 text-[10px] font-semibold text-emerald-600 border-r border-[var(--google-color-border)]">2</div>
+                        <div class="w-[56px] shrink-0 text-center py-2 text-[10px] font-semibold text-emerald-600 border-r border-[var(--google-color-border)]">2</div>
+                        <div class="w-[56px] shrink-0 text-center py-2 text-[10px] font-semibold text-emerald-600 border-r border-[var(--google-color-border)]">2</div>
+                        <div class="w-[56px] shrink-0 text-center py-2 text-[10px] font-semibold text-emerald-600 border-r border-[var(--google-color-border)]">2</div>
+                        <div class="w-[56px] shrink-0 text-center py-2 text-[10px] font-semibold text-emerald-600 border-r border-[var(--google-color-border)]">2</div>
+                        <div class="w-[56px] shrink-0 text-center py-2 text-[10px] font-semibold text-emerald-600 border-r border-[var(--google-color-border)]">2</div>
+                        <div class="w-[56px] shrink-0 text-center py-2 text-[10px] font-semibold text-emerald-600">2</div>
+                    </div>
+                </div>
+
+                <!-- 101-A: HOVER STATE -->
+                <div class="flex border-b border-[var(--google-color-border)] relative" style="height:52px;">
+                    <div class="w-40 shrink-0 px-3 flex items-center gap-2 border-r border-[var(--google-color-border)] sticky left-0 z-10 bg-[var(--google-color-card)]">
+                        <span class="text-[11px] font-medium text-[var(--google-color-muted-foreground)]">A</span><span class="text-[10px] text-[var(--google-color-muted-foreground)]">⬆</span><span class="flex-1 text-right text-[10px] text-[var(--google-color-muted-foreground)]">¥60</span>
+                    </div>
+                    <div class="flex-1 relative">
+                        <!-- Grid columns (behind booking blocks) -->
+                        <div class="absolute inset-0 flex z-0 pointer-events-none">
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40 bg-blue-50/30"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40 bg-gray-50/30"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40 bg-gray-50/30"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40 bg-gray-50/30"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40 bg-gray-50/30"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40"></div>
+                          <div class="w-[56px] shrink-0"></div>
+                        </div>
+                        <div class="absolute top-1.5 left-1 h-[calc(100%-12px)] rounded-lg bg-blue-100 text-blue-800 flex items-center px-2 overflow-hidden shadow-md ring-2 ring-blue-300" style="width:calc(3*56px - 4px);">
+                            <div class="absolute left-0 top-0 bottom-0 w-[20%] bg-blue-200/40 rounded-l-lg border-l-2 border-blue-300"></div>
+                            <div class="absolute right-0 top-0 bottom-0 w-[20%] bg-blue-200/40 rounded-r-lg border-r-2 border-blue-300"></div>
+                            <div class="truncate relative z-10"><div class="text-[10px] font-semibold leading-tight">张伟</div><div class="text-[9px] opacity-80 leading-tight">CN · 3n · 6/25 – 6/28</div></div>
+                            <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 bg-white/90 backdrop-blur-sm rounded-md shadow-lg flex items-center gap-1 px-1 py-0.5">
+                                <button class="p-1 rounded hover:bg-emerald-100 text-emerald-600 transition-colors"><i data-lucide="log-in" class="w-3 h-3"></i></button>
+                                <button class="p-1 rounded hover:bg-gray-100 text-gray-500 transition-colors"><i data-lucide="pencil" class="w-3 h-3"></i></button>
+                                <button class="p-1 rounded hover:bg-red-100 text-red-500 transition-colors"><i data-lucide="log-out" class="w-3 h-3"></i></button>
+                            </div>
+                            <div class="absolute -top-7 left-1/2 -translate-x-1/2 z-20 bg-gray-800 text-white text-[9px] px-2 py-0.5 rounded whitespace-nowrap">拖拽移动 · 边缘调整日期</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 101-B: DRAG SOURCE -->
+                <div class="flex border-b border-[var(--google-color-border)] relative" style="height:52px;">
+                    <div class="w-40 shrink-0 px-3 flex items-center gap-2 border-r border-[var(--google-color-border)] sticky left-0 z-10 bg-[var(--google-color-card)]">
+                        <span class="text-[11px] font-medium text-[var(--google-color-muted-foreground)]">B</span><span class="text-[10px] text-[var(--google-color-muted-foreground)]">⬇</span><span class="flex-1 text-right text-[10px] text-[var(--google-color-muted-foreground)]">¥60</span>
+                    </div>
+                    <div class="flex-1 relative">
+                        <!-- Grid columns (behind booking blocks) -->
+                        <div class="absolute inset-0 flex z-0 pointer-events-none">
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40 bg-blue-50/30"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40 bg-gray-50/30"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40 bg-gray-50/30"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40 bg-gray-50/30"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40 bg-gray-50/30"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40"></div>
+                          <div class="w-[56px] shrink-0"></div>
+                        </div>
+                        <div class="absolute top-1.5 left-1 h-[calc(100%-12px)] rounded-lg bg-blue-100 text-blue-800 flex items-center px-2 overflow-hidden opacity-50 ring-2 ring-blue-400 ring-offset-1" style="width:calc(5*56px - 4px);">
+                            <div class="truncate"><div class="text-[10px] font-semibold leading-tight">李明</div><div class="text-[9px] opacity-80 leading-tight">CN · 5n · 6/25 – 6/30</div></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 101-C: EMPTY quick book -->
+                <div class="flex border-b border-[var(--google-color-border)] relative" style="height:52px;">
+                    <div class="w-40 shrink-0 px-3 flex items-center gap-2 border-r border-[var(--google-color-border)] sticky left-0 z-10 bg-[var(--google-color-card)]">
+                        <span class="text-[11px] font-medium text-[var(--google-color-muted-foreground)]">C</span><span class="text-[10px] text-[var(--google-color-muted-foreground)]">⬆</span><span class="flex-1 text-right text-[10px] text-[var(--google-color-muted-foreground)]">¥60</span>
+                    </div>
+                    <div class="flex-1 relative">
+                        <!-- Grid columns (behind booking blocks) -->
+                        <div class="absolute inset-0 flex z-0 pointer-events-none">
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40 bg-blue-50/30"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40 bg-gray-50/30"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40 bg-gray-50/30"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40 bg-gray-50/30"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40 bg-gray-50/30"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40"></div>
+                          <div class="w-[56px] shrink-0"></div>
+                        </div>
+                        <div class="absolute top-1.5 left-1 h-[calc(100%-12px)] rounded-lg border-2 border-dashed border-blue-300 bg-blue-50/40 flex items-center justify-center cursor-pointer hover:bg-blue-100/60 transition-colors" style="width:calc(3*56px - 4px);">
+                            <div class="flex items-center gap-1 text-blue-400"><i data-lucide="plus" class="w-3 h-3"></i><span class="text-[9px]">点击快速预订</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 101-D: RESIZE STATE -->
+                <div class="flex border-b border-[var(--google-color-border)] relative" style="height:52px;">
+                    <div class="w-40 shrink-0 px-3 flex items-center gap-2 border-r border-[var(--google-color-border)] sticky left-0 z-10 bg-[var(--google-color-card)]">
+                        <span class="text-[11px] font-medium text-[var(--google-color-muted-foreground)]">D</span><span class="text-[10px] text-[var(--google-color-muted-foreground)]">⬇</span><span class="flex-1 text-right text-[10px] text-[var(--google-color-muted-foreground)]">¥80</span>
+                    </div>
+                    <div class="flex-1 relative">
+                        <!-- Grid columns (behind booking blocks) -->
+                        <div class="absolute inset-0 flex z-0 pointer-events-none">
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40 bg-blue-50/30"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40 bg-gray-50/30"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40 bg-gray-50/30"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40 bg-gray-50/30"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40 bg-gray-50/30"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40"></div>
+                          <div class="w-[56px] shrink-0"></div>
+                        </div>
+                        <div class="absolute top-1.5 left-1 h-[calc(100%-12px)] rounded-lg bg-blue-100 text-blue-800 flex items-center px-2 overflow-hidden" style="width:calc(7*56px - 4px);">
+                            <div class="truncate"><div class="text-[10px] font-semibold leading-tight">Sarah K.</div><div class="text-[9px] opacity-80 leading-tight">US · 7n · 6/25 – 7/2</div></div>
+                        </div>
+                        <div class="absolute top-1.5 h-[calc(100%-12px)] rounded-r-lg border-2 border-dashed border-blue-400 bg-blue-100/50 flex items-center px-2 overflow-hidden" style="left:calc(7*56px - 3px);width:54px;box-shadow:0 0 0 2px rgba(59,130,246,0.6);"><div class="truncate"><div class="text-[9px] font-medium leading-tight text-blue-600">+1</div></div></div>
+                        <div class="absolute top-1.5 h-[calc(100%-12px)] rounded-r-lg bg-blue-200/30" style="left:calc(6*56px);width:calc(2*56px);"></div>
+                        <div class="absolute top-1/2 -translate-y-1/2 z-10" style="left:calc(7*56px - 6px);"><div class="w-1 h-5 bg-blue-500 rounded-full"></div></div>
+                    </div>
+                </div>
+
+                <!-- ROOM 102 HEADER -->
+                <div class="flex border-b border-[var(--google-color-border)] bg-[var(--google-color-muted)] hover:bg-[var(--google-color-border)] cursor-pointer transition-colors">
+                    <div class="w-40 shrink-0 px-3 py-2 border-r border-[var(--google-color-border)] sticky left-0 z-10 bg-[var(--google-color-muted)] hover:bg-[var(--google-color-border)] flex items-center gap-2">
+                        <span class="text-[11px] font-bold text-[var(--google-color-foreground)]">Room 102</span>
+                        <span class="text-[9px] font-medium bg-pink-100 text-pink-700 px-1.5 py-0.5 rounded-full">Female Dorm</span>
+                        <span class="text-[10px] text-[var(--google-color-muted-foreground)]">¥70-90</span>
+                    </div>
+                    <div class="flex-1 flex">
+                        <div class="w-[56px] shrink-0 text-center py-2 text-[10px] font-semibold text-red-500 border-r border-[var(--google-color-border)]">0</div>
+                        <div class="w-[56px] shrink-0 text-center py-2 text-[10px] font-semibold text-amber-500 border-r border-[var(--google-color-border)]">1</div>
+                        <div class="w-[56px] shrink-0 text-center py-2 text-[10px] font-semibold text-amber-500 border-r border-[var(--google-color-border)]">2</div>
+                        <div class="w-[56px] shrink-0 text-center py-2 text-[10px] font-semibold text-red-500 border-r border-[var(--google-color-border)]">0</div>
+                        <div class="w-[56px] shrink-0 text-center py-2 text-[10px] font-semibold text-amber-500 border-r border-[var(--google-color-border)]">1</div>
+                        <div class="w-[56px] shrink-0 text-center py-2 text-[10px] font-semibold text-emerald-600 border-r border-[var(--google-color-border)]">3</div>
+                        <div class="w-[56px] shrink-0 text-center py-2 text-[10px] font-semibold text-emerald-600 border-r border-[var(--google-color-border)]">2</div>
+                        <div class="w-[56px] shrink-0 text-center py-2 text-[10px] font-semibold text-emerald-600 border-r border-[var(--google-color-border)]">2</div>
+                        <div class="w-[56px] shrink-0 text-center py-2 text-[10px] font-semibold text-emerald-600 border-r border-[var(--google-color-border)]">2</div>
+                        <div class="w-[56px] shrink-0 text-center py-2 text-[10px] font-semibold text-emerald-600 border-r border-[var(--google-color-border)]">2</div>
+                        <div class="w-[56px] shrink-0 text-center py-2 text-[10px] font-semibold text-emerald-600 border-r border-[var(--google-color-border)]">2</div>
+                        <div class="w-[56px] shrink-0 text-center py-2 text-[10px] font-semibold text-emerald-600 border-r border-[var(--google-color-border)]">2</div>
+                        <div class="w-[56px] shrink-0 text-center py-2 text-[10px] font-semibold text-emerald-600 border-r border-[var(--google-color-border)]">2</div>
+                        <div class="w-[56px] shrink-0 text-center py-2 text-[10px] font-semibold text-emerald-600">2</div>
+                    </div>
+                </div>
+
+                <!-- 102-A -->
+                <div class="flex border-b border-[var(--google-color-border)] relative" style="height:52px;">
+                    <div class="w-40 shrink-0 px-3 flex items-center gap-2 border-r border-[var(--google-color-border)] sticky left-0 z-10 bg-[var(--google-color-card)]"><span class="text-[11px] font-medium text-[var(--google-color-muted-foreground)]">A</span><span class="text-[10px] text-[var(--google-color-muted-foreground)]">⬆</span><span class="flex-1 text-right text-[10px] text-[var(--google-color-muted-foreground)]">¥70</span></div>
+                    <div class="flex-1 relative">
+                        <!-- Grid columns (behind booking blocks) -->
+                        <div class="absolute inset-0 flex z-0 pointer-events-none">
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40 bg-blue-50/30"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40 bg-gray-50/30"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40 bg-gray-50/30"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40 bg-gray-50/30"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40 bg-gray-50/30"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40"></div>
+                          <div class="w-[56px] shrink-0"></div>
+                        </div>
+                        <div class="absolute top-1.5 left-1 h-[calc(100%-12px)] rounded-lg bg-blue-100 text-blue-800 flex items-center px-2 overflow-hidden" style="width:calc(4*56px - 4px);"><div class="truncate"><div class="text-[10px] font-semibold leading-tight">Emma W.</div><div class="text-[9px] opacity-80 leading-tight">UK · 4n · 6/25 – 6/29</div></div></div></div>
+                </div>
+
+                <!-- 102-B -->
+                <div class="flex border-b border-[var(--google-color-border)] relative" style="height:52px;">
+                    <div class="w-40 shrink-0 px-3 flex items-center gap-2 border-r border-[var(--google-color-border)] sticky left-0 z-10 bg-[var(--google-color-card)]"><span class="text-[11px] font-medium text-[var(--google-color-muted-foreground)]">B</span><span class="text-[10px] text-[var(--google-color-muted-foreground)]">⬇</span><span class="flex-1 text-right text-[10px] text-[var(--google-color-muted-foreground)]">¥70</span></div>
+                    <div class="flex-1 relative">
+                        <!-- Grid columns (behind booking blocks) -->
+                        <div class="absolute inset-0 flex z-0 pointer-events-none">
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40 bg-blue-50/30"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40 bg-gray-50/30"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40 bg-gray-50/30"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40 bg-gray-50/30"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40 bg-gray-50/30"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40"></div>
+                          <div class="w-[56px] shrink-0"></div>
+                        </div>
+                        <div class="absolute top-1.5 left-1 h-[calc(100%-12px)] rounded-lg bg-blue-100 text-blue-800 flex items-center px-2 overflow-hidden" style="width:calc(6*56px - 4px);"><div class="truncate"><div class="text-[10px] font-semibold leading-tight">刘芳</div><div class="text-[9px] opacity-80 leading-tight">CN · 6n · 6/25 – 7/1</div></div></div></div>
+                </div>
+
+                <!-- 102-C: VALID DROP TARGET -->
+                <div class="flex border-b border-[var(--google-color-border)] relative ring-2 ring-emerald-400 bg-emerald-50/50" style="height:52px;">
+                    <div class="w-40 shrink-0 px-3 flex items-center gap-2 border-r border-[var(--google-color-border)] sticky left-0 z-10 bg-emerald-50/80"><span class="text-[11px] font-medium text-[var(--google-color-muted-foreground)]">C</span><span class="text-[10px] text-[var(--google-color-muted-foreground)]">⬆</span><span class="flex-1 text-right text-[10px] text-[var(--google-color-muted-foreground)]">¥70</span></div>
+                    <div class="flex-1 relative">
+                        <!-- Grid columns (behind booking blocks) -->
+                        <div class="absolute inset-0 flex z-0 pointer-events-none">
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40 bg-blue-50/30"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40 bg-gray-50/30"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40 bg-gray-50/30"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40 bg-gray-50/30"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40 bg-gray-50/30"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40"></div>
+                          <div class="w-[56px] shrink-0"></div>
+                        </div>
+                        <div class="absolute top-1.5 left-1 h-[calc(100%-12px)] rounded-lg border-2 border-dashed border-blue-400 bg-blue-100/40 flex items-center px-2 overflow-hidden" style="width:calc(5*56px - 4px);"><div class="truncate"><div class="text-[10px] font-semibold leading-tight text-blue-600">李明 · 5n</div></div></div>
+                        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 bg-emerald-500 text-white text-[10px] font-medium px-2.5 py-1 rounded-full shadow-lg">Release to swap beds</div>
+                    </div>
+                </div>
+
+                <!-- 102-D: INVALID DROP -->
+                <div class="flex border-b border-[var(--google-color-border)] relative ring-2 ring-red-400 bg-red-50/50" style="height:52px;">
+                    <div class="w-40 shrink-0 px-3 flex items-center gap-2 border-r border-[var(--google-color-border)] sticky left-0 z-10 bg-red-50/80"><span class="text-[11px] font-medium text-[var(--google-color-muted-foreground)]">D</span><span class="text-[10px] text-[var(--google-color-muted-foreground)]">⬇</span><span class="flex-1 text-right text-[10px] text-[var(--google-color-muted-foreground)]">¥90</span></div>
+                    <div class="flex-1 relative">
+                        <!-- Grid columns (behind booking blocks) -->
+                        <div class="absolute inset-0 flex z-0 pointer-events-none">
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40 bg-blue-50/30"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40 bg-gray-50/30"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40 bg-gray-50/30"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40 bg-gray-50/30"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40 bg-gray-50/30"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40"></div>
+                          <div class="w-[56px] shrink-0"></div>
+                        </div>
+                        <div class="absolute top-1.5 left-1 h-[calc(100%-12px)] rounded-lg border-2 border-dashed border-red-500 bg-red-100/60 flex items-center px-2 overflow-hidden" style="width:calc(5*56px - 4px);"><div class="truncate"><div class="text-[10px] font-semibold leading-tight text-red-600">Dates overlap</div></div></div>
+                        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 bg-red-500 text-white text-[10px] font-medium px-2.5 py-1 rounded-full shadow-lg">Dates overlap</div>
+                    </div>
+                </div>
+
+                <!-- ROOM 201 HEADER -->
+                <div class="flex border-b border-[var(--google-color-border)] bg-[var(--google-color-muted)] hover:bg-[var(--google-color-border)] cursor-pointer transition-colors">
+                    <div class="w-40 shrink-0 px-3 py-2 border-r border-[var(--google-color-border)] sticky left-0 z-10 bg-[var(--google-color-muted)] hover:bg-[var(--google-color-border)] flex items-center gap-2">
+                        <span class="text-[11px] font-bold text-[var(--google-color-foreground)]">Room 201</span>
+                        <span class="text-[9px] font-medium bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded-full">Mixed Dorm</span>
+                        <span class="text-[10px] text-[var(--google-color-muted-foreground)]">¥50-70</span>
+                    </div>
+                    <div class="flex-1 flex">
+                        <div class="w-[56px] shrink-0 text-center py-2 text-[10px] font-semibold text-amber-500 border-r border-[var(--google-color-border)]">2</div>
+                        <div class="w-[56px] shrink-0 text-center py-2 text-[10px] font-semibold text-amber-500 border-r border-[var(--google-color-border)]">3</div>
+                        <div class="w-[56px] shrink-0 text-center py-2 text-[10px] font-semibold text-emerald-600 border-r border-[var(--google-color-border)]">3</div>
+                        <div class="w-[56px] shrink-0 text-center py-2 text-[10px] font-semibold text-emerald-600 border-r border-[var(--google-color-border)]">3</div>
+                        <div class="w-[56px] shrink-0 text-center py-2 text-[10px] font-semibold text-emerald-600 border-r border-[var(--google-color-border)]">3</div>
+                        <div class="w-[56px] shrink-0 text-center py-2 text-[10px] font-semibold text-emerald-600 border-r border-[var(--google-color-border)]">3</div>
+                        <div class="w-[56px] shrink-0 text-center py-2 text-[10px] font-semibold text-amber-500 border-r border-[var(--google-color-border)]">1</div>
+                        <div class="w-[56px] shrink-0 text-center py-2 text-[10px] font-semibold text-amber-500 border-r border-[var(--google-color-border)]">1</div>
+                        <div class="w-[56px] shrink-0 text-center py-2 text-[10px] font-semibold text-amber-500 border-r border-[var(--google-color-border)]">1</div>
+                        <div class="w-[56px] shrink-0 text-center py-2 text-[10px] font-semibold text-amber-500 border-r border-[var(--google-color-border)]">1</div>
+                        <div class="w-[56px] shrink-0 text-center py-2 text-[10px] font-semibold text-amber-500 border-r border-[var(--google-color-border)]">1</div>
+                        <div class="w-[56px] shrink-0 text-center py-2 text-[10px] font-semibold text-amber-500 border-r border-[var(--google-color-border)]">1</div>
+                        <div class="w-[56px] shrink-0 text-center py-2 text-[10px] font-semibold text-amber-500 border-r border-[var(--google-color-border)]">1</div>
+                        <div class="w-[56px] shrink-0 text-center py-2 text-[10px] font-semibold text-amber-500">1</div>
+                    </div>
+                </div>
+
+                <!-- 201-A -->
+                <div class="flex border-b border-[var(--google-color-border)] relative" style="height:52px;">
+                    <div class="w-40 shrink-0 px-3 flex items-center gap-2 border-r border-[var(--google-color-border)] sticky left-0 z-10 bg-[var(--google-color-card)]"><span class="text-[11px] font-medium text-[var(--google-color-muted-foreground)]">A</span><span class="text-[10px] text-[var(--google-color-muted-foreground)]">⬆</span><span class="flex-1 text-right text-[10px] text-[var(--google-color-muted-foreground)]">¥50</span></div>
+                    <div class="flex-1 relative">
+                        <!-- Grid columns (behind booking blocks) -->
+                        <div class="absolute inset-0 flex z-0 pointer-events-none">
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40 bg-blue-50/30"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40 bg-gray-50/30"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40 bg-gray-50/30"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40 bg-gray-50/30"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40 bg-gray-50/30"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40"></div>
+                          <div class="w-[56px] shrink-0"></div>
+                        </div>
+                        <div class="absolute top-1.5 left-1 h-[calc(100%-12px)] rounded-lg bg-blue-100 text-blue-800 flex items-center px-2 overflow-hidden" style="width:calc(4*56px - 4px);"><div class="truncate"><div class="text-[10px] font-semibold leading-tight">田中</div><div class="text-[9px] opacity-80 leading-tight">JP · 4n · 6/25 – 6/29</div></div></div></div>
+                </div>
+
+                <!-- 201-B: CLEANING -->
+                <div class="flex border-b border-[var(--google-color-border)] relative" style="height:52px;">
+                    <div class="w-40 shrink-0 px-3 flex items-center gap-2 border-r border-[var(--google-color-border)] sticky left-0 z-10 bg-[var(--google-color-card)]">
+                        <span class="text-[11px] font-medium text-[var(--google-color-muted-foreground)]">B</span><span class="text-[10px] text-[var(--google-color-muted-foreground)]">⬇</span><span class="flex-1 text-right text-[10px] text-[var(--google-color-muted-foreground)]">¥50</span>
+                        <button class="p-0.5 rounded text-purple-500 hover:bg-purple-50 transition-colors"><i data-lucide="sparkles" class="w-3 h-3"></i></button>
+                    </div>
+                    <div class="flex-1 relative">
+                        <!-- Grid columns (behind booking blocks) -->
+                        <div class="absolute inset-0 flex z-0 pointer-events-none">
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40 bg-blue-50/30"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40 bg-gray-50/30"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40 bg-gray-50/30"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40 bg-gray-50/30"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40 bg-gray-50/30"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40"></div>
+                          <div class="w-[56px] shrink-0"></div>
+                        </div>
+                        <div class="absolute top-1.5 left-1 h-[calc(100%-12px)] rounded-lg border-2 border-dashed border-purple-300 bg-purple-50/30 flex items-center justify-center" style="width:calc(3*56px - 4px);">
+                            <div class="flex items-center gap-1 text-purple-400"><i data-lucide="sparkles" class="w-3 h-3"></i><span class="text-[9px]">Cleaning...</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 201-C: Marco full width -->
+                <div class="flex border-b border-[var(--google-color-border)] relative" style="height:52px;">
+                    <div class="w-40 shrink-0 px-3 flex items-center gap-2 border-r border-[var(--google-color-border)] sticky left-0 z-10 bg-[var(--google-color-card)]"><span class="text-[11px] font-medium text-[var(--google-color-muted-foreground)]">C</span><span class="text-[10px] text-[var(--google-color-muted-foreground)]">⬆</span><span class="flex-1 text-right text-[10px] text-[var(--google-color-muted-foreground)]">¥60</span></div>
+                    <div class="flex-1 relative">
+                        <!-- Grid columns (behind booking blocks) -->
+                        <div class="absolute inset-0 flex z-0 pointer-events-none">
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40 bg-blue-50/30"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40 bg-gray-50/30"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40 bg-gray-50/30"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40 bg-gray-50/30"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40 bg-gray-50/30"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40"></div>
+                          <div class="w-[56px] shrink-0"></div>
+                        </div>
+                        <div class="absolute top-1.5 left-1 h-[calc(100%-12px)] rounded-lg bg-blue-100 text-blue-800 flex items-center px-2 overflow-hidden" style="width:calc(8*56px - 4px);"><div class="truncate"><div class="text-[10px] font-semibold leading-tight">Marco R.</div><div class="text-[9px] opacity-80 leading-tight">IT · 8n · 6/25 – 7/2</div></div></div></div>
+                </div>
+
+                <!-- 201-D: Anna RESERVED -->
+                <div class="flex border-b border-[var(--google-color-border)] relative" style="height:52px;">
+                    <div class="w-40 shrink-0 px-3 flex items-center gap-2 border-r border-[var(--google-color-border)] sticky left-0 z-10 bg-[var(--google-color-card)]"><span class="text-[11px] font-medium text-[var(--google-color-muted-foreground)]">D</span><span class="text-[10px] text-[var(--google-color-muted-foreground)]">⬇</span><span class="flex-1 text-right text-[10px] text-[var(--google-color-muted-foreground)]">¥60</span></div>
+                    <div class="flex-1 relative">
+                        <!-- Grid columns (behind booking blocks) -->
+                        <div class="absolute inset-0 flex z-0 pointer-events-none">
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40 bg-blue-50/30"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40 bg-gray-50/30"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40 bg-gray-50/30"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40 bg-gray-50/30"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40 bg-gray-50/30"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40"></div>
+                          <div class="w-[56px] shrink-0"></div>
+                        </div>
+                        <div class="absolute top-1.5 h-[calc(100%-12px)] rounded-lg border-2 border-dashed border-emerald-500 bg-emerald-100 text-emerald-800 flex items-center px-2 overflow-hidden" style="left:calc(6*56px + 1px);width:calc(3*56px - 4px);"><div class="truncate"><div class="text-[10px] font-semibold leading-tight">Anna S.</div><div class="text-[9px] opacity-80 leading-tight">DE · 3n · 7/1 – 7/4</div></div></div>
+                    </div>
+                </div>
+
+                <!-- 201-E: CONTINUATION BLOCK -->
+                <div class="flex border-b border-[var(--google-color-border)] relative" style="height:52px;">
+                    <div class="w-40 shrink-0 px-3 flex items-center gap-2 border-r border-[var(--google-color-border)] sticky left-0 z-10 bg-[var(--google-color-card)]"><span class="text-[11px] font-medium text-[var(--google-color-muted-foreground)]">E</span><span class="text-[10px] text-[var(--google-color-muted-foreground)]">⬆</span><span class="flex-1 text-right text-[10px] text-[var(--google-color-muted-foreground)]">¥50</span></div>
+                    <div class="flex-1 relative">
+                        <!-- Grid columns (behind booking blocks) -->
+                        <div class="absolute inset-0 flex z-0 pointer-events-none">
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40 bg-blue-50/30"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40 bg-gray-50/30"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40 bg-gray-50/30"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40 bg-gray-50/30"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40 bg-gray-50/30"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40"></div>
+                          <div class="w-[56px] shrink-0"></div>
+                        </div>
+                        <div class="absolute top-1.5 left-0 h-[calc(100%-12px)] rounded-r-lg bg-blue-100 text-blue-800 flex items-center px-2 overflow-hidden" style="width:calc(4*56px);">
+                            <div class="absolute left-0 top-0 bottom-0 w-3 bg-gradient-to-r from-[var(--google-color-card)] to-transparent z-10"></div>
+                            <div class="truncate pl-2"><div class="text-[10px] font-semibold leading-tight">← 王磊</div><div class="text-[9px] opacity-80 leading-tight">CN · 6n · 6/22 – 6/28</div></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ROOM 301 HEADER -->
+                <div class="flex border-b border-[var(--google-color-border)] bg-[var(--google-color-muted)] hover:bg-[var(--google-color-border)] cursor-pointer transition-colors">
+                    <div class="w-40 shrink-0 px-3 py-2 border-r border-[var(--google-color-border)] sticky left-0 z-10 bg-[var(--google-color-muted)] hover:bg-[var(--google-color-border)] flex items-center gap-2">
+                        <span class="text-[11px] font-bold text-[var(--google-color-foreground)]">Room 301</span>
+                        <span class="text-[9px] font-medium bg-violet-100 text-violet-700 px-1.5 py-0.5 rounded-full">Private</span>
+                        <span class="text-[10px] text-[var(--google-color-muted-foreground)]">¥120-150</span>
+                    </div>
+                    <div class="flex-1 flex">
+                        <div class="w-[56px] shrink-0 text-center py-2 text-[10px] font-semibold text-amber-500 border-r border-[var(--google-color-border)]">1</div>
+                        <div class="w-[56px] shrink-0 text-center py-2 text-[10px] font-semibold text-amber-500 border-r border-[var(--google-color-border)]">1</div>
+                        <div class="w-[56px] shrink-0 text-center py-2 text-[10px] font-semibold text-emerald-600 border-r border-[var(--google-color-border)]">2</div>
+                        <div class="w-[56px] shrink-0 text-center py-2 text-[10px] font-semibold text-emerald-600 border-r border-[var(--google-color-border)]">2</div>
+                        <div class="w-[56px] shrink-0 text-center py-2 text-[10px] font-semibold text-emerald-600 border-r border-[var(--google-color-border)]">2</div>
+                        <div class="w-[56px] shrink-0 text-center py-2 text-[10px] font-semibold text-emerald-600 border-r border-[var(--google-color-border)]">2</div>
+                        <div class="w-[56px] shrink-0 text-center py-2 text-[10px] font-semibold text-emerald-600 border-r border-[var(--google-color-border)]">2</div>
+                        <div class="w-[56px] shrink-0 text-center py-2 text-[10px] font-semibold text-emerald-600 border-r border-[var(--google-color-border)]">2</div>
+                        <div class="w-[56px] shrink-0 text-center py-2 text-[10px] font-semibold text-emerald-600 border-r border-[var(--google-color-border)]">2</div>
+                        <div class="w-[56px] shrink-0 text-center py-2 text-[10px] font-semibold text-emerald-600 border-r border-[var(--google-color-border)]">2</div>
+                        <div class="w-[56px] shrink-0 text-center py-2 text-[10px] font-semibold text-emerald-600 border-r border-[var(--google-color-border)]">2</div>
+                        <div class="w-[56px] shrink-0 text-center py-2 text-[10px] font-semibold text-emerald-600 border-r border-[var(--google-color-border)]">2</div>
+                        <div class="w-[56px] shrink-0 text-center py-2 text-[10px] font-semibold text-emerald-600 border-r border-[var(--google-color-border)]">2</div>
+                        <div class="w-[56px] shrink-0 text-center py-2 text-[10px] font-semibold text-emerald-600">2</div>
+                    </div>
+                </div>
+
+                <!-- 301-A: PARTIAL PAYMENT -->
+                <div class="flex border-b border-[var(--google-color-border)] relative" style="height:52px;">
+                    <div class="w-40 shrink-0 px-3 flex items-center gap-2 border-r border-[var(--google-color-border)] sticky left-0 z-10 bg-[var(--google-color-card)]"><span class="text-[11px] font-medium text-[var(--google-color-muted-foreground)]">A</span><span class="text-[10px] text-[var(--google-color-muted-foreground)]">▥</span><span class="flex-1 text-right text-[10px] text-[var(--google-color-muted-foreground)]">¥120</span></div>
+                    <div class="flex-1 relative">
+                        <!-- Grid columns (behind booking blocks) -->
+                        <div class="absolute inset-0 flex z-0 pointer-events-none">
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40 bg-blue-50/30"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40 bg-gray-50/30"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40 bg-gray-50/30"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40 bg-gray-50/30"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40 bg-gray-50/30"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40"></div>
+                          <div class="w-[56px] shrink-0"></div>
+                        </div>
+                        <div class="absolute top-1.5 left-1 h-[calc(100%-12px)] rounded-lg bg-amber-100 text-amber-800 flex items-center px-2 overflow-hidden" style="width:calc(2*56px - 4px);"><div class="truncate"><div class="text-[10px] font-semibold leading-tight">陈先生</div><div class="text-[9px] opacity-80 leading-tight">CN · 2n · 6/25 – 6/27</div></div></div></div>
+                </div>
+
+                <!-- 301-B: EMPTY -->
+                <div class="flex relative" style="height:52px;">
+                    <div class="w-40 shrink-0 px-3 flex items-center gap-2 border-r border-[var(--google-color-border)] sticky left-0 z-10 bg-[var(--google-color-card)]"><span class="text-[11px] font-medium text-[var(--google-color-muted-foreground)]">B</span><span class="text-[10px] text-[var(--google-color-muted-foreground)]">▥</span><span class="flex-1 text-right text-[10px] text-[var(--google-color-muted-foreground)]">¥120</span></div>
+                    <div class="flex-1 relative">
+                        <!-- Grid columns (behind booking blocks) -->
+                        <div class="absolute inset-0 flex z-0 pointer-events-none">
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40 bg-blue-50/30"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40 bg-gray-50/30"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40 bg-gray-50/30"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40 bg-gray-50/30"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40 bg-gray-50/30"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40"></div>
+                          <div class="w-[56px] shrink-0 border-r border-[var(--google-color-border)]/40"></div>
+                          <div class="w-[56px] shrink-0"></div>
+                        </div>
+                        <div class="absolute top-1.5 left-1 h-[calc(100%-12px)] rounded-lg border-2 border-dashed border-blue-300 bg-blue-50/40 flex items-center justify-center cursor-pointer hover:bg-blue-100/60 transition-colors" style="width:calc(3*56px - 4px);">
+                            <div class="flex items-center gap-1 text-blue-400"><i data-lucide="plus" class="w-3 h-3"></i><span class="text-[9px]">点击快速预订</span></div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- DRAG OVERLAY -->
+            <div class="absolute z-50 pointer-events-none" style="left:580px;top:380px;">
+                <div class="bg-blue-100 text-blue-800 rounded-lg px-3 py-2 shadow-2xl ring-2 ring-white/40 transform -rotate-1.5" style="min-width:140px;">
+                    <div class="text-[10px] font-semibold leading-tight">李明</div>
+                    <div class="text-[9px] opacity-80 leading-tight">CN · 5n · 6/25 – 6/30</div>
+                    <div class="mt-1 text-[8px] text-blue-500 font-medium">拖拽中...</div>
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <script>lucide.createIcons();</script>
+    <nav class="md:hidden fixed bottom-0 inset-x-0 z-40 bg-[var(--google-color-card)]/95 backdrop-blur-xl border-t border-[var(--google-color-border)]" style="padding-bottom:env(safe-area-inset-bottom,0px)">
+        <div class="grid grid-cols-5 max-w-md mx-auto">
+            <button class="flex flex-col items-center justify-center gap-1 min-h-[56px] py-2 text-[var(--google-color-muted-foreground)]"><span class="text-lg">🏠</span><span class="text-[10px] font-semibold">助手</span></button>
+            <button class="flex flex-col items-center justify-center gap-1 min-h-[56px] py-2 text-[var(--google-color-primary)]"><span class="text-lg">🛏️</span><span class="text-[10px] font-semibold">床位</span></button>
+            <button class="flex flex-col items-center justify-center gap-1 min-h-[56px] py-2 text-[var(--google-color-muted-foreground)]"><span class="text-lg">🔑</span><span class="text-[10px] font-semibold">入住</span></button>
+            <button class="flex flex-col items-center justify-center gap-1 min-h-[56px] py-2 text-[var(--google-color-muted-foreground)]"><span class="text-lg">📋</span><span class="text-[10px] font-semibold">日志</span></button>
+            <button class="flex flex-col items-center justify-center gap-1 min-h-[56px] py-2 text-[var(--google-color-muted-foreground)]"><span class="text-lg">⚙️</span><span class="text-[10px] font-semibold">设置</span></button>
+        </div>
+    </nav>
+</body>
+</html>
