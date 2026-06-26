@@ -23,6 +23,7 @@ import {
   Globe, Link as LinkIcon, CalendarCheck, CreditCard,
   Users, FileText, Shield, MessageCircle,
   BarChart3, TrendingUp, Clock, SprayCan, Move, Check, Headphones, Languages,
+  Sparkles,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -52,8 +53,8 @@ export function LandingPage({ onEnterApp }: LandingPageProps) {
             <span className="text-base font-bold text-foreground">BunkDesk</span>
           </div>
           <div className="flex items-center gap-3">
-            <a href="#features" className="hidden md:inline text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">功能</a>
-            <a href="#pricing" className="hidden md:inline text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">定价</a>
+            <a href="#features" className="hidden md:inline text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">{t('landing.navFeatures')}</a>
+            <a href="#pricing" className="hidden md:inline text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">{t('landing.navPricing')}</a>
             <button
               onClick={() => setLanguage(language === 'zh' ? 'en' : 'zh')}
               className="hidden md:inline-flex items-center gap-1 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
@@ -66,7 +67,7 @@ export function LandingPage({ onEnterApp }: LandingPageProps) {
               onClick={onEnterApp}
               className="h-9 px-4 text-sm shadow-sm"
             >
-              免费试用
+              {t('landing.navCta')}
             </Button>
           </div>
         </div>
@@ -75,15 +76,19 @@ export function LandingPage({ onEnterApp }: LandingPageProps) {
       {/* ================== HERO (photo-first, text overlay) ================== */}
       <section className="relative min-h-[85vh] flex items-end">
         <img src="/assets/hero-hostel.jpg" className="absolute inset-0 w-full h-full object-cover" alt="" />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-black/10" />
+        {/* 三层遮罩：整体压暗 + 底部渐变 + 顶部轻暗，确保白字在任何区域都可读 */}
+        <div className="absolute inset-0 bg-black/50" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/60 to-black/30" />
         <div className="relative max-w-6xl mx-auto px-6 pb-16 md:pb-24 pt-32">
-          <p className="text-chart-4 text-sm font-medium tracking-wide">专为青旅打造的管理工具</p>
-          <h1 className="mt-4 text-4xl md:text-5xl lg:text-6xl font-extrabold text-white leading-[1.1] max-w-3xl">
-            告别表格<br />
-            <span className="text-chart-4">看清每一张床位</span>
+          <p className="inline-flex items-center gap-1.5 text-white/90 text-sm font-medium tracking-wide bg-white/10 backdrop-blur-sm border border-white/15 px-3 py-1 rounded-full">
+            <Sparkles className="h-3.5 w-3.5" /> {t('landing.heroBadgeV3')}
+          </p>
+          <h1 className="mt-4 text-4xl md:text-5xl lg:text-6xl font-extrabold text-white leading-[1.1] max-w-3xl drop-shadow-lg">
+            {t('landing.heroTitle1V3')}<br />
+            <span className="text-chart-3">{t('landing.heroTitle2V3')}</span>
           </h1>
-          <p className="mt-5 text-lg text-white/70 max-w-xl leading-relaxed">
-            可视化床位看板、一键入住、直销预订链接。专为 50 张床位以下的小型青旅设计，每月 $19。
+          <p className="mt-5 text-lg text-white/90 max-w-xl leading-relaxed drop-shadow">
+            {t('landing.heroSubtitleV3')}
           </p>
           <div className="mt-8 flex flex-col sm:flex-row gap-3">
             <Button
@@ -91,20 +96,20 @@ export function LandingPage({ onEnterApp }: LandingPageProps) {
               size="lg"
               className="h-12 px-8 text-base gap-2 shadow-lg shadow-primary/30 hover:bg-primary/90"
             >
-              14 天免费试用 <ArrowRight className="h-4 w-4" />
+              {t('landing.heroCta')} <ArrowRight className="h-4 w-4" />
             </Button>
             <a
               href="#features"
               className="inline-flex items-center justify-center gap-2 h-12 px-8 rounded-xl bg-white/10 backdrop-blur text-white text-base font-medium border border-white/20 hover:bg-white/20 transition-all"
             >
-              <Play className="h-4 w-4" /> 看看怎么用
+              <Play className="h-4 w-4" /> {t('landing.heroSecondary')}
             </a>
           </div>
           {/* Trust line */}
           <div className="mt-10 flex items-center gap-6 text-white/50 text-sm">
-            <span>已有 5+ 青旅在使用</span>
+            <span>{t('landing.heroTrust1')}</span>
             <span className="w-1 h-1 rounded-full bg-white/30" />
-            <span>支持 Booking.com / Airbnb / Walk-in</span>
+            <span>{t('landing.heroTrust2')}</span>
           </div>
         </div>
       </section>
@@ -112,7 +117,7 @@ export function LandingPage({ onEnterApp }: LandingPageProps) {
       {/* ================== PAIN POINT SECTION ================== */}
       <section className="py-16 md:py-20 bg-white">
         <div className="max-w-5xl mx-auto px-6">
-          <p className="text-center text-sm font-medium text-muted-foreground mb-12">经营青旅的现实</p>
+          <p className="text-center text-sm font-medium text-muted-foreground mb-12">{t('landing.painEyebrow')}</p>
           <div className="grid md:grid-cols-3 gap-8">
             {painPoints.map((p, i) => (
               <div key={i} className="text-center">
@@ -146,39 +151,39 @@ export function LandingPage({ onEnterApp }: LandingPageProps) {
                 <div className="h-6 w-6 rounded-md bg-primary/10 flex items-center justify-center">
                   <Move className="h-3 w-3 text-primary" />
                 </div>
-                <span className="text-xs text-foreground font-medium">拖拽即可换床</span>
+                <span className="text-xs text-foreground font-medium">{t('landing.mockupCallout')}</span>
               </div>
             </div>
             {/* Right: Feature description */}
             <div>
               <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/5 text-xs font-medium text-primary mb-4">
-                <LayoutGrid className="h-3.5 w-3.5" /> 核心功能
+                <LayoutGrid className="h-3.5 w-3.5" /> {t('landing.feat1Badge')}
               </div>
               <h2 className="text-3xl md:text-4xl font-extrabold text-foreground leading-tight">
-                可视化床位看板<br />
-                <span className="text-muted-foreground">一眼看清每张床</span>
+                {t('landing.feat1TitleV3')}<br />
+                <span className="text-muted-foreground">{t('landing.feat1Subtitle')}</span>
               </h2>
               <p className="mt-4 text-muted-foreground leading-relaxed">
-                不再翻表格。甘特图式时间线，每张床位、每个房间、每天状态一目了然。拖拽换床、边缘调整日期，就像操作日历一样简单。
+                {t('landing.feat1DescV3')}
               </p>
               <div className="mt-6 space-y-3">
                 <FeatureRow
                   icon={MousePointerClick}
                   iconClass="bg-chart-1/10 text-chart-1"
-                  title="拖拽入住 / 换床"
-                  desc="拖动客人色块到目标床位，自动检测冲突"
+                  title={t('landing.feat1Row1Title')}
+                  desc={t('landing.feat1Row1Desc')}
                 />
                 <FeatureRow
                   icon={Palette}
                   iconClass="bg-chart-3/10 text-chart-3"
-                  title="颜色 = 状态"
-                  desc="蓝色已付、琥珀待付、绿色已预订、红色冲突"
+                  title={t('landing.feat1Row2Title')}
+                  desc={t('landing.feat1Row2Desc')}
                 />
                 <FeatureRow
                   icon={Zap}
                   iconClass="bg-chart-5/10 text-chart-5"
-                  title="智能推荐床位"
-                  desc="根据性别、偏好、价格自动匹配最佳床位"
+                  title={t('landing.feat1Row3Title')}
+                  desc={t('landing.feat1Row3Desc')}
                 />
               </div>
             </div>
@@ -198,33 +203,33 @@ export function LandingPage({ onEnterApp }: LandingPageProps) {
             {/* Right: Direct booking text */}
             <div>
               <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-chart-5/10 text-xs font-medium text-chart-5 mb-4">
-                <Globe className="h-3.5 w-3.5" /> 直销预订
+                <Globe className="h-3.5 w-3.5" /> {t('landing.feat2Badge')}
               </div>
               <h2 className="text-3xl md:text-4xl font-extrabold text-foreground leading-tight">
-                你的专属预订页<br />
-                <span className="text-muted-foreground">0% 佣金</span>
+                {t('landing.feat2TitleV3')}<br />
+                <span className="text-muted-foreground">{t('landing.feat2Subtitle')}</span>
               </h2>
               <p className="mt-4 text-muted-foreground leading-relaxed">
-                OTA 每单抽 15-20%。我们给你一个链接，客人直接预订、直接付款、自动出现在床位看板上。省下来的钱够付 BunkDesk 一整年。
+                {t('landing.feat2DescV3')}
               </p>
               <div className="mt-6 space-y-3">
                 <FeatureRow
                   icon={LinkIcon}
                   iconClass="bg-chart-5/10 text-chart-5"
-                  title="一键生成预订链接"
-                  desc="分享到微信、Instagram、网站，客人扫码即可预订"
+                  title={t('landing.feat2Row1Title')}
+                  desc={t('landing.feat2Row1Desc')}
                 />
                 <FeatureRow
                   icon={CalendarCheck}
                   iconClass="bg-chart-5/10 text-chart-5"
-                  title="自动同步到床位看板"
-                  desc="客人订完立刻显示，不用手动录入"
+                  title={t('landing.feat2Row2Title')}
+                  desc={t('landing.feat2Row2Desc')}
                 />
                 <FeatureRow
                   icon={CreditCard}
                   iconClass="bg-chart-5/10 text-chart-5"
-                  title="在线收款"
-                  desc={'支持 Stripe / 支付宝，到账自动标记"已付"'}
+                  title={t('landing.feat2Row3Title')}
+                  desc={t('landing.feat2Row3Desc')}
                 />
               </div>
             </div>
@@ -239,33 +244,33 @@ export function LandingPage({ onEnterApp }: LandingPageProps) {
             {/* Left: Text (comes first on mobile via order) */}
             <div className="order-2 lg:order-1">
               <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-chart-3/10 text-xs font-medium text-chart-3 mb-4">
-                <Users className="h-3.5 w-3.5" /> 团队协作
+                <Users className="h-3.5 w-3.5" /> {t('landing.feat3Badge')}
               </div>
               <h2 className="text-3xl md:text-4xl font-extrabold text-foreground leading-tight">
-                交接班不再<br />
-                <span className="text-muted-foreground">靠微信消息</span>
+                {t('landing.feat3TitleV3')}<br />
+                <span className="text-muted-foreground">{t('landing.feat3Subtitle')}</span>
               </h2>
               <p className="mt-4 text-muted-foreground leading-relaxed">
-                前台换班时最怕信息断层。BunkDesk 内置交接日志：谁入住、谁退房、谁还没付款、有什么特殊需求。下一个同事打开就能看到全部。
+                {t('landing.feat3DescV3')}
               </p>
               <div className="mt-6 space-y-3">
                 <FeatureRow
                   icon={FileText}
                   iconClass="bg-chart-3/10 text-chart-3"
-                  title="交接日志"
-                  desc="入住、退房、维修、投诉——分类记录，不会遗漏"
+                  title={t('landing.feat3Row1Title')}
+                  desc={t('landing.feat3Row1Desc')}
                 />
                 <FeatureRow
                   icon={Shield}
                   iconClass="bg-chart-3/10 text-chart-3"
-                  title="权限分级"
-                  desc="老板看全部、前台操作入住、保洁员看清洁任务"
+                  title={t('landing.feat3Row2Title')}
+                  desc={t('landing.feat3Row2Desc')}
                 />
                 <FeatureRow
                   icon={MessageCircle}
                   iconClass="bg-chart-3/10 text-chart-3"
-                  title="客人备注 & 便签"
-                  desc="谁怕冷需要下铺、谁晚到——随手记，全员可见"
+                  title={t('landing.feat3Row3Title')}
+                  desc={t('landing.feat3Row3Desc')}
                 />
               </div>
             </div>
@@ -290,33 +295,33 @@ export function LandingPage({ onEnterApp }: LandingPageProps) {
             {/* Right: Revenue text */}
             <div>
               <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-chart-1/10 text-xs font-medium text-chart-1 mb-4">
-                <BarChart3 className="h-3.5 w-3.5" /> 数据驱动
+                <BarChart3 className="h-3.5 w-3.5" /> {t('landing.feat4Badge')}
               </div>
               <h2 className="text-3xl md:text-4xl font-extrabold text-foreground leading-tight">
-                知道每张床<br />
-                <span className="text-muted-foreground">赚了多少</span>
+                {t('landing.feat4TitleV3')}<br />
+                <span className="text-muted-foreground">{t('landing.feat4Subtitle')}</span>
               </h2>
               <p className="mt-4 text-muted-foreground leading-relaxed">
-                不只看入住率。BunkDesk 帮你追踪每张床的真实收入、空床损失、清洁成本。周末该涨价吗？哪间房卖得最好？数据告诉你答案。
+                {t('landing.feat4DescV3')}
               </p>
               <div className="mt-6 space-y-3">
                 <FeatureRow
                   icon={TrendingUp}
                   iconClass="bg-chart-1/10 text-chart-1"
-                  title="床位收入分析"
-                  desc="上铺 vs 下铺、不同价位段的入住对比"
+                  title={t('landing.feat4Row1Title')}
+                  desc={t('landing.feat4Row1Desc')}
                 />
                 <FeatureRow
                   icon={Clock}
                   iconClass="bg-chart-1/10 text-chart-1"
-                  title="空床损失追踪"
-                  desc={'按"房间"管理永远发现不了的隐性损失'}
+                  title={t('landing.feat4Row2Title')}
+                  desc={t('landing.feat4Row2Desc')}
                 />
                 <FeatureRow
                   icon={SprayCan}
                   iconClass="bg-chart-1/10 text-chart-1"
-                  title="清洁状态追踪"
-                  desc="退房自动生成清洁任务，保洁完成后自动标记"
+                  title={t('landing.feat4Row3Title')}
+                  desc={t('landing.feat4Row3Desc')}
                 />
               </div>
             </div>
@@ -330,25 +335,25 @@ export function LandingPage({ onEnterApp }: LandingPageProps) {
         <div className="absolute inset-0 bg-black/70" />
         <div className="relative max-w-3xl mx-auto px-6 text-center">
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-extrabold text-white leading-tight">
-            14 天免费试用<br className="sm:hidden" /> 无需信用卡
+            {t('landing.ctaTitleV3')}
           </h2>
-          <p className="mt-4 text-lg text-white/70">一整个下午就能搭好</p>
+          <p className="mt-4 text-lg text-white/70">{t('landing.ctaSubtitleV3')}</p>
           <Button
             onClick={onEnterApp}
             size="lg"
             className="mt-8 h-12 px-8 text-base gap-2 shadow-lg shadow-primary/30 hover:bg-primary/90"
           >
-            免费试用 <ArrowRight className="h-4 w-4" />
+            {t('landing.ctaButtonV3')} <ArrowRight className="h-4 w-4" />
           </Button>
           <div className="mt-6 flex flex-wrap items-center justify-center gap-4 sm:gap-6 text-xs text-white/60">
             <span className="flex items-center gap-1">
-              <Shield className="w-3.5 h-3.5" /> 无需信用卡
+              <Shield className="w-3.5 h-3.5" /> {t('landing.ctaTrust1')}
             </span>
             <span className="flex items-center gap-1">
-              <Clock className="w-3.5 h-3.5" /> 下午搭好，晚上使用
+              <Clock className="w-3.5 h-3.5" /> {t('landing.ctaTrust2')}
             </span>
             <span className="flex items-center gap-1">
-              <Headphones className="w-3.5 h-3.5" /> 中文客服支持
+              <Headphones className="w-3.5 h-3.5" /> {t('landing.ctaTrust3')}
             </span>
           </div>
         </div>
@@ -437,8 +442,8 @@ export function LandingPage({ onEnterApp }: LandingPageProps) {
             <span className="text-sm text-muted-foreground">{t('landing.footerTagline') || 'BunkDesk'}</span>
           </div>
           <div className="flex items-center gap-6 text-xs text-muted-foreground">
-            <a href="#features" className="hover:text-foreground transition-colors">功能</a>
-            <a href="#pricing" className="hover:text-foreground transition-colors">定价</a>
+            <a href="#features" className="hover:text-foreground transition-colors">{t('landing.navFeatures')}</a>
+            <a href="#pricing" className="hover:text-foreground transition-colors">{t('landing.navPricing')}</a>
             <span>&copy; 2026 BunkDesk</span>
           </div>
         </div>
@@ -474,6 +479,7 @@ function FeatureRow({
 }
 
 function BedBoardMockup() {
+  const { t } = useTranslation();
   return (
     <div className="rounded-2xl bg-white shadow-xl shadow-black/5 border border-border/50 overflow-hidden">
       {/* Mini toolbar */}
@@ -483,25 +489,25 @@ function BedBoardMockup() {
           <div className="w-3 h-3 rounded-full bg-chart-3" />
           <div className="w-3 h-3 rounded-full bg-chart-5" />
         </div>
-        <span className="text-xs text-muted-foreground font-medium">BunkDesk — 床位看板</span>
+        <span className="text-xs text-muted-foreground font-medium">{t('landing.mockupTitle')}</span>
         <div className="w-12" />
       </div>
       {/* Date header */}
       <div className="flex border-b border-border">
-        <div className="w-20 shrink-0 px-2 py-1.5 text-[9px] font-semibold text-muted-foreground border-r border-border">床位</div>
+        <div className="w-20 shrink-0 px-2 py-1.5 text-[9px] font-semibold text-muted-foreground border-r border-border">{t('landing.mockupBedHeader')}</div>
         <div className="flex-1 grid grid-cols-7">
-          <div className="px-1 py-1.5 text-[8px] text-center text-muted-foreground border-r border-border">周一<br /><span className="font-bold">23</span></div>
-          <div className="px-1 py-1.5 text-[8px] text-center text-muted-foreground border-r border-border">周二<br /><span className="font-bold">24</span></div>
-          <div className="px-1 py-1.5 text-[8px] text-center font-bold text-primary bg-primary/5 border-r border-border">今天<br /><span className="text-primary">25</span></div>
-          <div className="px-1 py-1.5 text-[8px] text-center text-muted-foreground border-r border-border">周四<br /><span className="font-bold">26</span></div>
-          <div className="px-1 py-1.5 text-[8px] text-center text-muted-foreground border-r border-border">周五<br /><span className="font-bold">27</span></div>
-          <div className="px-1 py-1.5 text-[8px] text-center text-muted-foreground/50 bg-muted/30 border-r border-border">周六<br /><span className="font-bold">28</span></div>
-          <div className="px-1 py-1.5 text-[8px] text-center text-muted-foreground/50 bg-muted/30">周日<br /><span className="font-bold">29</span></div>
+          <div className="px-1 py-1.5 text-[8px] text-center text-muted-foreground border-r border-border">{t('assistant.week.mon')}<br /><span className="font-bold">23</span></div>
+          <div className="px-1 py-1.5 text-[8px] text-center text-muted-foreground border-r border-border">{t('assistant.week.tue')}<br /><span className="font-bold">24</span></div>
+          <div className="px-1 py-1.5 text-[8px] text-center font-bold text-primary bg-primary/5 border-r border-border">{t('landing.mockupToday')}<br /><span className="text-primary">25</span></div>
+          <div className="px-1 py-1.5 text-[8px] text-center text-muted-foreground border-r border-border">{t('assistant.week.thu')}<br /><span className="font-bold">26</span></div>
+          <div className="px-1 py-1.5 text-[8px] text-center text-muted-foreground border-r border-border">{t('assistant.week.fri')}<br /><span className="font-bold">27</span></div>
+          <div className="px-1 py-1.5 text-[8px] text-center text-muted-foreground/50 bg-muted/30 border-r border-border">{t('assistant.week.sat')}<br /><span className="font-bold">28</span></div>
+          <div className="px-1 py-1.5 text-[8px] text-center text-muted-foreground/50 bg-muted/30">{t('assistant.week.sun')}<br /><span className="font-bold">29</span></div>
         </div>
       </div>
       {/* Room 101 header */}
       <div className="flex border-b border-border bg-muted/30">
-        <div className="w-20 shrink-0 px-2 py-1 text-[9px] font-bold text-foreground border-r border-border">101 · 6人间</div>
+        <div className="w-20 shrink-0 px-2 py-1 text-[9px] font-bold text-foreground border-r border-border">{t('landing.mockupRoom101')}</div>
         <div className="flex-1 grid grid-cols-7">
           <div className="text-[8px] text-center text-chart-5 border-r border-border py-1">2</div>
           <div className="text-[8px] text-center text-chart-5 border-r border-border py-1">1</div>
@@ -544,13 +550,13 @@ function BedBoardMockup() {
         <div className="w-20 shrink-0 px-2 py-1.5 text-[8px] text-muted-foreground border-r border-border">D · 下铺 · ¥70</div>
         <div className="flex-1 relative h-7 bg-muted/30">
           <div className="absolute inset-0.5 flex items-center justify-center">
-            <span className="text-[7px] text-muted-foreground/50 border border-dashed border-border rounded px-1.5 py-0.5">+ 快速预订</span>
+            <span className="text-[7px] text-muted-foreground/50 border border-dashed border-border rounded px-1.5 py-0.5">{t('landing.mockupQuickBook')}</span>
           </div>
         </div>
       </div>
       {/* Room 201 header */}
       <div className="flex border-b border-border bg-muted/30">
-        <div className="w-20 shrink-0 px-2 py-1 text-[9px] font-bold text-foreground border-r border-border">201 · 8人间</div>
+        <div className="w-20 shrink-0 px-2 py-1 text-[9px] font-bold text-foreground border-r border-border">{t('landing.mockupRoom201')}</div>
         <div className="flex-1 grid grid-cols-7">
           <div className="text-[8px] text-center text-chart-5 border-r border-border py-1">5</div>
           <div className="text-[8px] text-center text-chart-5 border-r border-border py-1">4</div>
